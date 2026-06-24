@@ -1,0 +1,49 @@
+{
+  "name": "tradeos-costbook-api",
+  "version": "0.1.0",
+  "description": "TradeOS Cost Book — MVP backend API (estimating and pricing platform for trade contractors)",
+  "main": "dist/api/server.js",
+  "private": true,
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/api/server.js",
+    "dev": "nodemon --watch src --watch modules --watch api --watch db --ext ts --exec ts-node api/server.ts",
+    "prisma:generate": "prisma generate",
+    "prisma:migrate": "prisma migrate dev",
+    "prisma:deploy": "prisma migrate deploy",
+    "db:deploy": "bash scripts/deploy-migrations.sh",
+    "db:provision-role": "bash scripts/provision-app-role.sh",
+    "db:seed": "ts-node db/seed/seed.ts",
+    "jobs:supplier-price-sync": "ts-node scripts/run-supplier-price-sync.ts",
+    "test": "jest --runInBand",
+    "test:integration": "bash scripts/test-integration-db.sh",
+    "lint": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@prisma/client": "^5.20.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.0",
+    "express-rate-limit": "^7.4.1",
+    "node-cron": "^3.0.3",
+    "pdfkit": "^0.15.0",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.17",
+    "@types/express": "^4.17.21",
+    "@types/jest": "^29.5.13",
+    "@types/node": "^20.16.5",
+    "@types/node-cron": "^3.0.11",
+    "@types/pdfkit": "^0.13.4",
+    "@types/supertest": "^6.0.2",
+    "jest": "^29.7.0",
+    "nodemon": "^3.1.4",
+    "playwright": "^1.61.1",
+    "prisma": "^5.20.0",
+    "supertest": "^6.3.4",
+    "ts-jest": "^29.2.5",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.6.2"
+  }
+}

@@ -1,0 +1,51 @@
+import { Request } from "express";
+import { AuthContext } from "./auth/context";
+import { ApiError } from "./middleware/errorHandler";
+
+type OrgScopedRequest = Request & {
+  orgId?: string;
+  auth?: AuthContext;
+};
+
+export function requireOrgId(req: Request): string {
+  const orgId = (req as OrgScopedRequest).orgId;
+  if (!orgId) {
+    throw new ApiError(401, "Organization context is required");
+  }
+  return orgId;
+}
+
+export function requireOrgAdmin(req: Request): AuthContext {
+  const auth = requireAuthContext(req);
+  if (!["owner", "admin"].includes(auth.role)) {
+    throw new ApiError(403, "Admin access required");
+  }
+  return auth;
+}
+
+export function requireAuthContext(req: Request): AuthContext {
+  const auth = (req as OrgScopedRequest).auth;
+  if (!auth) {
+    throw new ApiError(401, "Organization context is required");
+  }
+  return auth;
+}
+
+export function requireOrgAccess(req: Request, orgId: string): AuthContext {
+  const auth = requireOrgAdmin(req);
+  if (auth.orgId !== orgId) {
+    throw new ApiError(403, "Cross-organization access is not allowed");
+  }
+  return auth;
+}
+
+export function parsePositiveNumber(value: unknown, defaultValue: number): number {
+  if (value === undefined || value === null || value === "") {
+    return defaultValue;
+  }
+  const parsed = Number(value);
+  if (!Number.isFinite(parsed) || parsed <= 0) {
+    throw new ApiError(400, "Expected a positive number");
+  }
+  return parsed;
+}

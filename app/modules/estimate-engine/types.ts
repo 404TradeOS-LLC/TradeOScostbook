@@ -1,0 +1,50 @@
+import { PricingMode } from "./formulas";
+
+export interface CreateEstimateInput {
+  orgId?: string;
+  projectId: string;
+  overheadPct?: number;
+}
+
+export interface AddLineItemInput {
+  estimateId: string;
+  orgId?: string;
+  costItemId?: string;
+  assemblyId?: string;
+  quantity: number;
+  description?: string;
+}
+
+export interface SetPricingModeInput {
+  estimateId: string;
+  orgId?: string;
+  mode: PricingMode;
+  markupPct?: number;
+  targetMarginPct?: number;
+}
+
+export interface EstimateDTO {
+  id: string;
+  orgId: string | null;
+  projectId: string;
+  version: number;
+  status: string;
+  overheadPct: number;
+  profitPct: number;
+  targetMarginPct: number | null;
+  subtotalCost: number;
+  totalPrice: number;
+}
+
+export interface EstimateLineItemDTO {
+  id: string;
+  estimateId: string;
+  costItemId: string | null;
+  assemblyId: string | null;
+  description: string;
+  quantity: number;
+  unitOfMeasure: string;
+  unitCost: number;
+  lineCost: number;
+  sortOrder: number;
+}

@@ -1,0 +1,22 @@
+import { PrismaClient } from "@prisma/client";
+import { getRequestDatabaseClient } from "./requestSession";
+
+// Singleton Prisma client. Reused across modules/services to avoid exhausting
+// database connections, especially under ts-node-dev/nodemon hot reloads.
+const globalForPrisma = global as unknown as { prisma?: PrismaClient };
+
+export const basePrisma = globalForPrisma.prisma ?? new PrismaClient();
+
+// Existing services import this object once. The proxy transparently routes
+// model calls through the request transaction when RLS context is active.
+export const prisma = new Proxy(basePrisma, {
+  get(target, property, receiver) {
+    const client = getRequestDatabaseClient() ?? target;
+    const value = Reflect.get(client, property, receiver);
+    return typeof value === "function" ? value.bind(client) : value;
+  },
+}) as PrismaClient;
+
+if (process.env.NODE_ENV !== "production") {
+  globalForPrisma.prisma = basePrisma;
+}

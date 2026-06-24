@@ -1,0 +1,492 @@
+// Prisma schema for TradeOS Cost Book.
+// Mirrors db/migrations/0001_init_schema.sql (the source of truth for the SQL DDL).
+// Run `npm run prisma:migrate` to apply this schema to a fresh database, or
+// `npm run prisma:generate` to regenerate the client after editing this file.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Organization {
+  id         String   @id @default(uuid())
+  name       String
+  regionCode String?  @map("region_code")
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @default(now()) @updatedAt @map("updated_at")
+
+  memberships    OrganizationMembership[]
+  membershipAudits OrganizationMembershipAudit[]
+  materialPriceAudits MaterialPriceAudit[]
+  supplierPriceUpdates SupplierPriceUpdate[]
+  divisions      Division[]
+  regions        Region[]
+  suppliers      Supplier[]
+  materials      Material[]
+  laborRates     LaborRate[]
+  equipment      Equipment[]
+  subcontractors Subcontractor[]
+  costItems      CostItem[]
+  assemblies     Assembly[]
+  customers      Customer[]
+  projects       Project[]
+  estimates      Estimate[]
+
+  @@map("organizations")
+}
+
+model AppUser {
+  id           String   @id @default(uuid())
+  authSubject  String   @unique @map("auth_subject")
+  email        String   @unique
+  fullName     String?  @map("full_name")
+  isActive     Boolean  @default(true) @map("is_active")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @default(now()) @updatedAt @map("updated_at")
+
+  memberships  OrganizationMembership[]
+  reviewedSupplierPriceUpdates SupplierPriceUpdate[]
+
+  @@map("users")
+}
+
+model OrganizationMembership {
+  id         String   @id @default(uuid())
+  orgId      String   @map("org_id")
+  userId     String   @map("user_id")
+  role       String   @default("owner")
+  status     String   @default("active")
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @default(now()) @updatedAt @map("updated_at")
+
+  organization Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  user         AppUser      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([orgId, userId])
+  @@index([userId])
+  @@map("organization_memberships")
+}
+
+model OrganizationMembershipAudit {
+  id          String   @id @default(uuid())
+  orgId       String   @map("org_id")
+  membershipId String  @map("membership_id")
+  userId      String   @map("user_id")
+  action      String
+  actorUserId String?  @map("actor_user_id")
+  actorRole   String?  @map("actor_role")
+  beforeState Json?    @map("before_state")
+  afterState  Json?    @map("after_state")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  organization Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+
+  @@index([orgId, membershipId, createdAt])
+  @@index([userId, createdAt])
+  @@map("organization_membership_audits")
+}
+
+model Division {
+  id        String   @id @default(uuid())
+  orgId     String?  @map("org_id")
+  code      String
+  name      String
+  sortOrder Int      @default(0) @map("sort_order")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  organization Organization? @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  categories   Category[]
+
+  @@unique([orgId, code])
+  @@map("divisions")
+}
+
+model Category {
+  id         String   @id @default(uuid())
+  divisionId String   @map("division_id")
+  code       String
+  name       String
+  sortOrder  Int      @default(0) @map("sort_order")
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  division      Division      @relation(fields: [divisionId], references: [id], onDelete: Cascade)
+  subcategories Subcategory[]
+
+  @@unique([divisionId, code])
+  @@map("categories")
+}
+
+model Subcategory {
+  id         String   @id @default(uuid())
+  categoryId String   @map("category_id")
+  code       String
+  name       String
+  sortOrder  Int      @default(0) @map("sort_order")
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  category  Category   @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  costItems CostItem[]
+
+  @@unique([categoryId, code])
+  @@map("subcategories")
+}
+
+model Region {
+  id            String   @id @default(uuid())
+  orgId         String?  @map("org_id")
+  code          String
+  name          String
+  laborIndex    Decimal  @default(1.0000) @map("labor_index") @db.Decimal(6, 4)
+  materialIndex Decimal  @default(1.0000) @map("material_index") @db.Decimal(6, 4)
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  organization Organization? @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  laborRates   LaborRate[]
+  projects     Project[]
+
+  @@unique([orgId, code])
+  @@map("regions")
+}
+
+model Supplier {
+  id                 String   @id @default(uuid())
+  orgId              String?  @map("org_id")
+  name               String
+  contactEmail       String?  @map("contact_email")
+  contactPhone       String?  @map("contact_phone")
+  website            String?
+  apiIntegrationKey  String?  @map("api_integration_key")
+  createdAt          DateTime @default(now()) @map("created_at")
+  updatedAt          DateTime @default(now()) @updatedAt @map("updated_at")
+
+  organization Organization? @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  materials    Material[]
+  priceUpdates SupplierPriceUpdate[]
+
+  @@map("suppliers")
+}
+
+model Material {
+  id               String    @id @default(uuid())
+  orgId            String?   @map("org_id")
+  sku              String?
+  name             String
+  unitOfMeasure    String    @map("unit_of_measure")
+  unitCost         Decimal   @map("unit_cost") @db.Decimal(12, 4)
+  wasteFactorPct   Decimal   @default(0) @map("waste_factor_pct") @db.Decimal(5, 2)
+  supplierId       String?   @map("supplier_id")
+  lastPriceUpdate  DateTime? @map("last_price_update")
+  createdAt        DateTime  @default(now()) @map("created_at")
+  updatedAt        DateTime  @default(now()) @updatedAt @map("updated_at")
+
+  organization Organization? @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  supplier     Supplier?     @relation(fields: [supplierId], references: [id], onDelete: SetNull)
+  costItems    CostItem[]
+  priceAudits  MaterialPriceAudit[]
+  supplierPriceUpdates SupplierPriceUpdate[]
+
+  @@index([orgId])
+  @@index([supplierId])
+  @@map("materials")
+}
+
+model MaterialPriceAudit {
+  id           String   @id @default(uuid())
+  orgId        String   @map("org_id")
+  materialId   String   @map("material_id")
+  materialName String   @map("material_name")
+  oldUnitCost  Decimal  @map("old_unit_cost") @db.Decimal(12, 4)
+  newUnitCost  Decimal  @map("new_unit_cost") @db.Decimal(12, 4)
+  source       String   @default("manual")
+  actorUserId  String?  @map("actor_user_id")
+  actorRole    String?  @map("actor_role")
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  organization Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  material     Material     @relation(fields: [materialId], references: [id], onDelete: Restrict)
+
+  @@index([orgId, createdAt])
+  @@index([materialId, createdAt])
+  @@map("material_price_audits")
+}
+
+// Queued-review staging area for supplier-fed price proposals: a sync job
+// (run via runWithBackgroundDatabaseSession) enqueues rows here rather than
+// writing straight to Material, so a human reviews/approves before any price
+// actually changes. Approval writes the same MaterialPriceAudit trail a
+// manual edit would.
+model SupplierPriceUpdate {
+  id                String   @id @default(uuid())
+  orgId             String   @map("org_id")
+  supplierId        String   @map("supplier_id")
+  materialId        String   @map("material_id")
+  currentUnitCost   Decimal  @map("current_unit_cost") @db.Decimal(12, 4)
+  proposedUnitCost  Decimal  @map("proposed_unit_cost") @db.Decimal(12, 4)
+  status            String   @default("pending")
+  source            String   @default("supplier-feed")
+  requestedByJob    String?  @map("requested_by_job")
+  reviewedByUserId  String?  @map("reviewed_by_user_id")
+  reviewedAt        DateTime? @map("reviewed_at")
+  createdAt         DateTime @default(now()) @map("created_at")
+
+  organization Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  supplier     Supplier     @relation(fields: [supplierId], references: [id], onDelete: Restrict)
+  material     Material     @relation(fields: [materialId], references: [id], onDelete: Restrict)
+  reviewedBy   AppUser?     @relation(fields: [reviewedByUserId], references: [id], onDelete: SetNull)
+
+  @@index([orgId, status, createdAt])
+  @@index([materialId])
+  @@index([supplierId])
+  @@map("supplier_price_updates")
+}
+
+model LaborRate {
+  id              String   @id @default(uuid())
+  orgId           String?  @map("org_id")
+  trade           String
+  baseHourlyRate  Decimal  @map("base_hourly_rate") @db.Decimal(10, 2)
+  burdenPct       Decimal  @default(0) @map("burden_pct") @db.Decimal(5, 2)
+  regionId        String?  @map("region_id")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @default(now()) @updatedAt @map("updated_at")
+
+  organization Organization? @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  region       Region?       @relation(fields: [regionId], references: [id], onDelete: SetNull)
+  costItems    CostItem[]
+
+  @@index([orgId])
+  @@map("labor_rates")
+}
+
+model Equipment {
+  id                    String   @id @default(uuid())
+  orgId                 String?  @map("org_id")
+  name                  String
+  ownershipCostPerHour  Decimal  @default(0) @map("ownership_cost_per_hour") @db.Decimal(10, 2)
+  operatingCostPerHour  Decimal  @default(0) @map("operating_cost_per_hour") @db.Decimal(10, 2)
+  dailyRate             Decimal? @map("daily_rate") @db.Decimal(10, 2)
+  createdAt             DateTime @default(now()) @map("created_at")
+  updatedAt             DateTime @default(now()) @updatedAt @map("updated_at")
+
+  organization Organization? @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  costItems    CostItem[]
+
+  @@index([orgId])
+  @@map("equipment")
+}
+
+model Subcontractor {
+  id                String   @id @default(uuid())
+  orgId             String?  @map("org_id")
+  name              String
+  trade             String?
+  contactEmail      String?  @map("contact_email")
+  contactPhone      String?  @map("contact_phone")
+  defaultMarkupPct  Decimal  @default(0) @map("default_markup_pct") @db.Decimal(5, 2)
+  createdAt         DateTime @default(now()) @map("created_at")
+  updatedAt         DateTime @default(now()) @updatedAt @map("updated_at")
+
+  organization Organization? @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  costItems    CostItem[]
+
+  @@map("subcontractors")
+}
+
+model CostItem {
+  id               String   @id @default(uuid())
+  orgId            String?  @map("org_id")
+  subcategoryId    String   @map("subcategory_id")
+  code             String
+  name             String
+  unitOfMeasure    String   @map("unit_of_measure")
+  productionRate   Decimal? @map("production_rate") @db.Decimal(12, 4)
+  laborRateId      String?  @map("labor_rate_id")
+  materialId       String?  @map("material_id")
+  equipmentId      String?  @map("equipment_id")
+  subcontractorId  String?  @map("subcontractor_id")
+  notes            String?
+  isActive         Boolean  @default(true) @map("is_active")
+  createdAt        DateTime @default(now()) @map("created_at")
+  updatedAt        DateTime @default(now()) @updatedAt @map("updated_at")
+
+  organization     Organization?    @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  subcategory      Subcategory      @relation(fields: [subcategoryId], references: [id], onDelete: Cascade)
+  laborRate        LaborRate?       @relation(fields: [laborRateId], references: [id], onDelete: SetNull)
+  material         Material?        @relation(fields: [materialId], references: [id], onDelete: SetNull)
+  equipment        Equipment?       @relation(fields: [equipmentId], references: [id], onDelete: SetNull)
+  subcontractor    Subcontractor?   @relation(fields: [subcontractorId], references: [id], onDelete: SetNull)
+  assemblyItems    AssemblyItem[]
+  estimateLineItems EstimateLineItem[]
+  changeOrderLineItems ChangeOrderLineItem[]
+
+  @@unique([orgId, code])
+  @@index([subcategoryId])
+  @@map("cost_items")
+}
+
+model Assembly {
+  id            String   @id @default(uuid())
+  orgId         String?  @map("org_id")
+  code          String
+  name          String
+  unitOfMeasure String   @map("unit_of_measure")
+  description   String?
+  // Marks a reusable starting-point assembly (e.g. "Standard Bathroom
+  // Remodel") that an org's estimators browse for quick adds, as distinct
+  // from one-off assemblies built for a specific job. Org-scoped, not a
+  // cross-tenant catalog — forced RLS would hide a NULL-org_id row from
+  // every tenant anyway (NULL = current_app_org_id() is never true), so a
+  // shared system-wide template library isn't possible under the current
+  // RLS model without a separate mechanism.
+  isTemplate    Boolean  @default(false) @map("is_template")
+  isActive      Boolean  @default(true) @map("is_active")
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @default(now()) @updatedAt @map("updated_at")
+
+  organization      Organization?      @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  items             AssemblyItem[]      @relation("AssemblyToItems")
+  usedAsChildIn     AssemblyItem[]      @relation("ChildAssembly")
+  estimateLineItems EstimateLineItem[]
+
+  @@unique([orgId, code])
+  @@index([orgId, isTemplate], map: "idx_assemblies_org_template")
+  @@map("assemblies")
+}
+
+model AssemblyItem {
+  id               String  @id @default(uuid())
+  assemblyId       String  @map("assembly_id")
+  costItemId       String? @map("cost_item_id")
+  childAssemblyId  String? @map("child_assembly_id")
+  quantityPerUnit  Decimal @map("quantity_per_unit") @db.Decimal(12, 4)
+  sortOrder        Int     @default(0) @map("sort_order")
+
+  assembly      Assembly  @relation("AssemblyToItems", fields: [assemblyId], references: [id], onDelete: Cascade)
+  costItem      CostItem? @relation(fields: [costItemId], references: [id], onDelete: Cascade)
+  childAssembly Assembly? @relation("ChildAssembly", fields: [childAssemblyId], references: [id], onDelete: Cascade)
+
+  @@index([assemblyId])
+  @@map("assembly_items")
+}
+
+model Customer {
+  id              String   @id @default(uuid())
+  orgId           String?  @map("org_id")
+  name            String
+  email           String?
+  phone           String?
+  billingAddress  String?  @map("billing_address")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @default(now()) @updatedAt @map("updated_at")
+
+  organization Organization? @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  projects     Project[]
+
+  @@map("customers")
+}
+
+model Project {
+  id          String   @id @default(uuid())
+  orgId       String?  @map("org_id")
+  customerId  String?  @map("customer_id")
+  name        String
+  siteAddress String?  @map("site_address")
+  regionId    String?  @map("region_id")
+  status      String   @default("lead")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @default(now()) @updatedAt @map("updated_at")
+
+  organization Organization?  @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  customer     Customer?      @relation(fields: [customerId], references: [id], onDelete: SetNull)
+  region       Region?        @relation(fields: [regionId], references: [id], onDelete: SetNull)
+  estimates    Estimate[]
+  changeOrders ChangeOrder[]
+
+  @@index([orgId])
+  @@index([customerId])
+  @@map("projects")
+}
+
+model Estimate {
+  id               String   @id @default(uuid())
+  orgId            String?  @map("org_id")
+  projectId        String   @map("project_id")
+  version          Int      @default(1)
+  status           String   @default("draft")
+  overheadPct      Decimal  @default(0) @map("overhead_pct") @db.Decimal(5, 2)
+  profitPct        Decimal  @default(0) @map("profit_pct") @db.Decimal(5, 2)
+  targetMarginPct  Decimal? @map("target_margin_pct") @db.Decimal(5, 2)
+  subtotalCost     Decimal  @default(0) @map("subtotal_cost") @db.Decimal(14, 2)
+  totalPrice       Decimal  @default(0) @map("total_price") @db.Decimal(14, 2)
+  createdAt        DateTime @default(now()) @map("created_at")
+  updatedAt        DateTime @default(now()) @updatedAt @map("updated_at")
+
+  organization Organization?       @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  project      Project             @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  lineItems    EstimateLineItem[]
+  changeOrders ChangeOrder[]
+
+  @@index([projectId])
+  @@map("estimates")
+}
+
+model EstimateLineItem {
+  id            String   @id @default(uuid())
+  estimateId    String   @map("estimate_id")
+  costItemId    String?  @map("cost_item_id")
+  assemblyId    String?  @map("assembly_id")
+  description   String
+  quantity      Decimal  @db.Decimal(12, 4)
+  unitOfMeasure String   @map("unit_of_measure")
+  unitCost      Decimal  @map("unit_cost") @db.Decimal(12, 4)
+  lineCost      Decimal  @map("line_cost") @db.Decimal(14, 2)
+  sortOrder     Int      @default(0) @map("sort_order")
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  estimate Estimate  @relation(fields: [estimateId], references: [id], onDelete: Cascade)
+  costItem CostItem? @relation(fields: [costItemId], references: [id], onDelete: SetNull)
+  assembly Assembly? @relation(fields: [assemblyId], references: [id], onDelete: SetNull)
+
+  @@index([estimateId])
+  @@map("estimate_line_items")
+}
+
+model ChangeOrder {
+  id           String   @id @default(uuid())
+  projectId    String   @map("project_id")
+  estimateId   String?  @map("estimate_id")
+  coNumber     Int      @map("co_number")
+  description  String
+  status       String   @default("draft")
+  amount       Decimal  @default(0) @db.Decimal(14, 2)
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @default(now()) @updatedAt @map("updated_at")
+
+  project   Project               @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  estimate  Estimate?             @relation(fields: [estimateId], references: [id], onDelete: SetNull)
+  lineItems ChangeOrderLineItem[]
+
+  @@unique([projectId, coNumber])
+  @@map("change_orders")
+}
+
+model ChangeOrderLineItem {
+  id            String  @id @default(uuid())
+  changeOrderId String  @map("change_order_id")
+  costItemId    String? @map("cost_item_id")
+  description   String
+  quantity      Decimal @db.Decimal(12, 4)
+  unitCost      Decimal @map("unit_cost") @db.Decimal(12, 4)
+  lineCost      Decimal @map("line_cost") @db.Decimal(14, 2)
+  sortOrder     Int     @default(0) @map("sort_order")
+
+  changeOrder ChangeOrder @relation(fields: [changeOrderId], references: [id], onDelete: Cascade)
+  costItem    CostItem?   @relation(fields: [costItemId], references: [id], onDelete: SetNull)
+
+  @@index([changeOrderId])
+  @@map("change_order_line_items")
+}
