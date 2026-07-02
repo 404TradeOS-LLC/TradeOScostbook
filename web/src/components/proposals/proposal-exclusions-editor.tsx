@@ -1,7 +1,7 @@
 import { ProposalTextSection } from "./proposal-text-section";
 
 interface ProposalExclusionsEditorProps {
-  defaultValue: string;
+  defaultValue: string | string[];
   readOnly?: boolean;
   name?: string;
   label?: string;
