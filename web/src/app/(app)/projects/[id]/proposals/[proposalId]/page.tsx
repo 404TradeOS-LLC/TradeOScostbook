@@ -2,19 +2,23 @@ import Link from "next/link";
 import { ProposalContextPanel } from "@/components/proposals/proposal-context-panel";
 import { ProposalLifecyclePanel } from "@/components/proposals/proposal-lifecycle-panel";
 import { ProposalReviewForm } from "@/components/proposals/proposal-review-form";
-import { StatusBadge } from "@/components/shared/status-badge";
-import { MetricCard } from "@/components/shared/metric-card";
-import { EmptyState } from "@/components/ui/empty-state";
-import { buttonVariants } from "@/components/ui/button";
+import { ProposalStatusBadge } from "@/components/proposals/proposal-status-badge";
+import { ProposalActionsToolbar } from "@/components/proposals/proposal-actions-toolbar";
+import { ProposalCustomerCard } from "@/components/proposals/proposal-customer-card";
+import { ProposalProjectCard } from "@/components/proposals/proposal-project-card";
+import { InvestmentSummaryCard } from "@/components/proposals/investment-summary-card";
+import { ProposalTimelineCard } from "@/components/proposals/proposal-timeline-card";
+import { PaymentScheduleCard } from "@/components/proposals/payment-schedule-card";
+import { ProposalVersionCard } from "@/components/proposals/proposal-version-card";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { getProject, getProposal } from "@/lib/api";
+import { getProject, getProposal, type ProposalPaymentScheduleEntry } from "@/lib/api";
 import { getSessionToken } from "@/lib/session";
 
 export default async function ProposalDetailPage({ params }: { params: Promise<{ id: string; proposalId: string }> }) {
   const { id: projectId, proposalId } = await params;
   const token = await getSessionToken();
   const [project, proposal] = await Promise.all([getProject(token ?? "", projectId), getProposal(token ?? "", proposalId)]);
-  const paymentSchedule = Array.isArray(proposal.paymentScheduleJson) ? proposal.paymentScheduleJson : [];
+  const paymentSchedule = Array.isArray(proposal.paymentScheduleJson) ? (proposal.paymentScheduleJson as ProposalPaymentScheduleEntry[]) : [];
 
   return (
     <div className="flex flex-col gap-6">
@@ -25,10 +29,14 @@ export default async function ProposalDetailPage({ params }: { params: Promise<{
           </Link>
           <h1 className="text-3xl font-semibold tracking-tight">Proposal Review</h1>
           <p className="max-w-2xl text-sm text-muted-foreground">
-            Tighten the draft before it goes to the customer. This proposal should feel professional, but still clearly marked as a working draft until final pricing is locked.
+            Tighten the draft before it goes to the customer. This proposal should feel professional, but still clearly marked
+            as a working draft until final pricing is locked.
           </p>
         </div>
-        <StatusBadge status={proposal.status} />
+        <div className="flex flex-col items-end gap-3">
+          <ProposalStatusBadge status={proposal.status} />
+          <ProposalActionsToolbar projectId={projectId} proposal={proposal} variant="review" />
+        </div>
       </div>
 
       <div className="grid gap-6 xl:grid-cols-[1.15fr_0.85fr]">
@@ -42,95 +50,20 @@ export default async function ProposalDetailPage({ params }: { params: Promise<{
         </Card>
 
         <div className="grid gap-6">
-          <Card className="border-border/70 bg-gradient-to-br from-card via-card to-muted/30">
-            <CardHeader>
-              <CardTitle>Proposal snapshot</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4 text-sm">
-              <div>
-                <div className="text-xs uppercase tracking-[0.2em] text-muted-foreground">Customer</div>
-                <div className="mt-1 font-medium">{project.customer?.name ?? "No customer linked"}</div>
-              </div>
-              <div>
-                <div className="text-xs uppercase tracking-[0.2em] text-muted-foreground">Project address</div>
-                <div className="mt-1">{project.siteAddress ?? "No address saved"}</div>
-              </div>
-              <div>
-                <div className="text-xs uppercase tracking-[0.2em] text-muted-foreground">Next milestone</div>
-                <div className="mt-1 font-medium">{getNextMilestone(proposal.status)}</div>
-              </div>
-              <div className="grid gap-3 md:grid-cols-3 xl:grid-cols-1">
-                <MetricCard label="Low" value={formatCurrency(proposal.priceLow)} />
-                <MetricCard label="High" value={formatCurrency(proposal.priceHigh)} />
-                <MetricCard label="Final" value={formatCurrency(proposal.finalPrice)} />
-              </div>
-              <div className="flex flex-col gap-3">
-                <Link href={`/projects/${projectId}/proposals/${proposal.id}/preview`} className={buttonVariants()}>
-                  Preview PDF
-                </Link>
-                <a
-                  href={`/api/documents/proposals/${proposal.id}/pdf`}
-                  target="_blank"
-                  rel="noreferrer"
-                  className={buttonVariants({ variant: "outline" })}
-                >
-                  Download PDF
-                </a>
-              </div>
-            </CardContent>
-          </Card>
+          <ProposalCustomerCard customer={project.customer} />
+          <ProposalProjectCard project={project} />
+          <InvestmentSummaryCard priceLow={proposal.priceLow} priceHigh={proposal.priceHigh} finalPrice={proposal.finalPrice} />
+          <ProposalTimelineCard timeline={proposal.timeline} />
 
           <ProposalLifecyclePanel projectId={projectId} proposal={proposal} />
 
-          <Card className="border-border/70">
-            <CardHeader>
-              <CardTitle>Payment schedule</CardTitle>
-            </CardHeader>
-            <CardContent>
-              {paymentSchedule.length === 0 ? (
-                <EmptyState title="No payment schedule saved." description="Add milestone payments before sending the proposal." />
-              ) : (
-                <ul className="space-y-3 text-sm">
-                  {paymentSchedule.map((entry, index) => {
-                    const item = entry as { label?: string; amountPercent?: number; notes?: string };
-                    return (
-                      <li key={`${item.label ?? "payment"}-${index}`} className="rounded-lg border border-border/60 p-3">
-                        <div className="font-medium">{item.label ?? `Payment ${index + 1}`}</div>
-                        <div className="text-muted-foreground">{item.amountPercent ?? 0}%</div>
-                        {item.notes && <div className="mt-1 text-muted-foreground">{item.notes}</div>}
-                      </li>
-                    );
-                  })}
-                </ul>
-              )}
-            </CardContent>
-          </Card>
+          <PaymentScheduleCard schedule={paymentSchedule} />
+
+          <ProposalVersionCard projectId={projectId} proposals={project.proposals} currentProposalId={proposal.id} />
 
           <ProposalContextPanel latestVisit={project.siteVisits[0] ?? null} projectFiles={project.projectFiles} />
         </div>
       </div>
     </div>
   );
-}
-
-function formatCurrency(value: number | null) {
-  if (value === null) return "Not set";
-  return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 }).format(value);
-}
-
-function getNextMilestone(status: "draft" | "sent" | "viewed" | "accepted" | "rejected") {
-  switch (status) {
-    case "draft":
-      return "Issue the proposal to the customer";
-    case "sent":
-      return "Track the customer response";
-    case "viewed":
-      return "Follow up and close the decision";
-    case "accepted":
-      return "Generate the contract";
-    case "rejected":
-      return "Revise and resend a stronger draft";
-    default:
-      return "Review the current state";
-  }
 }

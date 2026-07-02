@@ -3,6 +3,9 @@
 import { useActionState } from "react";
 import { createProposalAction } from "@/app/actions/proposals";
 import { PaymentScheduleFields } from "@/components/proposals/payment-schedule-fields";
+import { ProposalScopeEditor } from "@/components/proposals/proposal-scope-editor";
+import { ProposalAssumptionsEditor } from "@/components/proposals/proposal-assumptions-editor";
+import { ProposalExclusionsEditor } from "@/components/proposals/proposal-exclusions-editor";
 import { MetricCard } from "@/components/shared/metric-card";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -98,19 +101,10 @@ export function NewProposalForm({
               />
             </div>
           )}
-          <div className="flex flex-col gap-2">
-            <Label htmlFor="scopeOfWork">Scope of work override</Label>
-            <Textarea id="scopeOfWork" name="scopeOfWork" rows={8} defaultValue={draft.scopeOfWork} />
-          </div>
+          <ProposalScopeEditor label="Scope of work override" defaultValue={draft.scopeOfWork} />
           <div className="grid gap-5 md:grid-cols-2">
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="assumptions">Assumptions override</Label>
-              <Textarea id="assumptions" name="assumptions" rows={6} defaultValue={draft.assumptions} />
-            </div>
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="exclusions">Exclusions override</Label>
-              <Textarea id="exclusions" name="exclusions" rows={6} defaultValue={draft.exclusions} />
-            </div>
+            <ProposalAssumptionsEditor label="Assumptions override" defaultValue={draft.assumptions} />
+            <ProposalExclusionsEditor label="Exclusions override" defaultValue={draft.exclusions} />
           </div>
           <PaymentScheduleFields schedule={draft.paymentSchedule} />
           <label className="flex items-center gap-2 text-sm">

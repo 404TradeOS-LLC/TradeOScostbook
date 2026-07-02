@@ -1,9 +1,16 @@
 import Link from "next/link";
-import { StatusBadge } from "@/components/shared/status-badge";
-import { buttonVariants } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { SummaryMetricCard } from "@/components/shared/summary-metric-card";
-import { getProject, getProposal } from "@/lib/api";
+import { ProposalHeader } from "@/components/proposals/proposal-header";
+import { ProposalActionsToolbar } from "@/components/proposals/proposal-actions-toolbar";
+import { ProposalCustomerCard } from "@/components/proposals/proposal-customer-card";
+import { InvestmentSummaryCard } from "@/components/proposals/investment-summary-card";
+import { ProposalTimelineCard } from "@/components/proposals/proposal-timeline-card";
+import { PaymentScheduleCard } from "@/components/proposals/payment-schedule-card";
+import { ProposalScopeEditor } from "@/components/proposals/proposal-scope-editor";
+import { ProposalAssumptionsEditor } from "@/components/proposals/proposal-assumptions-editor";
+import { ProposalExclusionsEditor } from "@/components/proposals/proposal-exclusions-editor";
+import { ProposalAcceptanceCard } from "@/components/proposals/proposal-acceptance-card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { getProject, getProposal, type ProposalPaymentScheduleEntry } from "@/lib/api";
 import { getSessionToken } from "@/lib/session";
 
 export default async function ProposalPreviewPage({
@@ -15,53 +22,57 @@ export default async function ProposalPreviewPage({
   const token = await getSessionToken();
   const [project, proposal] = await Promise.all([getProject(token ?? "", projectId), getProposal(token ?? "", proposalId)]);
   const pdfUrl = `/api/documents/proposals/${proposal.id}/pdf`;
+  const paymentSchedule = Array.isArray(proposal.paymentScheduleJson)
+    ? (proposal.paymentScheduleJson as ProposalPaymentScheduleEntry[])
+    : [];
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex flex-wrap items-start justify-between gap-4">
-        <div className="space-y-2">
-          <Link href={`/projects/${projectId}/proposals/${proposalId}`} className="text-sm text-muted-foreground underline">
-            ← Back to proposal review
-          </Link>
-          <h1 className="text-3xl font-semibold tracking-tight">Proposal PDF Preview</h1>
-          <p className="max-w-2xl text-sm text-muted-foreground">
-            This is the client-facing PDF for {project.customer?.name ?? "the customer"}. Project-first drafts and estimate-backed proposals both render here.
-          </p>
-        </div>
-        <div className="flex items-center gap-3">
-          <StatusBadge status={proposal.status} />
-          <a href={pdfUrl} target="_blank" rel="noreferrer" className={buttonVariants({ variant: "outline" })}>
-            Open in new tab
-          </a>
-        </div>
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <Link href={`/projects/${projectId}/proposals/${proposalId}`} className="text-sm text-muted-foreground underline">
+          ← Back to proposal review
+        </Link>
+        <ProposalActionsToolbar projectId={projectId} proposal={proposal} variant="preview" />
       </div>
 
-      <Card className="border-border/70">
-        <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle>{proposal.estimateId ? "Estimate-backed PDF" : "Project draft PDF"}</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="mb-4 grid gap-3 md:grid-cols-3">
-            <SummaryMetricCard label="Customer" value={project.customer?.name ?? "Not linked"} />
-            <SummaryMetricCard
-              label="Price"
-              value={proposal.finalPrice !== null ? formatCurrency(proposal.finalPrice) : proposal.priceHigh !== null ? formatCurrency(proposal.priceHigh) : "In progress"}
-            />
-            <SummaryMetricCard label="Timeline" value={proposal.timeline ?? "Not set"} />
-          </div>
-          <div className="overflow-hidden rounded-2xl border border-border/70 bg-muted/20">
-            <iframe
-              src={pdfUrl}
-              title="Proposal PDF Preview"
-              className="h-[78vh] w-full bg-white"
-            />
-          </div>
-        </CardContent>
-      </Card>
+      <ProposalHeader proposal={proposal} customerName={project.customer?.name} projectName={project.name} />
+
+      <div className="grid gap-6 lg:grid-cols-[1.3fr_0.7fr]">
+        <div className="flex flex-col gap-6">
+          <Card className="border-border/70">
+            <CardHeader>
+              <CardTitle>{proposal.estimateId ? "Estimate-backed PDF" : "Project draft PDF"}</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="overflow-hidden rounded-2xl border border-border/70 bg-muted/20">
+                <iframe src={pdfUrl} title="Proposal PDF Preview" className="h-[70vh] w-full bg-white" />
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="border-border/70">
+            <CardHeader>
+              <CardTitle>Proposal details</CardTitle>
+              <CardDescription>Accessible text version of the PDF content above, for screen readers and quick reference.</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-5">
+              <ProposalScopeEditor readOnly defaultValue={proposal.scopeOfWork ?? ""} />
+              <div className="grid gap-5 md:grid-cols-2">
+                <ProposalAssumptionsEditor readOnly defaultValue={proposal.assumptions ?? ""} />
+                <ProposalExclusionsEditor readOnly defaultValue={proposal.exclusions ?? ""} />
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        <div className="flex flex-col gap-6">
+          <InvestmentSummaryCard priceLow={proposal.priceLow} priceHigh={proposal.priceHigh} finalPrice={proposal.finalPrice} />
+          <ProposalTimelineCard timeline={proposal.timeline} />
+          <PaymentScheduleCard schedule={paymentSchedule} />
+          <ProposalCustomerCard customer={project.customer} />
+          <ProposalAcceptanceCard proposal={proposal} />
+        </div>
+      </div>
     </div>
   );
-}
-
-function formatCurrency(value: number) {
-  return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 }).format(value);
 }
