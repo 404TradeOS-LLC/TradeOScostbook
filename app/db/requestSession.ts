@@ -1,6 +1,6 @@
 import { AsyncLocalStorage } from "node:async_hooks";
 import { Prisma, PrismaClient } from "@prisma/client";
-import { AuthContext } from "../api/auth/context";
+import { AuthContext } from "../backend/auth/context";
 
 const requestDatabase = new AsyncLocalStorage<Prisma.TransactionClient>();
 

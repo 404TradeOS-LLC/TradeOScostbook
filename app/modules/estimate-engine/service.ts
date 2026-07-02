@@ -1,5 +1,5 @@
 import { prisma } from "../../db/client";
-import { ApiError } from "../../api/middleware/errorHandler";
+import { ApiError } from "../../backend/middleware/errorHandler";
 import { CostDatabaseService } from "../cost-database/service";
 import { AssembliesDatabaseService } from "../assemblies-database/service";
 import { applyOverhead, sellPrice } from "./formulas";
@@ -160,7 +160,7 @@ function round2(value: number): number {
   return Math.round(value * 100) / 100;
 }
 
-function toEstimateDTO(row: {
+export function toEstimateDTO(row: {
   id: string;
   orgId: string | null;
   projectId: string;

@@ -4,8 +4,8 @@ import { ApiError } from "../middleware/errorHandler";
 export interface AuthClaims {
   sub: string;
   email?: string;
-  orgId: string;
-  role: string;
+  orgId?: string;
+  role?: string;
   iss?: string;
   aud?: string | string[];
   exp?: number;
@@ -70,7 +70,7 @@ export function verifyAuthToken(token: string, secret: string): AuthClaims {
   }
 
   const payload = parseSegment<Partial<AuthClaims>>(encodedPayload, "JWT payload");
-  if (!payload.sub || !payload.orgId || !payload.role) {
+  if (!payload.sub) {
     throw new ApiError(401, "JWT payload is missing required claims");
   }
 
@@ -95,3 +95,66 @@ export function verifyAuthToken(token: string, secret: string): AuthClaims {
   return payload as AuthClaims;
 }
 
+let supabaseJwks: unknown = null;
+
+export async function verifyAnyAuthToken(token: string): Promise<AuthClaims> {
+  const header = parseHeader(token);
+  if (header.alg === "HS256") {
+    return verifyAuthToken(token, process.env.AUTH_JWT_SECRET ?? "");
+  }
+
+  return verifySupabaseToken(token);
+}
+
+async function verifySupabaseToken(token: string): Promise<AuthClaims> {
+  const { jwtVerify } = await import("jose");
+  const jwks = await getSupabaseJwks();
+  const issuer = getSupabaseIssuer();
+  const audience = process.env.SUPABASE_JWT_AUDIENCE;
+
+  try {
+    const { payload } = await jwtVerify(token, jwks as Parameters<typeof jwtVerify>[1], {
+      issuer,
+      audience: audience || undefined,
+    });
+
+    if (!payload.sub) throw new ApiError(401, "JWT payload is missing required claims");
+
+    return {
+      sub: payload.sub,
+      email: typeof payload.email === "string" ? payload.email : undefined,
+      iss: typeof payload.iss === "string" ? payload.iss : undefined,
+      aud: Array.isArray(payload.aud) ? payload.aud.filter((value): value is string => typeof value === "string") : typeof payload.aud === "string" ? payload.aud : undefined,
+      exp: typeof payload.exp === "number" ? payload.exp : undefined,
+      iat: typeof payload.iat === "number" ? payload.iat : undefined,
+    };
+  } catch (error) {
+    if (error instanceof ApiError) throw error;
+    throw new ApiError(401, "Invalid bearer token");
+  }
+}
+
+function parseHeader(token: string): { alg?: string } {
+  const parts = token.split(".");
+  if (parts.length !== 3) throw new ApiError(401, "Invalid bearer token");
+  return parseSegment<{ alg?: string }>(parts[0], "JWT header");
+}
+
+function getSupabaseIssuer() {
+  const explicit = process.env.SUPABASE_JWT_ISSUER;
+  if (explicit) return explicit;
+
+  const url = process.env.SUPABASE_URL ?? process.env.NEXT_PUBLIC_SUPABASE_URL;
+  if (!url) throw new ApiError(500, "SUPABASE_URL is not configured");
+  return `${url.replace(/\/$/, "")}/auth/v1`;
+}
+
+async function getSupabaseJwks() {
+  if (!supabaseJwks) {
+    const { createRemoteJWKSet } = await import("jose");
+    const explicit = process.env.SUPABASE_JWT_JWKS_URL;
+    const issuer = getSupabaseIssuer();
+    supabaseJwks = createRemoteJWKSet(new URL(explicit ?? `${issuer}/.well-known/jwks.json`));
+  }
+  return supabaseJwks;
+}

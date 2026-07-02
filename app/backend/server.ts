@@ -13,11 +13,15 @@ import { equipmentDatabaseRouter } from "./routes/equipmentDatabase.routes";
 import { assembliesDatabaseRouter } from "./routes/assembliesDatabase.routes";
 import { estimateEngineRouter } from "./routes/estimateEngine.routes";
 import { proposalGeneratorRouter } from "./routes/proposalGenerator.routes";
+import { proposalsRouter } from "./routes/proposals.routes";
+import { invoicesRouter } from "./routes/invoices.routes";
+import { contractsRouter } from "./routes/contracts.routes";
 import { adminDashboardRouter } from "./routes/adminDashboard.routes";
 import { customersRouter, projectsRouter } from "./routes/projects.routes";
 import { changeOrdersRouter } from "./routes/changeOrders.routes";
 import { supplierIntegrationRouter } from "./routes/supplierIntegration.routes";
 import { organizationProvisioningRouter } from "./routes/organizationProvisioning.routes";
+import { authRouter } from "./routes/auth.routes";
 import { projectIntakeRouter } from "./routes/projectIntake.routes";
 
 export function createServer() {
@@ -37,6 +41,11 @@ export function createServer() {
   // tenant identity exists until this transaction creates the first owner.
   app.use("/api/v1/platform", organizationProvisioningRouter);
 
+  // Public self-serve signup/login — no bearer token exists yet, that's what
+  // these issue. Rate-limited per IP (see authRateLimit) since unlike
+  // platform provisioning these are meant to be reachable by anyone.
+  app.use("/api/v1/auth", authRouter);
+
   // requireAuth now verifies bearer JWTs and loads org membership context.
   app.use("/api/v1", requireAuth, databaseSession);
 
@@ -48,6 +57,9 @@ export function createServer() {
   app.use("/api/v1/assemblies", assembliesDatabaseRouter);
   app.use("/api/v1/estimates", estimateEngineRouter);
   app.use("/api/v1/proposals", proposalGeneratorRouter);
+  app.use("/api/v1/proposals", proposalsRouter);
+  app.use("/api/v1/invoices", invoicesRouter);
+  app.use("/api/v1/contracts", contractsRouter);
   app.use("/api/v1/admin", adminDashboardRouter);
   app.use("/api/v1/customers", customersRouter);
   app.use("/api/v1/projects", projectsRouter);

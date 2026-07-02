@@ -1,0 +1,335 @@
+const mockPrisma = {
+  estimate: {
+    findFirst: jest.fn(),
+  },
+  project: {
+    findFirst: jest.fn(),
+    update: jest.fn(),
+  },
+  proposal: {
+    create: jest.fn(),
+    findMany: jest.fn(),
+    findFirst: jest.fn(),
+    update: jest.fn(),
+  },
+};
+
+const mockProposalGenerator = {
+  generateProposal: jest.fn(),
+  generateProjectProposal: jest.fn(),
+};
+
+jest.mock("../db/client", () => ({ prisma: mockPrisma }));
+jest.mock("../modules/proposal-generator/service", () => ({
+  ProposalGeneratorService: jest.fn().mockImplementation(() => mockProposalGenerator),
+}));
+
+import { ProposalsService } from "../modules/proposals/service";
+
+describe("ProposalsService", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it("creates a draft proposal scoped to the estimate's project", async () => {
+    mockPrisma.estimate.findFirst.mockResolvedValue({ id: "estimate-1", projectId: "project-1", orgId: "org-1" });
+    mockPrisma.proposal.create.mockResolvedValue({
+      id: "proposal-1",
+      projectId: "project-1",
+      estimateId: "estimate-1",
+      status: "draft",
+      companyName: null,
+      showLineItemDetail: false,
+      termsAndConditions: null,
+      sentAt: null,
+      viewedAt: null,
+      respondedAt: null,
+      createdAt: new Date(),
+    });
+
+    const service = new ProposalsService();
+    const proposal = await service.create({ orgId: "org-1", estimateId: "estimate-1" });
+
+    expect(proposal.status).toBe("draft");
+    expect(mockPrisma.proposal.create).toHaveBeenCalledWith(
+      expect.objectContaining({ data: expect.objectContaining({ projectId: "project-1", estimateId: "estimate-1" }) })
+    );
+  });
+
+  it("sends a draft proposal and stamps sentAt", async () => {
+    mockPrisma.proposal.findFirst.mockResolvedValue({
+      id: "proposal-1",
+      projectId: "project-1",
+      status: "draft",
+      paymentScheduleJson: [
+        { label: "Deposit", amountPercent: 50 },
+        { label: "Final", amountPercent: 50 },
+      ],
+    });
+    mockPrisma.proposal.update.mockResolvedValue({
+      id: "proposal-1",
+      projectId: "project-1",
+      estimateId: "estimate-1",
+      status: "sent",
+      companyName: null,
+      showLineItemDetail: false,
+      termsAndConditions: null,
+      sentAt: new Date(),
+      viewedAt: null,
+      respondedAt: null,
+      createdAt: new Date(),
+    });
+
+    const service = new ProposalsService();
+    const proposal = await service.send("proposal-1", "org-1");
+
+    expect(proposal.status).toBe("sent");
+    expect(proposal.sentAt).not.toBeNull();
+    expect(mockPrisma.project.update).toHaveBeenCalledWith({ where: { id: "project-1" }, data: { status: "proposal_sent" } });
+  });
+
+  it("rejects sending a proposal that has already been sent", async () => {
+    mockPrisma.proposal.findFirst.mockResolvedValue({ id: "proposal-1", status: "sent" });
+
+    const service = new ProposalsService();
+    await expect(service.send("proposal-1", "org-1")).rejects.toThrow("already been sent");
+  });
+
+  it("accepts a sent proposal", async () => {
+    mockPrisma.proposal.findFirst.mockResolvedValue({ id: "proposal-1", projectId: "project-1", status: "sent" });
+    mockPrisma.proposal.update.mockResolvedValue({
+      id: "proposal-1",
+      projectId: "project-1",
+      estimateId: "estimate-1",
+      status: "accepted",
+      companyName: null,
+      showLineItemDetail: false,
+      termsAndConditions: null,
+      sentAt: new Date(),
+      viewedAt: null,
+      respondedAt: new Date(),
+      createdAt: new Date(),
+    });
+
+    const service = new ProposalsService();
+    const proposal = await service.accept("proposal-1", "org-1");
+
+    expect(proposal.status).toBe("accepted");
+    expect(mockPrisma.project.update).toHaveBeenCalledWith({ where: { id: "project-1" }, data: { status: "accepted" } });
+  });
+
+  it("rejects accepting a proposal still in draft", async () => {
+    mockPrisma.proposal.findFirst.mockResolvedValue({ id: "proposal-1", status: "draft" });
+
+    const service = new ProposalsService();
+    await expect(service.accept("proposal-1", "org-1")).rejects.toThrow("cannot be accepted");
+  });
+
+  it("generates a PDF using the proposal's stored options", async () => {
+    mockPrisma.proposal.findFirst.mockResolvedValue({
+      id: "proposal-1",
+      estimateId: "estimate-1",
+      status: "draft",
+      companyName: "Acme Co",
+      showLineItemDetail: true,
+      termsAndConditions: "Custom terms",
+    });
+    mockProposalGenerator.generateProposal.mockResolvedValue({ buffer: Buffer.from("pdf"), filename: "p.pdf", contentType: "application/pdf" });
+
+    const service = new ProposalsService();
+    await service.getPdf("proposal-1", "org-1");
+
+    expect(mockProposalGenerator.generateProposal).toHaveBeenCalledWith({
+      estimateId: "estimate-1",
+      orgId: "org-1",
+      companyName: "Acme Co",
+      showLineItemDetail: true,
+      termsAndConditions: "Custom terms",
+    });
+  });
+
+  it("generates a project-first PDF when the proposal has no estimate", async () => {
+    mockPrisma.proposal.findFirst.mockResolvedValueOnce({
+      id: "proposal-project-1",
+      estimateId: null,
+      status: "draft",
+      companyName: "Acme Co",
+      showLineItemDetail: false,
+      termsAndConditions: "Custom terms",
+    });
+    mockProposalGenerator.generateProjectProposal.mockResolvedValue({
+      buffer: Buffer.from("pdf"),
+      filename: "project-draft.pdf",
+      contentType: "application/pdf",
+    });
+
+    const service = new ProposalsService();
+    await service.getPdf("proposal-project-1", "org-1");
+
+    expect(mockProposalGenerator.generateProjectProposal).toHaveBeenCalledWith({
+      proposalId: "proposal-project-1",
+      orgId: "org-1",
+    });
+  });
+
+  it("creates a project-first proposal draft from site visit context", async () => {
+    mockPrisma.project.findFirst.mockResolvedValue({
+      id: "project-1",
+      name: "Smith Residence Roof Replacement",
+      orgId: "org-1",
+      jobType: "roofing",
+      simpleScope: "Replace existing shingle roof and haul away debris.",
+      siteAddress: "123 Main St",
+      organization: { name: "Acme Roofing" },
+      customer: { name: "Jane Smith" },
+      siteVisits: [
+        {
+          notes: "Visible leak near chimney. Approx 2200 square feet.",
+          transcript: null,
+          measurementsJson: { squareFeet: 2200 },
+        },
+      ],
+    });
+    mockPrisma.proposal.create.mockResolvedValue({
+      id: "proposal-2",
+      projectId: "project-1",
+      estimateId: null,
+      status: "draft",
+      companyName: "Acme Roofing",
+      showLineItemDetail: false,
+      scopeOfWork: "draft scope",
+      assumptions: "draft assumptions",
+      exclusions: "draft exclusions",
+      timeline: "draft timeline",
+      priceLow: "9900.00",
+      priceHigh: "18700.00",
+      finalPrice: null,
+      paymentScheduleJson: [],
+      pdfUrl: null,
+      termsAndConditions: null,
+      sentAt: null,
+      viewedAt: null,
+      respondedAt: null,
+      createdAt: new Date(),
+    });
+
+    const service = new ProposalsService();
+    const proposal = await service.create({ orgId: "org-1", projectId: "project-1" });
+
+    expect(proposal.projectId).toBe("project-1");
+    expect(proposal.estimateId).toBeNull();
+    expect(mockPrisma.project.findFirst).toHaveBeenCalled();
+    expect(mockPrisma.project.update).toHaveBeenCalledWith({ where: { id: "project-1" }, data: { status: "proposal_draft" } });
+    expect(mockPrisma.proposal.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          projectId: "project-1",
+          estimateId: null,
+          companyName: "Acme Roofing",
+        }),
+      })
+    );
+  });
+
+  it("previews a project-first draft with AI context from the latest site visit", async () => {
+    mockPrisma.project.findFirst.mockResolvedValue({
+      id: "project-1",
+      name: "Smith Residence Roof Replacement",
+      orgId: "org-1",
+      jobType: "roofing",
+      simpleScope: "Replace existing shingle roof and haul away debris.",
+      siteAddress: "123 Main St",
+      organization: { name: "Acme Roofing" },
+      customer: { name: "Jane Smith" },
+      siteVisits: [
+        {
+          notes: "Visible leak near chimney. Approx 2200 square feet.",
+          transcript: null,
+          measurementsJson: { squareFeet: 2200 },
+          confidenceScore: "90",
+          missingInfoJson: ["project address"],
+          aiQuestionsJson: ["Will tear-off and disposal be included in the base proposal?"],
+        },
+      ],
+    });
+
+    const service = new ProposalsService();
+    const preview = await service.previewProjectDraft("project-1", "org-1");
+
+    expect(preview.companyName).toBe("Acme Roofing");
+    expect(preview.normalizedJobType).toBe("roofing");
+    expect(preview.confidenceScore).toBe(90);
+    expect(preview.aiQuestions).toContain("Will tear-off and disposal be included in the base proposal?");
+    expect(preview.paymentSchedule).toHaveLength(3);
+  });
+
+  it("rejects sending a proposal when the payment schedule does not total 100 percent", async () => {
+    mockPrisma.proposal.findFirst.mockResolvedValue({
+      id: "proposal-1",
+      projectId: "project-1",
+      status: "draft",
+      paymentScheduleJson: [{ label: "Deposit", amountPercent: 60 }],
+    });
+
+    const service = new ProposalsService();
+    await expect(service.send("proposal-1", "org-1")).rejects.toThrow("Payment schedule must total 100%");
+    expect(mockPrisma.proposal.update).not.toHaveBeenCalled();
+  });
+
+  it("uses a valid custom payment schedule when creating a proposal", async () => {
+    mockPrisma.project.findFirst.mockResolvedValue({
+      id: "project-1",
+      name: "Smith Residence Roof Replacement",
+      orgId: "org-1",
+      jobType: "roofing",
+      simpleScope: "Replace existing shingle roof and haul away debris.",
+      siteAddress: "123 Main St",
+      organization: { name: "Acme Roofing" },
+      customer: { name: "Jane Smith" },
+      siteVisits: [],
+    });
+    mockPrisma.proposal.create.mockResolvedValue({
+      id: "proposal-3",
+      projectId: "project-1",
+      estimateId: null,
+      status: "draft",
+      companyName: "Acme Roofing",
+      showLineItemDetail: false,
+      scopeOfWork: "draft scope",
+      assumptions: "draft assumptions",
+      exclusions: "draft exclusions",
+      timeline: "draft timeline",
+      priceLow: null,
+      priceHigh: null,
+      finalPrice: null,
+      paymentScheduleJson: [],
+      pdfUrl: null,
+      termsAndConditions: null,
+      sentAt: null,
+      viewedAt: null,
+      respondedAt: null,
+      createdAt: new Date(),
+    });
+
+    const service = new ProposalsService();
+    await service.create({
+      orgId: "org-1",
+      projectId: "project-1",
+      paymentScheduleJson: [
+        { label: "Deposit", amountPercent: 40 },
+        { label: "Completion", amountPercent: 60 },
+      ],
+    });
+
+    expect(mockPrisma.proposal.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          paymentScheduleJson: [
+            { label: "Deposit", amountPercent: 40 },
+            { label: "Completion", amountPercent: 60 },
+          ],
+        }),
+      })
+    );
+  });
+});

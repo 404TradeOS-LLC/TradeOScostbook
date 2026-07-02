@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { requirePlatformProvisioningSecret } from "../api/middleware/platformProvisioningAuth";
+import { requirePlatformProvisioningSecret } from "../backend/middleware/platformProvisioningAuth";
 
 describe("platform provisioning authentication", () => {
   const secret = "a-secure-platform-provisioning-key-123456";

@@ -1,6 +1,6 @@
 import { prisma, basePrisma } from "../../db/client";
-import { ApiError } from "../../api/middleware/errorHandler";
-import { AuthContext } from "../../api/auth/context";
+import { ApiError } from "../../backend/middleware/errorHandler";
+import { AuthContext } from "../../backend/auth/context";
 import { runInDatabaseTransaction } from "../../db/requestSession";
 import {
   EnqueuePriceUpdateInput,

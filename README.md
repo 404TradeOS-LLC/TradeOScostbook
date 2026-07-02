@@ -11,23 +11,24 @@ A cloud-based estimating and pricing system for trade contractors (general const
 
 The MVP backend (Phase 1) is implemented in [`app/`](app/) — see [`app/README.md`](app/README.md) for setup, migrations, seeding, and how to run the core estimate → proposal loop end-to-end. It is a Node.js/TypeScript/Express API backed by PostgreSQL/Supabase via Prisma, implementing the Cost Database, Labor Database, Material Database, Equipment Database, Assemblies Database, Estimate Engine, Proposal Generator, and Admin Dashboard modules. A lightweight internal admin page for membership history is also available at `/admin/member-history`.
 
-No frontend exists yet — the MVP roadmap defers the React/TypeScript UI until the backend and core logic are validated (see `app/README.md`'s "Not Yet Implemented" section).
+A Next.js front-end has started in [`web/`](web/) — see [`web/README.md`](web/README.md) for setup. It implements Phase 1 (auth shell: sign-up/sign-in, a protected dashboard, and a typed API client) of [`docs/frontend-platform-completion-plan.md`](docs/frontend-platform-completion-plan.md).
 
 ## Structure
 
 ```
 .github/workflows/deploy-migrations.yml   CI/CD entry point for production migration rollout
-docs/                                 Planning, architecture, wireframe & module spec documents
+docs/                                 Planning, architecture, wireframe & module spec documents, front-end completion plan
 app/                                  MVP backend — Express API, Prisma schema, module services, tests
-  api/                                 Routes, controllers, middleware
+  backend/                             Routes, controllers, middleware, auth
   db/                                  Prisma client singleton, seed script
   modules/                            One folder per core module (types.ts + service.ts)
   prisma/schema.prisma                 ORM schema
   prisma/migrations/                   Tracked migration history (source of truth for schema + RLS)
   scripts/deploy-migrations.sh         Production migration rollout automation
   tests/                                Jest test suite
+web/                                  Next.js (App Router) front-end — auth shell, typed API client, TanStack Query
 ```
 
 ## Status
 
-Phase 1 (MVP) backend implemented — no full frontend yet. Bearer-token auth, organization membership checks, request-scoped database sessions, and forced PostgreSQL RLS policies are now in place as the Phase 2 foundation. See the architecture doc for the roadmap and `app/README.md` for deployment details and remaining work.
+Backend (Phase 0/1 of the original MVP roadmap) is implemented: bearer-token auth (including real email/password sign-up/sign-in), organization membership checks, request-scoped database sessions, forced PostgreSQL RLS policies, and Proposal/Invoice/Contract entities with status lifecycles. A Next.js front-end shell now exists in `web/` covering auth end-to-end. See `docs/frontend-platform-completion-plan.md` for the remaining front-end/CRM/AI roadmap and `app/README.md` for backend deployment details.

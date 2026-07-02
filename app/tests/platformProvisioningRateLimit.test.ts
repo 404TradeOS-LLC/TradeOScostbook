@@ -15,7 +15,7 @@ describe("platform provisioning rate limit", () => {
 
     // require after setting env so the module picks up the test config
     // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const { platformProvisioningRateLimit } = require("../api/middleware/platformProvisioningRateLimit");
+    const { platformProvisioningRateLimit } = require("../backend/middleware/platformProvisioningRateLimit");
 
     const app = express();
     app.post("/organizations", platformProvisioningRateLimit, (_req, res) => res.status(200).json({ ok: true }));

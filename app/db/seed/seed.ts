@@ -1,6 +1,6 @@
 import "dotenv/config";
 import { prisma } from "../client";
-import { signAuthToken } from "../../api/auth/jwt";
+import { signAuthToken } from "../../backend/auth/jwt";
 
 // Seeds a minimal but functional sample dataset: one organization, one
 // division/category/subcategory, a labor rate, a material, and a cost item

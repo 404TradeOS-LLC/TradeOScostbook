@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from "express";
-import { verifyAuthToken } from "../auth/jwt";
+import { verifyAnyAuthToken } from "../auth/jwt";
 import { ApiError } from "./errorHandler";
 import { AuthContext } from "../auth/context";
 import { resolveAuthContext } from "../auth/session";
@@ -16,8 +16,8 @@ export function requireAuth(req: AuthedRequest, _res: Response, next: NextFuncti
   const token = bearer?.match(/^Bearer\s+(.+)$/i)?.[1];
 
   if (token) {
-    const claims = verifyAuthToken(token, process.env.AUTH_JWT_SECRET ?? "");
-    void resolveAuthContext(claims)
+    void verifyAnyAuthToken(token)
+      .then((claims) => resolveAuthContext(claims))
       .then((auth) => {
         req.auth = auth;
         req.orgId = auth.orgId;

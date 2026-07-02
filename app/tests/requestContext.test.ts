@@ -1,4 +1,4 @@
-import { requireOrgAccess } from "../api/requestContext";
+import { requireOrgAccess } from "../backend/requestContext";
 
 describe("requestContext org guards", () => {
   it("rejects cross-organization member management", () => {

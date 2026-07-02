@@ -1,7 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { Prisma } from "@prisma/client";
 import { basePrisma } from "../../db/client";
-import { ApiError } from "../../api/middleware/errorHandler";
+import { ApiError } from "../../backend/middleware/errorHandler";
 import { ProvisionOrganizationInput, ProvisionOrganizationResult } from "./types";
 
 export class OrganizationProvisioningService {
@@ -39,6 +39,7 @@ export class OrganizationProvisioningService {
           authSubject: input.owner.authSubject,
           email: normalizedEmail,
           fullName: input.owner.fullName,
+          passwordHash: input.owner.passwordHash,
         },
       });
 
@@ -86,6 +87,7 @@ export class OrganizationProvisioningService {
         owner: {
           userId: user.id,
           membershipId: membership.id,
+          authSubject: user.authSubject,
           email: user.email,
           role: "owner",
           status: "active",

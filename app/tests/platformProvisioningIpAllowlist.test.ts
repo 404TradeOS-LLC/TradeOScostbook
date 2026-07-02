@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { requirePlatformProvisioningAllowedIp } from "../api/middleware/platformProvisioningIpAllowlist";
+import { requirePlatformProvisioningAllowedIp } from "../backend/middleware/platformProvisioningIpAllowlist";
 
 describe("platform provisioning IP allowlist", () => {
   afterEach(() => {

@@ -1,4 +1,4 @@
-import { renderAdminPricingShell } from "../api/views/adminShell.view";
+import { renderAdminPricingShell } from "../backend/views/adminShell.view";
 
 describe("admin pricing shell", () => {
   it("renders pricing history and membership activity in the shared admin shell", () => {

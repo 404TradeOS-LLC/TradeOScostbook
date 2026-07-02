@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { Prisma } from "@prisma/client";
 import { z } from "zod";
-import { ApiError, errorHandler } from "../api/middleware/errorHandler";
+import { ApiError, errorHandler } from "../backend/middleware/errorHandler";
 
 function mockResponse() {
   const res = { status: jest.fn(), json: jest.fn() } as unknown as Response;

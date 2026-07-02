@@ -9,6 +9,9 @@ import { MaterialDatabaseService } from "../modules/material-database/service";
 import { SupplierIntegrationService } from "../modules/supplier-integration/service";
 import { runSupplierPriceSyncJob } from "../modules/supplier-integration/worker";
 import { AssembliesDatabaseService } from "../modules/assemblies-database/service";
+import { ProposalsService } from "../modules/proposals/service";
+import { InvoicesService } from "../modules/invoices/service";
+import { ContractsService } from "../modules/contracts/service";
 
 const appDatabaseUrl = requiredEnvironment("TEST_DATABASE_URL");
 const adminDatabaseUrl = requiredEnvironment("TEST_DATABASE_ADMIN_URL");
@@ -30,6 +33,10 @@ const divisionB = "20000000-0000-0000-0000-000000000052";
 const materialA = "10000000-0000-0000-0000-000000000061";
 const supplierA = "10000000-0000-0000-0000-000000000071";
 const materialForSupplierQueue = "10000000-0000-0000-0000-000000000072";
+const projectA = "10000000-0000-0000-0000-000000000081";
+const projectB = "20000000-0000-0000-0000-000000000082";
+const estimateA = "10000000-0000-0000-0000-000000000091";
+const assemblyForEstimateA = "10000000-0000-0000-0000-000000000092";
 
 describe("live organization row-level security", () => {
   beforeAll(async () => {
@@ -94,6 +101,27 @@ describe("live organization row-level security", () => {
         actorUserId: adminUser,
         actorRole: "admin",
         afterState: { membershipId: viewerMembership, role: "viewer", status: "active" },
+      },
+    });
+    await adminClient.project.createMany({
+      data: [
+        { id: projectA, orgId: orgA, name: "Org A Project" },
+        { id: projectB, orgId: orgB, name: "Org B Project" },
+      ],
+    });
+    await adminClient.assembly.create({
+      data: { id: assemblyForEstimateA, orgId: orgA, code: "RLS-TEST-ASM", name: "RLS Test Assembly", unitOfMeasure: "CY" },
+    });
+    await adminClient.estimate.create({
+      data: {
+        id: estimateA,
+        orgId: orgA,
+        projectId: projectA,
+        lineItems: {
+          create: [{ assemblyId: assemblyForEstimateA, description: "Excavation", quantity: 10, unitOfMeasure: "CY", unitCost: 20, lineCost: 200 }],
+        },
+        subtotalCost: 200,
+        totalPrice: 200,
       },
     });
   });
@@ -317,6 +345,74 @@ describe("live organization row-level security", () => {
     expect(Number(adminRows[0].oldUnitCost)).toBe(150);
     expect(Number(adminRows[0].newUnitCost)).toBe(165);
     expect(viewerRows).toEqual([]);
+  });
+
+  it("enforces project-inherited RLS on proposals, invoices, and contracts end to end", async () => {
+    await expect(
+      inSession(viewerUser, orgA, "viewer", async () => new ProposalsService().create({ orgId: orgA, estimateId: estimateA }))
+    ).rejects.toThrow();
+
+    const proposal = await inSession(adminUser, orgA, "admin", async () =>
+      new ProposalsService().create({ orgId: orgA, estimateId: estimateA, termsAndConditions: "Net 30" })
+    );
+    expect(proposal.status).toBe("draft");
+
+    // Cross-org: a session scoped to orgB must not see a proposal that
+    // belongs to an orgA project, even by direct id lookup.
+    const crossOrgLookup = await inSession(otherUser, orgB, "owner", async () =>
+      currentTransaction().proposal.findUnique({ where: { id: proposal.id } })
+    );
+    expect(crossOrgLookup).toBeNull();
+
+    const sent = await inSession(adminUser, orgA, "admin", async () => new ProposalsService().send(proposal.id, orgA));
+    expect(sent.status).toBe("sent");
+    const accepted = await inSession(adminUser, orgA, "admin", async () => new ProposalsService().accept(proposal.id, orgA));
+    expect(accepted.status).toBe("accepted");
+
+    await expect(
+      inSession(viewerUser, orgA, "viewer", async () =>
+        new InvoicesService().create({
+          orgId: orgA,
+          projectId: projectA,
+          lineItems: [{ description: "Deposit", quantity: 1, unitOfMeasure: "EA", unitCost: 1000 }],
+        })
+      )
+    ).rejects.toThrow();
+
+    const invoice = await inSession(adminUser, orgA, "admin", async () =>
+      new InvoicesService().create({
+        orgId: orgA,
+        projectId: projectA,
+        proposalId: proposal.id,
+        lineItems: [{ description: "Deposit", quantity: 1, unitOfMeasure: "EA", unitCost: 1000 }],
+      })
+    );
+    expect(invoice.amount).toBe(1000);
+
+    const invoiceCrossOrgLookup = await inSession(otherUser, orgB, "owner", async () =>
+      currentTransaction().invoice.findUnique({ where: { id: invoice.id } })
+    );
+    expect(invoiceCrossOrgLookup).toBeNull();
+
+    await expect(
+      inSession(viewerUser, orgA, "viewer", async () => new ContractsService().create({ orgId: orgA, proposalId: proposal.id }))
+    ).rejects.toThrow();
+
+    const contract = await inSession(adminUser, orgA, "admin", async () =>
+      new ContractsService().create({ orgId: orgA, proposalId: proposal.id })
+    );
+    expect(contract.status).toBe("pending_signature");
+
+    const signed = await inSession(adminUser, orgA, "admin", async () =>
+      new ContractsService().sign(contract.id, { orgId: orgA, signerName: "Jane Doe", signerEmail: "jane@example.com" })
+    );
+    expect(signed.status).toBe("signed");
+    expect(signed.signerName).toBe("Jane Doe");
+
+    const contractCrossOrgLookup = await inSession(otherUser, orgB, "owner", async () =>
+      currentTransaction().contract.findUnique({ where: { id: contract.id } })
+    );
+    expect(contractCrossOrgLookup).toBeNull();
   });
 });
 

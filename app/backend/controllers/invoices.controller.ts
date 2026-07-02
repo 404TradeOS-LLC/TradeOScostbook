@@ -1,0 +1,50 @@
+import { Request, Response } from "express";
+import { z } from "zod";
+import { InvoicesService } from "../../modules/invoices/service";
+import { requireOrgId } from "../requestContext";
+
+const service = new InvoicesService();
+
+const lineItemSchema = z.object({
+  description: z.string().min(1),
+  quantity: z.coerce.number().positive(),
+  unitOfMeasure: z.string().min(1),
+  unitCost: z.coerce.number().nonnegative(),
+});
+
+const createSchema = z.object({
+  projectId: z.string().uuid(),
+  estimateId: z.string().uuid().optional(),
+  proposalId: z.string().uuid().optional(),
+  type: z.enum(["full", "progress"]).optional(),
+  percentComplete: z.coerce.number().min(0).max(100).optional(),
+  dueDate: z.string().optional(),
+  lineItems: z.array(lineItemSchema).optional(),
+});
+
+export const invoicesController = {
+  async listByProject(req: Request, res: Response) {
+    res.json(await service.listByProject(req.params.projectId, requireOrgId(req)));
+  },
+  async getById(req: Request, res: Response) {
+    res.json(await service.getById(req.params.id, requireOrgId(req)));
+  },
+  async create(req: Request, res: Response) {
+    res.status(201).json(await service.create({ ...createSchema.parse(req.body), orgId: requireOrgId(req) }));
+  },
+  async getPdf(req: Request, res: Response) {
+    const doc = await service.getPdf(req.params.id, requireOrgId(req));
+    res.setHeader("Content-Type", doc.contentType);
+    res.setHeader("Content-Disposition", `attachment; filename="${doc.filename}"`);
+    res.send(doc.buffer);
+  },
+  async send(req: Request, res: Response) {
+    res.json(await service.send(req.params.id, requireOrgId(req)));
+  },
+  async markPaid(req: Request, res: Response) {
+    res.json(await service.markPaid(req.params.id, requireOrgId(req)));
+  },
+  async void(req: Request, res: Response) {
+    res.json(await service.void(req.params.id, requireOrgId(req)));
+  },
+};

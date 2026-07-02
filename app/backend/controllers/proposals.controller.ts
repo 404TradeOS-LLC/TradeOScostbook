@@ -1,0 +1,75 @@
+import { Request, Response } from "express";
+import { z } from "zod";
+import { ProposalsService } from "../../modules/proposals/service";
+import { requireOrgId } from "../requestContext";
+
+const service = new ProposalsService();
+
+const createSchema = z.object({
+  estimateId: z.string().uuid().optional(),
+  projectId: z.string().uuid().optional(),
+  companyName: z.string().optional(),
+  showLineItemDetail: z.boolean().optional(),
+  scopeOfWork: z.string().optional(),
+  assumptions: z.string().optional(),
+  exclusions: z.string().optional(),
+  timeline: z.string().optional(),
+  priceLow: z.number().nullable().optional(),
+  priceHigh: z.number().nullable().optional(),
+  finalPrice: z.number().nullable().optional(),
+  paymentScheduleJson: z.unknown().optional(),
+  termsAndConditions: z.string().optional(),
+}).refine((value) => value.estimateId || value.projectId, {
+  message: "Either estimateId or projectId is required",
+  path: ["estimateId"],
+});
+
+const updateSchema = z.object({
+  companyName: z.string().optional(),
+  showLineItemDetail: z.boolean().optional(),
+  scopeOfWork: z.string().optional(),
+  assumptions: z.string().optional(),
+  exclusions: z.string().optional(),
+  timeline: z.string().optional(),
+  priceLow: z.number().nullable().optional(),
+  priceHigh: z.number().nullable().optional(),
+  finalPrice: z.number().nullable().optional(),
+  paymentScheduleJson: z.unknown().optional(),
+  termsAndConditions: z.string().optional(),
+});
+
+export const proposalsController = {
+  async listByProject(req: Request, res: Response) {
+    res.json(await service.listByProject(req.params.projectId, requireOrgId(req)));
+  },
+  async getById(req: Request, res: Response) {
+    res.json(await service.getById(req.params.id, requireOrgId(req)));
+  },
+  async previewProjectDraft(req: Request, res: Response) {
+    res.json(await service.previewProjectDraft(req.params.projectId, requireOrgId(req), req.query.companyName?.toString()));
+  },
+  async create(req: Request, res: Response) {
+    res.status(201).json(await service.create({ ...createSchema.parse(req.body), orgId: requireOrgId(req) }));
+  },
+  async update(req: Request, res: Response) {
+    res.json(await service.update(req.params.id, updateSchema.parse(req.body), requireOrgId(req)));
+  },
+  async getPdf(req: Request, res: Response) {
+    const doc = await service.getPdf(req.params.id, requireOrgId(req));
+    res.setHeader("Content-Type", doc.contentType);
+    res.setHeader("Content-Disposition", `attachment; filename="${doc.filename}"`);
+    res.send(doc.buffer);
+  },
+  async send(req: Request, res: Response) {
+    res.json(await service.send(req.params.id, requireOrgId(req)));
+  },
+  async markViewed(req: Request, res: Response) {
+    res.json(await service.markViewed(req.params.id, requireOrgId(req)));
+  },
+  async accept(req: Request, res: Response) {
+    res.json(await service.accept(req.params.id, requireOrgId(req)));
+  },
+  async reject(req: Request, res: Response) {
+    res.json(await service.reject(req.params.id, requireOrgId(req)));
+  },
+};

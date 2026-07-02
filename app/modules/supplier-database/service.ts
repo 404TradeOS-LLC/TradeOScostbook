@@ -1,5 +1,5 @@
 import { prisma } from "../../db/client";
-import { ApiError } from "../../api/middleware/errorHandler";
+import { ApiError } from "../../backend/middleware/errorHandler";
 import { CreateSupplierInput, SupplierDTO, UpdateSupplierInput } from "./types";
 
 // Supplier Database module: supplier contact records that materials and

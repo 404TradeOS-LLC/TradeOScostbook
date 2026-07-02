@@ -10,7 +10,7 @@ const mockPrisma = {
 
 jest.mock("../db/client", () => ({ prisma: mockPrisma, basePrisma: mockPrisma }));
 
-import { signAuthToken } from "../api/auth/jwt";
+import { signAuthToken } from "../backend/auth/jwt";
 
 describe("requireAuth middleware", () => {
   const secret = "test-secret";
@@ -54,7 +54,7 @@ describe("requireAuth middleware", () => {
       status: "active",
     });
 
-    const { requireAuth } = await import("../api/middleware/auth");
+    const { requireAuth } = await import("../backend/middleware/auth");
     const req = {
       header: (name: string) => (name.toLowerCase() === "authorization" ? `Bearer ${token}` : undefined),
     };
@@ -80,7 +80,7 @@ describe("requireAuth middleware", () => {
   });
 
   it("rejects header-only org scoping when fallback is disabled", async () => {
-    const { requireAuth } = await import("../api/middleware/auth");
+    const { requireAuth } = await import("../backend/middleware/auth");
     const req = {
       header: (name: string) => (name.toLowerCase() === "x-org-id" ? "org-1" : undefined),
     };

@@ -6,6 +6,11 @@ export interface GenerateProposalInput {
   termsAndConditions?: string;
 }
 
+export interface GenerateProjectProposalInput {
+  proposalId: string;
+  orgId?: string;
+}
+
 export interface ProposalDocument {
   buffer: Buffer;
   filename: string;

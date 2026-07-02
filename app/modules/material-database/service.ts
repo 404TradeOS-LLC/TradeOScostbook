@@ -1,7 +1,7 @@
 import { prisma } from "../../db/client";
-import { ApiError } from "../../api/middleware/errorHandler";
+import { ApiError } from "../../backend/middleware/errorHandler";
 import { adjustedMaterialCost } from "../estimate-engine/formulas";
-import { AuthContext } from "../../api/auth/context";
+import { AuthContext } from "../../backend/auth/context";
 import { basePrisma } from "../../db/client";
 import { runInDatabaseTransaction } from "../../db/requestSession";
 import {

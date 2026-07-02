@@ -1,7 +1,7 @@
 import { Prisma } from "@prisma/client";
 import { prisma } from "../../db/client";
-import { AuthContext } from "../../api/auth/context";
-import { ApiError } from "../../api/middleware/errorHandler";
+import { AuthContext } from "../../backend/auth/context";
+import { ApiError } from "../../backend/middleware/errorHandler";
 import { MaterialDatabaseService } from "../material-database/service";
 import {
   OrganizationDTO,

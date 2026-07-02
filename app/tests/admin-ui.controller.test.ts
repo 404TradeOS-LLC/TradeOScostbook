@@ -7,11 +7,11 @@ jest.mock("../modules/admin-dashboard/service", () => ({
   AdminDashboardService: jest.fn().mockImplementation(() => mockService),
 }));
 
-jest.mock("../api/auth/jwt", () => ({
+jest.mock("../backend/auth/jwt", () => ({
   verifyAuthToken: jest.fn(),
 }));
 
-jest.mock("../api/auth/session", () => ({
+jest.mock("../backend/auth/session", () => ({
   resolveAuthContext: jest.fn(),
 }));
 
@@ -19,9 +19,9 @@ jest.mock("../db/requestSession", () => ({
   runWithDatabaseSession: jest.fn((_client, _auth, operation) => operation()),
 }));
 
-import { adminUiController } from "../api/controllers/adminUi.controller";
-import { verifyAuthToken } from "../api/auth/jwt";
-import { resolveAuthContext } from "../api/auth/session";
+import { adminUiController } from "../backend/controllers/adminUi.controller";
+import { verifyAuthToken } from "../backend/auth/jwt";
+import { resolveAuthContext } from "../backend/auth/session";
 
 describe("adminUiController", () => {
   beforeEach(() => {

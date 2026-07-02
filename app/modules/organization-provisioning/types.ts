@@ -5,6 +5,7 @@ export interface ProvisionOrganizationInput {
     authSubject: string;
     email: string;
     fullName?: string;
+    passwordHash?: string;
   };
 }
 
@@ -17,6 +18,7 @@ export interface ProvisionOrganizationResult {
   owner: {
     userId: string;
     membershipId: string;
+    authSubject: string;
     email: string;
     role: "owner";
     status: "active";
