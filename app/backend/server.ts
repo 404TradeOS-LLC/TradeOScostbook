@@ -18,6 +18,7 @@ import { customersRouter, projectsRouter } from "./routes/projects.routes";
 import { changeOrdersRouter } from "./routes/changeOrders.routes";
 import { supplierIntegrationRouter } from "./routes/supplierIntegration.routes";
 import { organizationProvisioningRouter } from "./routes/organizationProvisioning.routes";
+import { projectIntakeRouter } from "./routes/projectIntake.routes";
 
 export function createServer() {
   const app = express();
@@ -52,6 +53,7 @@ export function createServer() {
   app.use("/api/v1/projects", projectsRouter);
   app.use("/api/v1/change-orders", changeOrdersRouter);
   app.use("/api/v1/supplier-integrations", supplierIntegrationRouter);
+  app.use("/api/v1/project-intake", projectIntakeRouter);
 
   app.use(notFoundHandler);
   app.use(errorHandler);
