@@ -1,4 +1,6 @@
 import "server-only";
+import type { OrganizationSettingsResponse } from "@/lib/settings";
+import type { BrandAsset, BrandDocumentSettings, BrandProfile, BrandStudioPreview } from "@/lib/brand-studio";
 
 const BACKEND_API_URL = process.env.BACKEND_API_URL ?? "http://localhost:4000";
 
@@ -54,6 +56,26 @@ export function signup(input: { organizationName: string; regionCode?: string; e
 
 export function login(input: { email: string; password: string }) {
   return apiFetch<AuthSession>("/api/v1/auth/login", { method: "POST", body: JSON.stringify(input) });
+}
+
+export function getOrganizationSettings(token: string) {
+  return apiFetch<OrganizationSettingsResponse>("/api/v1/settings", { token });
+}
+
+export function getBrandStudioProfile(token: string) {
+  return apiFetch<BrandProfile>("/api/v1/brand-studio/profile", { token });
+}
+
+export function getBrandStudioAssets(token: string) {
+  return apiFetch<BrandAsset[]>("/api/v1/brand-studio/assets", { token });
+}
+
+export function getBrandStudioDocumentSettings(token: string) {
+  return apiFetch<BrandDocumentSettings>("/api/v1/brand-studio/document-settings", { token });
+}
+
+export function getBrandStudioPreview(token: string) {
+  return apiFetch<BrandStudioPreview>("/api/v1/brand-studio/preview", { token });
 }
 
 export interface Customer {
@@ -162,6 +184,29 @@ export interface Estimate {
   subtotalCost: number;
   totalPrice: number;
   createdAt?: string;
+}
+
+export interface EstimateLineItem {
+  id: string;
+  estimateId: string;
+  costItemId: string | null;
+  assemblyId: string | null;
+  description: string;
+  quantity: number;
+  unitOfMeasure: string;
+  unitCost: number;
+  lineCost: number;
+  sortOrder: number;
+}
+
+export type EstimateDetail = Estimate & { lineItems: EstimateLineItem[] };
+
+export function listEstimatesByProject(token: string, projectId: string) {
+  return apiFetch<Estimate[]>(`/api/v1/estimates/by-project/${projectId}`, { token });
+}
+
+export function getEstimate(token: string, id: string) {
+  return apiFetch<EstimateDetail>(`/api/v1/estimates/${id}`, { token });
 }
 
 export interface AIEstimateSuggestion {
@@ -312,7 +357,7 @@ export function getProject(token: string, id: string) {
       proposals: Proposal[];
       invoices: Array<Invoice & { lineItems: InvoiceLineItem[] }>;
       contracts: Contract[];
-      changeOrders: ChangeOrder[];
+      changeOrders: Array<ChangeOrder & { lineItems: ChangeOrderLineItem[] }>;
       tasks: ProjectTask[];
     }
   >(`/api/v1/projects/${id}`, { token });

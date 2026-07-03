@@ -4,6 +4,7 @@ import express, { Request, Response } from "express";
 import { errorHandler, notFoundHandler } from "./middleware/errorHandler";
 import { requireAuth } from "./middleware/auth";
 import { databaseSession } from "./middleware/databaseSession";
+import { assignRequestId, parseTrustProxy, requestLogger, securityHeaders } from "./middleware/productionHardening";
 import { adminUiRouter } from "./routes/adminUi.routes";
 import { costDatabaseRouter } from "./routes/costDatabase.routes";
 import { laborDatabaseRouter } from "./routes/laborDatabase.routes";
@@ -25,16 +26,30 @@ import { organizationProvisioningRouter } from "./routes/organizationProvisionin
 import { authRouter } from "./routes/auth.routes";
 import { projectIntakeRouter } from "./routes/projectIntake.routes";
 import { knowledgeRuntimeRouter } from "./routes/knowledgeRuntime.routes";
+import { settingsRouter } from "./routes/settings.routes";
+import { brandStudioRouter } from "./routes/brandStudio.routes";
+import { intelligenceRouter } from "./routes/intelligence.routes";
 
 export function createServer() {
   const app = express();
 
+  app.set("trust proxy", parseTrustProxy(process.env.TRUST_PROXY));
+  app.disable("x-powered-by");
+  app.use(assignRequestId);
+  app.use(requestLogger);
+  app.use(securityHeaders);
   app.use(cors());
   app.use(express.json());
   app.use(express.urlencoded({ extended: false }));
 
   app.get("/health", (_req: Request, res: Response) => {
-    res.json({ status: "ok" });
+    res.json({
+      status: "ok",
+      service: "tradeos-costbook-api",
+      version: process.env.npm_package_version ?? "0.1.0",
+      timestamp: new Date().toISOString(),
+      uptimeSeconds: Math.round(process.uptime()),
+    });
   });
 
   app.use("/admin", adminUiRouter);
@@ -70,6 +85,9 @@ export function createServer() {
   app.use("/api/v1/supplier-integrations", supplierIntegrationRouter);
   app.use("/api/v1/project-intake", projectIntakeRouter);
   app.use("/api/v1/knowledge", knowledgeRuntimeRouter);
+  app.use("/api/v1/settings", settingsRouter);
+  app.use("/api/v1/brand-studio", brandStudioRouter);
+  app.use("/api/v1/intelligence", intelligenceRouter);
 
   app.use(notFoundHandler);
   app.use(errorHandler);

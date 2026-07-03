@@ -3,6 +3,7 @@ import { listProjects } from "@/lib/api";
 import { getSessionToken } from "@/lib/session";
 import { buttonVariants } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { EmptyState } from "@/components/ui/empty-state";
 
 export default async function ProjectsPage() {
   const token = await getSessionToken();
@@ -21,7 +22,15 @@ export default async function ProjectsPage() {
       </div>
 
       {projects.length === 0 ? (
-        <p className="text-sm text-muted-foreground">No projects yet. Start with a customer, then create the first job you want to estimate.</p>
+        <EmptyState
+          title="No projects yet"
+          description="Create the first job so TradeOS can carry the work from field intake through estimating, proposal, contract, invoicing, and closeout."
+          action={
+            <Link href="/projects/new" className={buttonVariants()}>
+              Add first project
+            </Link>
+          }
+        />
       ) : (
         <ul className="flex flex-col gap-2">
           {projects.map((project) => (

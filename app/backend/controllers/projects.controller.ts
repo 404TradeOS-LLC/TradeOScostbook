@@ -3,13 +3,16 @@ import { Prisma } from "@prisma/client";
 import { z } from "zod";
 import { prisma } from "../../db/client";
 import { ApiError } from "../middleware/errorHandler";
-import { requireOrgId } from "../requestContext";
+import { requireAuthContext, requireOrgId } from "../requestContext";
 import { toEstimateDTO } from "../../modules/estimate-engine/service";
+import { ActivityTimelineService } from "../../modules/intelligence/service";
 import { buildProjectIntake } from "../../modules/project-intake/service";
 
 // Lightweight CRUD for customers/projects. Not one of the 8 specified core
 // modules — this is plumbing required so the Estimate Engine has a projectId
 // to attach to, since estimates.project_id is not-null in the schema.
+
+const activityService = new ActivityTimelineService();
 
 const customerSchema = z.object({
   orgId: z.string().uuid().optional(),
@@ -100,7 +103,17 @@ export const customersController = {
     );
   },
   async create(req: Request, res: Response) {
-    res.status(201).json(await prisma.customer.create({ data: { ...customerSchema.parse(req.body), orgId: requireOrgId(req) } }));
+    const auth = requireAuthContext(req);
+    const customer = await prisma.customer.create({ data: { ...customerSchema.parse(req.body), orgId: requireOrgId(req) } });
+    await activityService.record({
+      orgId: requireOrgId(req),
+      entityType: "customer",
+      entityId: customer.id,
+      eventType: "customer.created",
+      title: `Customer created: ${customer.name}`,
+      actorUserId: auth.userId,
+    });
+    res.status(201).json(customer);
   },
   async getById(req: Request, res: Response) {
     const row = await prisma.customer.findFirst({
@@ -129,7 +142,17 @@ export const projectsController = {
     res.json(await prisma.project.findMany({ where: { orgId: requireOrgId(req) }, orderBy: { createdAt: "desc" } }));
   },
   async create(req: Request, res: Response) {
-    res.status(201).json(await prisma.project.create({ data: { ...projectSchema.parse(req.body), orgId: requireOrgId(req) } }));
+    const auth = requireAuthContext(req);
+    const project = await prisma.project.create({ data: { ...projectSchema.parse(req.body), orgId: requireOrgId(req) } });
+    await activityService.record({
+      orgId: requireOrgId(req),
+      entityType: "project",
+      entityId: project.id,
+      eventType: "project.created",
+      title: `Project created: ${project.name}`,
+      actorUserId: auth.userId,
+    });
+    res.status(201).json(project);
   },
   async getById(req: Request, res: Response) {
     const row = await prisma.project.findFirst({
@@ -142,7 +165,7 @@ export const projectsController = {
         proposals: { orderBy: { createdAt: "desc" } },
         invoices: { orderBy: { createdAt: "desc" }, include: { lineItems: { orderBy: { sortOrder: "asc" } } } },
         contracts: { orderBy: { createdAt: "desc" } },
-        changeOrders: { orderBy: { createdAt: "desc" } },
+        changeOrders: { orderBy: { createdAt: "desc" }, include: { lineItems: { orderBy: { sortOrder: "asc" } } } },
         tasks: { orderBy: [{ status: "asc" }, { dueDate: "asc" }, { createdAt: "desc" }] },
       },
     });
@@ -159,6 +182,12 @@ export const projectsController = {
       changeOrders: (row.changeOrders ?? []).map((changeOrder) => ({
         ...changeOrder,
         amount: toNullableNumber(changeOrder.amount) ?? 0,
+        lineItems: (changeOrder.lineItems ?? []).map((lineItem) => ({
+          ...lineItem,
+          quantity: toNullableNumber(lineItem.quantity) ?? 0,
+          unitCost: toNullableNumber(lineItem.unitCost) ?? 0,
+          lineCost: toNullableNumber(lineItem.lineCost) ?? 0,
+        })),
       })),
       invoices: (row.invoices ?? []).map((invoice) => ({
         ...invoice,
@@ -180,6 +209,7 @@ export const projectsController = {
     res.json(await prisma.project.update({ where: { id: req.params.id }, data: body }));
   },
   async updateStatus(req: Request, res: Response) {
+    const auth = requireAuthContext(req);
     const schema = z.object({
       status: z.enum([
         "lead",
@@ -210,7 +240,17 @@ export const projectsController = {
     const { status } = schema.parse(req.body);
     const existing = await prisma.project.findFirst({ where: { id: req.params.id, orgId: requireOrgId(req) } });
     if (!existing) throw new ApiError(404, `Project ${req.params.id} not found`);
-    res.json(await prisma.project.update({ where: { id: req.params.id }, data: { status } }));
+    const project = await prisma.project.update({ where: { id: req.params.id }, data: { status } });
+    await activityService.record({
+      orgId: requireOrgId(req),
+      entityType: "project",
+      entityId: project.id,
+      eventType: "project.status_changed",
+      title: `Project status changed to ${status}`,
+      actorUserId: auth.userId,
+      metadata: { previousStatus: existing.status, nextStatus: status },
+    });
+    res.json(project);
   },
 };
 
@@ -227,6 +267,7 @@ export const siteVisitsController = {
   },
 
   async create(req: Request, res: Response) {
+    const auth = requireAuthContext(req);
     const project = await prisma.project.findFirst({ where: { id: req.params.id, orgId: requireOrgId(req) } });
     if (!project) throw new ApiError(404, `Project ${req.params.id} not found`);
 
@@ -252,6 +293,17 @@ export const siteVisitsController = {
     } else if (project.status === "lead") {
       await prisma.project.update({ where: { id: project.id }, data: { status: "site_visit" } });
     }
+
+    await activityService.record({
+      orgId: requireOrgId(req),
+      entityType: "project",
+      entityId: project.id,
+      eventType: "site_visit.created",
+      title: "Site visit captured",
+      description: input.notes ?? input.transcript ?? undefined,
+      actorUserId: auth.userId,
+      metadata: { siteVisitId: visit.id, confidenceScore: toNullableNumber(visit.confidenceScore) },
+    });
 
     res.status(201).json({ ...visit, confidenceScore: toNullableNumber(visit.confidenceScore) });
   },
@@ -296,6 +348,7 @@ export const projectFilesController = {
   },
 
   async create(req: Request, res: Response) {
+    const auth = requireAuthContext(req);
     const project = await prisma.project.findFirst({ where: { id: req.params.id, orgId: requireOrgId(req) } });
     if (!project) throw new ApiError(404, `Project ${req.params.id} not found`);
 
@@ -304,6 +357,15 @@ export const projectFilesController = {
         projectId: project.id,
         ...projectFileSchema.parse(req.body),
       },
+    });
+    await activityService.record({
+      orgId: requireOrgId(req),
+      entityType: file.fileType.startsWith("image") ? "photo" : "document",
+      entityId: file.id,
+      eventType: "project_file.uploaded",
+      title: `File uploaded: ${file.fileName}`,
+      actorUserId: auth.userId,
+      metadata: { projectId: project.id, storagePath: file.storagePath, fileType: file.fileType },
     });
     res.status(201).json(file);
   },

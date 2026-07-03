@@ -2,6 +2,7 @@ import Link from "next/link";
 import { listCustomers } from "@/lib/api";
 import { getSessionToken } from "@/lib/session";
 import { buttonVariants } from "@/components/ui/button";
+import { EmptyState } from "@/components/ui/empty-state";
 
 export default async function CustomersPage() {
   const token = await getSessionToken();
@@ -20,7 +21,15 @@ export default async function CustomersPage() {
       </div>
 
       {customers.length === 0 ? (
-        <p className="text-sm text-muted-foreground">No customers yet. Add the first homeowner, builder, or property manager you want to track.</p>
+        <EmptyState
+          title="No customers yet"
+          description="Add the first homeowner, builder, or property manager so future projects, proposals, and invoices stay tied to the right account."
+          action={
+            <Link href="/customers/new" className={buttonVariants()}>
+              Add first customer
+            </Link>
+          }
+        />
       ) : (
         <ul className="flex flex-col gap-2">
           {customers.map((customer) => (

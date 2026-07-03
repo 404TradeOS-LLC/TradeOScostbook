@@ -22,6 +22,7 @@ If the bucket is private, set `SUPABASE_STORAGE_BUCKET_PUBLIC=false` so server-r
 - `/projects/[id]/invoices/new`, `/projects/[id]/invoices/[invoiceId]` — create a full or progress invoice from an estimate; send/mark-paid/void; download PDF.
 - `/projects/[id]/contracts/[contractId]` — view terms, sign (name/email), void; download PDF.
 - `/projects/[id]/estimates/[estimateId]/assist` — org-scoped AI estimate drafting that returns reviewable line-item suggestions from the active cost book.
+- `/projects/[id]/estimates/compare` — side-by-side estimate version comparison with duplicate-into-draft actions.
 
 ## Auth model
 

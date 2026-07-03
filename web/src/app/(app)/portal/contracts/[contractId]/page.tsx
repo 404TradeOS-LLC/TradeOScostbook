@@ -66,7 +66,7 @@ export default async function CustomerPortalContractPage({ params }: { params: P
             <SignContractForm contractId={contract.id} projectId={project.id} portal />
           ) : (
             <div className="rounded-xl border border-border/60 bg-muted/20 p-4 text-sm text-muted-foreground">
-              Signed on {formatDateTime(contract.signedAt)}. Audit capture includes the typed name, drawn signature, and IP placeholder.
+              Signed on {formatDateTime(contract.signedAt)}. Audit capture includes the typed name, drawn signature, and the saved network record when available.
             </div>
           )}
         </CardContent>

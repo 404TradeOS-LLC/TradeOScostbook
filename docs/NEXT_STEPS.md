@@ -1,33 +1,53 @@
 # Next Steps
 
-## Immediate follow-up
+Last updated: 2026-07-03
 
-1. Add persisted lifecycle event records so project timeline and activity no longer rely only on derived timestamps from project subdomains.
-2. Add project-task editing beyond status changes, including bulk completion and lightweight field assignment filters.
-3. Add change-order customer approval artifacts and signed acceptance capture on top of the current internal approval timestamps.
-4. Add richer document taxonomy, signed artifact storage, and document-version visibility for plans, permits, and closeout packages.
-5. Add warranty records, claim intake, and post-closeout reminders as a real backend-owned module.
-6. Add AI suggestion acceptance and rejection logging so executive metrics can report a true acceptance rate instead of an instrumentation gap.
+## Immediate RC1 priorities
 
-## What should stay out of scope
+1. Remove or complete the last contractor-visible placeholder surfaces that still weaken launch trust.
+2. Decide whether supplier integrations ship as manual review infrastructure only or whether one live connector is required for RC1.
+3. Finish release-facing documentation and repository cleanup so the repo reads like a production candidate instead of an internal build log.
+4. Run the full release verification pass in a machine or CI environment that has `psql` available for integration testing.
+5. Produce release assets: `CHANGELOG.md` and `RELEASE_NOTES_RC1.md`.
 
-Do not start any of the following in Sprint 12 unless priorities change:
+## Recommended next engineering slice after RC1 docs
 
-- Scheduling or dispatch workflows
-- Payroll or accounting integrations
-- Inventory management
+The highest-value product hardening items after the current documentation phase are:
+
+1. Persist backend-owned lifecycle events so project timeline and dashboard activity do not rely only on derived timestamps.
+2. Add customer-facing change-order acceptance artifacts and signed acknowledgment flow.
+3. Improve project-document structure for closeout packages, permits, and signed deliverables.
+4. Add AI suggestion acceptance/rejection telemetry so estimate-assist quality can be measured in production.
+5. Decide on the final RC1 scope for warranty: launch it as closeout/supporting records only, or promote it into a first-class backend domain.
+
+## Explicitly out of scope during RC1 hardening
+
+Do not start these while RC1 is still open unless priorities change:
+
+- scheduling or dispatch workflows
+- payroll or accounting integrations
+- inventory management
 - CRM redesign
-- RAG or knowledge-runtime persistence rewrites
-- Broad architecture rewrites or framework migrations
+- architecture rewrites
+- framework migrations
+- knowledge-runtime persistence rewrites unrelated to launch blockers
 
-## Recommended Sprint 12
+## Next milestone recommendation
 
-Sprint 12 should harden the operational lifecycle that Sprint 11 introduced.
+If RC1 verification closes cleanly, the recommended sequence is:
 
-Suggested deliverables:
+1. `RC1`
+2. `v1.0`
+3. `v1.1`
+4. `v2.0`
 
-1. Persist backend-owned activity events and use them as the source for the project timeline and dashboard activity feeds.
-2. Add customer-facing change-order acceptance and signed artifact generation on top of the current change-order center.
-3. Introduce a first-class warranty module with claim records, reminders, and closeout handoff metadata.
-4. Add project-document versioning and structured document metadata while keeping the existing storage architecture.
-5. Instrument AI estimate suggestion review outcomes so the executive dashboard can report real acceptance trends.
+### Suggested milestone intent
+
+- `RC1`
+  Production readiness, stability, launch polish, release documentation, deployment confidence
+- `v1.0`
+  General-availability launch with resolved RC blockers and final release packaging
+- `v1.1`
+  Post-launch operational improvements: lifecycle event persistence, document/versioning refinement, AI review telemetry
+- `v2.0`
+  Larger product expansion only after launch operations are stable

@@ -38,6 +38,22 @@ const projectB = "20000000-0000-0000-0000-000000000082";
 const projectTaskA = "10000000-0000-0000-0000-000000000083";
 const estimateA = "10000000-0000-0000-0000-000000000091";
 const assemblyForEstimateA = "10000000-0000-0000-0000-000000000092";
+const settingsA = "10000000-0000-0000-0000-000000000093";
+const settingsB = "20000000-0000-0000-0000-000000000094";
+const brandProfileA = "10000000-0000-0000-0000-000000000095";
+const brandProfileB = "20000000-0000-0000-0000-000000000096";
+const brandDocumentSettingsA = "10000000-0000-0000-0000-000000000097";
+const brandDocumentSettingsB = "20000000-0000-0000-0000-000000000098";
+const brandAssetA = "10000000-0000-0000-0000-000000000099";
+const activityEventA = "10000000-0000-0000-0000-000000000100";
+const notificationA = "10000000-0000-0000-0000-000000000101";
+const attachmentA = "10000000-0000-0000-0000-000000000102";
+const commentA = "10000000-0000-0000-0000-000000000103";
+const tagA = "10000000-0000-0000-0000-000000000104";
+const tagAssignmentA = "10000000-0000-0000-0000-000000000105";
+const savedViewA = "10000000-0000-0000-0000-000000000106";
+const recentItemA = "10000000-0000-0000-0000-000000000107";
+const featureFlagA = "10000000-0000-0000-0000-000000000108";
 
 describe("live organization row-level security", () => {
   beforeAll(async () => {
@@ -134,6 +150,161 @@ describe("live organization row-level security", () => {
         totalPrice: 200,
       },
     });
+    await adminClient.organizationSettings.createMany({
+      data: [
+        {
+          id: settingsA,
+          orgId: orgA,
+          settingsJson: { companyName: "Org A Settings", currency: "USD", emailNotifications: true },
+        },
+        {
+          id: settingsB,
+          orgId: orgB,
+          settingsJson: { companyName: "Org B Settings", currency: "CAD", emailNotifications: false },
+        },
+      ],
+    });
+    await adminClient.brandProfile.createMany({
+      data: [
+        {
+          id: brandProfileA,
+          organizationId: orgA,
+          companyDisplayName: "Org A Brand",
+          primaryColor: "#112233",
+          licenseNumber: "ORG-A-LIC",
+          serviceAreasJson: ["Indianapolis"],
+        },
+        {
+          id: brandProfileB,
+          organizationId: orgB,
+          companyDisplayName: "Org B Brand",
+          primaryColor: "#334455",
+        },
+      ],
+    });
+    await adminClient.brandDocumentSettings.createMany({
+      data: [
+        {
+          id: brandDocumentSettingsA,
+          organizationId: orgA,
+          brandProfileId: brandProfileA,
+          showPoweredByTradeOS: false,
+        },
+        {
+          id: brandDocumentSettingsB,
+          organizationId: orgB,
+          brandProfileId: brandProfileB,
+          showPoweredByTradeOS: true,
+        },
+      ],
+    });
+    await adminClient.brandAsset.create({
+      data: {
+        id: brandAssetA,
+        organizationId: orgA,
+        brandProfileId: brandProfileA,
+        type: "logo",
+        label: "Org A primary logo",
+        url: "https://cdn.example.com/org-a/logo.svg",
+      },
+    });
+    await adminClient.activityEvent.create({
+      data: {
+        id: activityEventA,
+        orgId: orgA,
+        entityType: "project",
+        entityId: projectA,
+        eventType: "project.created",
+        title: "Project created",
+        actorUserId: adminUser,
+      },
+    });
+    await adminClient.notification.create({
+      data: {
+        id: notificationA,
+        orgId: orgA,
+        entityType: "project",
+        entityId: projectA,
+        category: "ai_suggestion",
+        title: "AI suggested a change order",
+        body: "Check weather-related contingency",
+        priority: "high",
+        activityEventId: activityEventA,
+        createdByUserId: adminUser,
+      },
+    });
+    await adminClient.attachment.create({
+      data: {
+        id: attachmentA,
+        orgId: orgA,
+        entityType: "project",
+        entityId: projectA,
+        kind: "photo",
+        fileName: "front-elevation.jpg",
+        fileUrl: "https://cdn.example.com/front-elevation.jpg",
+        uploadedByUserId: adminUser,
+      },
+    });
+    await adminClient.comment.create({
+      data: {
+        id: commentA,
+        orgId: orgA,
+        entityType: "project",
+        entityId: projectA,
+        body: "Need permit confirmation before crew dispatch.",
+        authorUserId: adminUser,
+      },
+    });
+    await adminClient.tag.create({
+      data: {
+        id: tagA,
+        orgId: orgA,
+        name: "Urgent",
+        slug: "urgent",
+        color: "#f97316",
+      },
+    });
+    await adminClient.tagAssignment.create({
+      data: {
+        id: tagAssignmentA,
+        orgId: orgA,
+        tagId: tagA,
+        entityType: "project",
+        entityId: projectA,
+        assignedByUserId: adminUser,
+      },
+    });
+    await adminClient.savedView.create({
+      data: {
+        id: savedViewA,
+        orgId: orgA,
+        entityType: "project",
+        name: "High Priority Projects",
+        filterJson: { status: ["active"], tags: ["urgent"] },
+        createdByUserId: adminUser,
+      },
+    });
+    await adminClient.recentItem.create({
+      data: {
+        id: recentItemA,
+        orgId: orgA,
+        userId: adminUser,
+        entityType: "project",
+        entityId: projectA,
+        title: "Org A Project",
+        href: "/projects/" + projectA,
+      },
+    });
+    await adminClient.featureFlag.create({
+      data: {
+        id: featureFlagA,
+        orgId: orgA,
+        key: "intelligence-foundation",
+        enabled: true,
+        scopeType: "org",
+        scopeKey: orgA,
+      },
+    });
   });
 
   afterAll(async () => {
@@ -156,6 +327,82 @@ describe("live organization row-level security", () => {
     expect(row).toBeNull();
   });
 
+  it("enforces organization settings visibility and admin-only writes", async () => {
+    const visibleSettings = await inSession(adminUser, orgA, "admin", async () =>
+      currentTransaction().organizationSettings.findUnique({ where: { orgId: orgA } })
+    );
+    expect(visibleSettings?.orgId).toBe(orgA);
+
+    const hiddenSettings = await inSession(otherUser, orgB, "owner", async () =>
+      currentTransaction().organizationSettings.findUnique({ where: { orgId: orgA } })
+    );
+    expect(hiddenSettings).toBeNull();
+
+    await expect(
+      inSession(viewerUser, orgA, "viewer", async () =>
+        currentTransaction().organizationSettings.update({
+          where: { orgId: orgA },
+          data: { settingsJson: { companyName: "Viewer Blocked" } },
+        })
+      )
+    ).rejects.toThrow();
+
+    const updatedSettings = await inSession(adminUser, orgA, "admin", async () =>
+      currentTransaction().organizationSettings.update({
+        where: { orgId: orgA },
+        data: { settingsJson: { companyName: "Org A Updated", currency: "USD", emailNotifications: true } },
+      })
+    );
+    expect(updatedSettings.orgId).toBe(orgA);
+  });
+
+  it("enforces brand studio visibility and admin-only writes", async () => {
+    const visibleProfile = await inSession(adminUser, orgA, "admin", async () =>
+      currentTransaction().brandProfile.findUnique({ where: { organizationId: orgA } })
+    );
+    expect(visibleProfile?.id).toBe(brandProfileA);
+
+    const hiddenProfile = await inSession(otherUser, orgB, "owner", async () =>
+      currentTransaction().brandProfile.findUnique({ where: { organizationId: orgA } })
+    );
+    expect(hiddenProfile).toBeNull();
+
+    const visibleAsset = await inSession(adminUser, orgA, "admin", async () =>
+      currentTransaction().brandAsset.findUnique({ where: { id: brandAssetA } })
+    );
+    expect(visibleAsset?.organizationId).toBe(orgA);
+
+    await expect(
+      inSession(viewerUser, orgA, "viewer", async () =>
+        currentTransaction().brandProfile.update({
+          where: { organizationId: orgA },
+          data: { companyDisplayName: "Viewer Blocked Brand" },
+        })
+      )
+    ).rejects.toThrow();
+
+    const updatedSettings = await inSession(adminUser, orgA, "admin", async () =>
+      currentTransaction().brandDocumentSettings.update({
+        where: { organizationId: orgA },
+        data: { showPoweredByTradeOS: true },
+      })
+    );
+    expect(updatedSettings.showPoweredByTradeOS).toBe(true);
+
+    await expect(
+      inSession(adminUser, orgA, "admin", async () =>
+        currentTransaction().brandAsset.create({
+          data: {
+            organizationId: orgB,
+            brandProfileId: brandProfileB,
+            type: "logo",
+            url: "https://cdn.example.com/cross-org/logo.svg",
+          },
+        })
+      )
+    ).rejects.toThrow();
+  });
+
   it("enforces project task visibility and write permissions", async () => {
     const visibleTasks = await inSession(adminUser, orgA, "admin", async () =>
       currentTransaction().projectTask.findMany({ orderBy: { createdAt: "asc" } })
@@ -175,6 +422,62 @@ describe("live organization row-level security", () => {
             title: "Viewer blocked task",
             status: "todo",
             priority: "low",
+          },
+        })
+      )
+    ).rejects.toThrow();
+  });
+
+  it("enforces intelligence foundation tenant boundaries", async () => {
+    const visibleActivity = await inSession(adminUser, orgA, "admin", async () =>
+      currentTransaction().activityEvent.findUnique({ where: { id: activityEventA } })
+    );
+    expect(visibleActivity?.orgId).toBe(orgA);
+
+    const hiddenNotification = await inSession(otherUser, orgB, "owner", async () =>
+      currentTransaction().notification.findUnique({ where: { id: notificationA } })
+    );
+    expect(hiddenNotification).toBeNull();
+
+    const visibleAttachment = await inSession(adminUser, orgA, "admin", async () =>
+      currentTransaction().attachment.findUnique({ where: { id: attachmentA } })
+    );
+    expect(visibleAttachment?.entityId).toBe(projectA);
+
+    const visibleComment = await inSession(adminUser, orgA, "admin", async () =>
+      currentTransaction().comment.findUnique({ where: { id: commentA } })
+    );
+    expect(visibleComment?.body).toContain("permit");
+
+    const visibleTagAssignment = await inSession(adminUser, orgA, "admin", async () =>
+      currentTransaction().tagAssignment.findUnique({ where: { id: tagAssignmentA } })
+    );
+    expect(visibleTagAssignment?.tagId).toBe(tagA);
+
+    const visibleSavedView = await inSession(adminUser, orgA, "admin", async () =>
+      currentTransaction().savedView.findUnique({ where: { id: savedViewA } })
+    );
+    expect(visibleSavedView?.entityType).toBe("project");
+
+    const visibleRecentItem = await inSession(adminUser, orgA, "admin", async () =>
+      currentTransaction().recentItem.findUnique({ where: { id: recentItemA } })
+    );
+    expect(visibleRecentItem?.userId).toBe(adminUser);
+
+    const visibleFeatureFlag = await inSession(adminUser, orgA, "admin", async () =>
+      currentTransaction().featureFlag.findUnique({ where: { id: featureFlagA } })
+    );
+    expect(visibleFeatureFlag?.enabled).toBe(true);
+
+    await expect(
+      inSession(viewerUser, orgA, "viewer", async () =>
+        currentTransaction().featureFlag.create({
+          data: {
+            orgId: orgA,
+            key: "viewer-blocked-flag",
+            enabled: true,
+            scopeType: "org",
+            scopeKey: orgA,
           },
         })
       )

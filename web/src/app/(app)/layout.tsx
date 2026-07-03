@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { logoutAction } from "@/app/actions/auth";
+import { CommandPaletteTrigger } from "@/components/shared/global-command-palette";
 import { Button } from "@/components/ui/button";
 import { getSession } from "@/lib/session";
 
@@ -8,6 +9,8 @@ const NAV_LINKS = [
   { href: "/dashboard", label: "Dashboard" },
   { href: "/customers", label: "Customers" },
   { href: "/projects", label: "Projects" },
+  { href: "/brand-studio", label: "Brand Studio" },
+  { href: "/settings", label: "Settings" },
 ];
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
@@ -25,6 +28,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
           ))}
         </nav>
         <div className="flex items-center gap-3 text-sm text-muted-foreground">
+          <CommandPaletteTrigger />
           <span>{session.email}</span>
           <form action={logoutAction}>
             <Button type="submit" variant="outline" size="sm">
@@ -33,7 +37,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
           </form>
         </div>
       </header>
-      <main className="mx-auto w-full max-w-4xl flex-1 px-6 py-8">{children}</main>
+      <main className="mx-auto w-full max-w-7xl flex-1 px-6 py-8">{children}</main>
     </div>
   );
 }

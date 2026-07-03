@@ -6,6 +6,7 @@ const mockPrisma = {
     count: jest.fn(),
     create: jest.fn(),
     findFirst: jest.fn(),
+    findMany: jest.fn(),
     update: jest.fn(),
   },
   costItem: {
@@ -174,6 +175,98 @@ describe("EstimateEngineService", () => {
         data: { status: "sent" },
       })
     );
+  });
+
+  it("duplicates an estimate into the next draft version with copied line items", async () => {
+    mockPrisma.estimate.findFirst
+      .mockResolvedValueOnce({
+        id: "estimate-1",
+        orgId: "org-1",
+        projectId: "project-1",
+        version: 1,
+        status: "sent",
+        overheadPct: 10,
+        profitPct: 20,
+        targetMarginPct: null,
+        subtotalCost: 25,
+        totalPrice: 33,
+        lineItems: [
+          {
+            costItemId: "cost-item-1",
+            assemblyId: null,
+            description: "Excavation",
+            quantity: 2,
+            unitOfMeasure: "CY",
+            unitCost: 12.5,
+            lineCost: 25,
+            sortOrder: 1,
+          },
+        ],
+      })
+      .mockResolvedValueOnce({
+        id: "estimate-2",
+        orgId: "org-1",
+        projectId: "project-1",
+        version: 2,
+        status: "draft",
+        overheadPct: 10,
+        profitPct: 20,
+        targetMarginPct: null,
+        subtotalCost: 25,
+        totalPrice: 33,
+        lineItems: [
+          {
+            id: "line-2",
+            estimateId: "estimate-2",
+            costItemId: "cost-item-1",
+            assemblyId: null,
+            description: "Excavation",
+            quantity: 2,
+            unitOfMeasure: "CY",
+            unitCost: 12.5,
+            lineCost: 25,
+            sortOrder: 1,
+          },
+        ],
+      });
+    mockPrisma.estimate.count.mockResolvedValue(1);
+    mockPrisma.estimate.create.mockResolvedValue({
+      id: "estimate-2",
+      orgId: "org-1",
+      projectId: "project-1",
+      version: 2,
+      status: "draft",
+      overheadPct: 10,
+      profitPct: 20,
+      targetMarginPct: null,
+      subtotalCost: 25,
+      totalPrice: 33,
+    });
+
+    const service = new EstimateEngineService();
+    const duplicate = await service.duplicateFromVersion("estimate-1", "org-1");
+
+    expect(mockPrisma.estimate.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({
+          projectId: "project-1",
+          version: 2,
+          status: "draft",
+          lineItems: {
+            create: [
+              expect.objectContaining({
+                description: "Excavation",
+                quantity: 2,
+                lineCost: 25,
+              }),
+            ],
+          },
+        }),
+      })
+    );
+    expect(duplicate.version).toBe(2);
+    expect(duplicate.status).toBe("draft");
+    expect(duplicate.lineItems).toHaveLength(1);
   });
 });
 

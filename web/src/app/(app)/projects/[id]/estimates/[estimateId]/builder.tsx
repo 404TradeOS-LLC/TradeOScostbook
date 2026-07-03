@@ -41,6 +41,7 @@ export function EstimateBuilder({ projectId, estimateId }: { projectId: string; 
   const { data: estimate, isLoading } = useQuery({
     queryKey: estimateKey,
     queryFn: () => clientFetch<EstimateDetail>(`/estimates/${estimateId}`),
+    staleTime: 15_000,
   });
 
   const invalidate = () => queryClient.invalidateQueries({ queryKey: estimateKey });
@@ -93,6 +94,9 @@ export function EstimateBuilder({ projectId, estimateId }: { projectId: string; 
           </div>
         </div>
         <div className="flex flex-wrap items-center gap-3">
+          <Link href={`/projects/${projectId}/estimates/compare`} className={buttonVariants({ variant: "outline" })}>
+            Compare versions
+          </Link>
           <Link href={`/projects/${projectId}/estimates/${estimateId}/assist`} className={buttonVariants({ variant: "outline" })}>
             AI assist
           </Link>
@@ -243,6 +247,7 @@ function LineItemPicker({ estimateId, onAdded }: { estimateId: string; onAdded: 
       ];
     },
     enabled: debouncedQuery.length > 0,
+    staleTime: 5 * 60_000,
   });
 
   const orderedResults = useMemo(() => {

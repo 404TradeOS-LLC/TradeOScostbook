@@ -1,6 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import { Prisma } from "@prisma/client";
 import { ZodError } from "zod";
+import { logError } from "../logging";
 
 export class ApiError extends Error {
   constructor(public statusCode: number, message: string) {
@@ -53,23 +54,35 @@ export function mapPrismaKnownRequestError(err: Prisma.PrismaClientKnownRequestE
 
 // Centralized error handler. Keeps controllers free of repetitive try/catch
 // boilerplate — controllers can throw ApiError or let Zod/Prisma errors bubble up.
-export function errorHandler(err: unknown, _req: Request, res: Response, _next: NextFunction): void {
+export function errorHandler(err: unknown, req: Request, res: Response, _next: NextFunction): void {
+  const requestId = typeof res.locals.requestId === "string" ? res.locals.requestId : undefined;
+
   if (err instanceof ApiError) {
-    res.status(err.statusCode).json({ error: err.message });
+    res.status(err.statusCode).json({ error: err.message, ...(requestId ? { requestId } : {}) });
     return;
   }
   if (err instanceof ZodError) {
-    res.status(400).json({ error: "Validation failed", details: err.issues });
+    res.status(400).json({ error: "Validation failed", details: err.issues, ...(requestId ? { requestId } : {}) });
     return;
   }
   if (err instanceof Prisma.PrismaClientKnownRequestError) {
     const mapped = mapPrismaKnownRequestError(err);
     if (mapped) {
-      res.status(mapped.statusCode).json({ error: mapped.message, ...(mapped.details ? { details: mapped.details } : {}) });
+      res.status(mapped.statusCode).json({
+        error: mapped.message,
+        ...(mapped.details ? { details: mapped.details } : {}),
+        ...(requestId ? { requestId } : {}),
+      });
       return;
     }
   }
-  // eslint-disable-next-line no-console
-  console.error(err);
-  res.status(500).json({ error: "Internal server error" });
+
+  logError("request.failed", {
+    requestId,
+    method: req.method,
+    path: req.originalUrl,
+    error: err instanceof Error ? { name: err.name, message: err.message, stack: err.stack } : String(err),
+  });
+
+  res.status(500).json({ error: "Internal server error", ...(requestId ? { requestId } : {}) });
 }

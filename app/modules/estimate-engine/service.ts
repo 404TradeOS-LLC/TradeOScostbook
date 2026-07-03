@@ -45,6 +45,44 @@ export class EstimateEngineService {
     return rows.map(toEstimateDTO);
   }
 
+  /** Creates the next project version as a draft, copying line-item snapshots and pricing settings. */
+  async duplicateFromVersion(sourceEstimateId: string, orgId?: string): Promise<EstimateDTO & { lineItems: EstimateLineItemDTO[] }> {
+    const source = await prisma.estimate.findFirst({
+      where: { id: sourceEstimateId, orgId },
+      include: { lineItems: { orderBy: { sortOrder: "asc" } } },
+    });
+    if (!source) throw new ApiError(404, `Estimate ${sourceEstimateId} not found`);
+
+    const priorVersions = await prisma.estimate.count({ where: { projectId: source.projectId } });
+    const row = await prisma.estimate.create({
+      data: {
+        orgId: source.orgId,
+        projectId: source.projectId,
+        version: priorVersions + 1,
+        status: "draft",
+        overheadPct: source.overheadPct,
+        profitPct: source.profitPct,
+        targetMarginPct: source.targetMarginPct,
+        subtotalCost: source.subtotalCost,
+        totalPrice: source.totalPrice,
+        lineItems: {
+          create: source.lineItems.map((lineItem) => ({
+            costItemId: lineItem.costItemId,
+            assemblyId: lineItem.assemblyId,
+            description: lineItem.description,
+            quantity: lineItem.quantity,
+            unitOfMeasure: lineItem.unitOfMeasure,
+            unitCost: lineItem.unitCost,
+            lineCost: lineItem.lineCost,
+            sortOrder: lineItem.sortOrder,
+          })),
+        },
+      },
+    });
+
+    return this.getById(row.id, orgId);
+  }
+
   /** Adds a line item, snapshotting its unit cost at the moment it's added. */
   async addLineItem(input: AddLineItemInput): Promise<EstimateLineItemDTO> {
     await this.assertDraft(input.estimateId, input.orgId);

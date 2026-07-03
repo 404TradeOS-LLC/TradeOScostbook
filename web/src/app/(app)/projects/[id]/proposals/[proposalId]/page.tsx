@@ -29,7 +29,7 @@ export default async function ProposalDetailPage({ params }: { params: Promise<{
           </Link>
           <h1 className="text-3xl font-semibold tracking-tight">Proposal Review</h1>
           <p className="max-w-2xl text-sm text-muted-foreground">
-            Tighten the draft before it goes to the customer. This page now carries the full proposal lifecycle from internal review through customer response.
+            Review the final scope, pricing, and payment milestones before the proposal goes out. Keep this page as the source of truth from internal review through customer decision.
           </p>
         </div>
         <StatusBadge status={displayStatus} />

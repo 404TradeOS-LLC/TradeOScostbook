@@ -462,9 +462,19 @@ TradeOS Cost Book
    - Kept it frontend-only: all suggestions are local mock data, and nothing calls or requires backend AI services
    - `web`'s `npm run lint` and `npm run build` pass after the change
 
+43. Added estimate version comparison and duplicate-from-version workflow:
+   - Added `EstimateEngineService.duplicateFromVersion` and `POST /api/v1/estimates/:id/duplicate` — creates the next project version as a draft, copying line-item snapshots and pricing settings from any prior version (including finalized ones)
+   - Added unit test coverage for the duplicate path
+   - Added `/projects/[id]/estimates/compare` with baseline/compare version pickers, summary deltas, and a line-item comparison table
+   - Wired duplicate actions into the compare page and the project workspace Estimate History tab; added Compare versions entry points from the estimate builder and history tab
+   - `app` lint/build pass; estimate-engine service tests pass; `web` lint/build pass
+
 ## Next Suggested Slice
-- Consider an Estimate Builder "duplicate from previous version" or multi-version comparison view now that projects can carry multiple estimate versions.
-- Add backend AI-assisted estimating (Phase 3 of `docs/frontend-platform-completion-plan.md`) when it is time to connect the new UI to a real model and persistence path.
+- Add persisted lifecycle event records so project timeline/dashboard activity no longer rely only on derived timestamps (`docs/NEXT_STEPS.md` Sprint 12 item 1).
+- Add customer-facing change-order acceptance and signed artifact capture on top of the current internal change-order center.
+- Introduce a first-class warranty module (claims, reminders, closeout handoff) — the workspace tab exists today but is still a placeholder.
+- Instrument AI suggestion accept/reject outcomes so the dashboard can report a real acceptance rate instead of "Not logged".
+- Add Settings UI (company profile, users & permissions, regions, supplier integrations) — backend admin APIs exist; no contractor-facing settings pages yet.
 - Resolve why required-reviewer protection rules won't enable on the `production` Environment despite GitHub Pro — try the web UI, or check whether this needs an Organization-owned repo rather than a personal account.
 - Investigate and commit (or otherwise resolve) the uncommitted `api/` → `backend/` rename and untracked `vercel.json` that were already present in the working tree at the start of this session — undocumented in this log, so the reasoning/status should be confirmed before it's folded into a commit.
 - Deploy the actual API application somewhere (Vercel/Fly/Railway/a VM) pointed at the now-live Supabase database via the `tradeos_app` role.

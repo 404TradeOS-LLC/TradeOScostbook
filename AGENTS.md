@@ -1,105 +1,190 @@
-# AGENTS.md — TradeOS Cost Book Developer Guide
-Essential knowledge for AI agents working in this codebase.
-## Big Picture
+# AGENTS.md — TradeOS RC1 Developer Guide
+
+Essential knowledge for AI agents working in this repository.
+
+## Big picture
+
 Two independent deployables:
-- **`app/`** — Express/TypeScript API (Node 20+, Prisma, PostgreSQL, forced RLS multi-tenancy)
-- **`web/`** — Next.js 16 front-end (React, Server Components, TanStack Query)
-**Security model:** Bearer JWT + org-membership check + forced PostgreSQL RLS. All three required. Request runs in scoped Prisma transaction with PostgreSQL session vars (`app.user_id`, `app.org_id`, `app.role`) for RLS.
-## Module Pattern
-Every business module:
-```
+
+- **`app/`** — Express/TypeScript API
+- **`web/`** — Next.js 16 frontend
+
+Current operating mode:
+
+- TradeOS is in RC1 hardening
+- prioritize production readiness, stability, polish, and documentation
+- do not redesign working systems
+- do not introduce speculative abstractions
+
+## Security model
+
+Every authenticated backend request depends on all three of these layers:
+
+1. bearer JWT verification
+2. organization-membership authorization
+3. forced PostgreSQL row-level security inside a scoped database session
+
+The request-scoped database session sets:
+
+- `app.user_id`
+- `app.org_id`
+- `app.role`
+
+## Module pattern
+
+Every business module follows:
+
+```text
 app/modules/<name>/
-  types.ts      (interfaces, DTOs)
-  service.ts    (class, async methods, takes orgId param)
+  types.ts
+  service.ts
 ```
-Services have zero Express knowledge. Controllers add HTTP layer. Routes mount controllers.
-## Adding a Feature
-1. Extend `service.ts` with org-scoped logic: `findFirst({ where: { id, orgId } })`
-2. Add controller method (Zod validation, call service)
-3. Add route mounting controller
-4. Wire route into `app/backend/server.ts` under `/api/v1`
-5. Unit test: mock Prisma, assert shape
-6. Integration test: if new table with RLS, verify in `app/tests/rls.integration.ts` against live PostgreSQL
-7. `npm test && npm run test:integration && npm run build` — all must pass
-## Database & Migrations
-Source of truth: `app/prisma/migrations/` (timestamp-ordered, tracked by Prisma)
-New tables with RLS:
-- Write raw SQL in migration (Prisma schema language doesn't express RLS)
-- `FORCE ROW LEVEL SECURITY` on the table
-- Policies: readers check `org_id = current_app_org_id()`, writers check role
-- Child tables join through parent: `exists (select 1 from projects where id = ... and org_id = current_app_org_id())`
-- **Test with `npm run test:integration`** (real PostgreSQL, restricted role)
-Deploy with `npm run db:deploy`. GitHub Actions wires this in `.github/workflows/deploy-migrations.yml`.
-## Testing
-**Unit tests** (`npm test`):
-- Mock Prisma (see `estimate-engine.service.test.ts`)
-- 60+ tests, seconds
-**Integration tests** (`npm run test:integration`):
-- Disposable PostgreSQL 16, restricted `tradeos_app` role
-- Prove same-org reads, cross-org denied, viewers blocked
-- **New table? Add live test here** — RLS bugs hide in mocked tests
-- 10+ tests, ~30s
-## Error Handling
-Centralized in `app/backend/middleware/errorHandler.ts`:
-- Controllers throw `ApiError(statusCode, message)`
-- Prisma codes: `P2002` → 409, `P2003` → 409, `P2025` → 404
-- Zod validation → 400 with issues
-- Unmapped → 500
-Response: `{ error, details? }` or data.
-## Front-End Patterns
-**Server Components/Actions** (prefer):
-- Token read server-side via `src/lib/api.ts`
-- Never in browser JS
-**Client Components + TanStack Query**:
-- Use `src/app/api/proxy/[...path]/route.ts` (same-origin proxy, attaches token server-side)
-- Token never reaches browser
-**PDFs** (binary):
-- Use `src/app/api/documents/[...path]/route.ts` (arrayBuffer passthrough)
-## Key Files
-| Path | Role |
-|------|------|
-| `app/backend/server.ts` | Express setup, routes |
-| `app/backend/middleware/auth.ts` | JWT verify, org-membership, set `req.auth` |
-| `app/backend/middleware/databaseSession.ts` | Wrap request in transaction, set PostgreSQL vars |
-| `app/db/requestSession.ts` | AsyncLocalStorage routing, workers |
-| `app/backend/controllers/*.ts` | Zod validation, call service |
-| `app/modules/*/service.ts` | Org-scoped business logic |
-| `app/prisma/migrations/` | Authoritative schema + RLS |
-| `app/tests/rls.integration.ts` | Live RLS verification |
-| `web/src/lib/api.ts` | Typed backend client |
-## Gotchas
-1. **RLS is forced.** Every service WHERE includes `orgId`. DB enforces; app filters are defense-in-depth.
-2. **Request transactions timeout** (60s, `RLS_TRANSACTION_TIMEOUT_MS`). Long work uses `runWithBackgroundDatabaseSession`.
-3. **Mocked tests hide RLS bugs.** Live tests catch violations. New tables need one.
-4. **Services never see `req`.** They take `orgId` explicitly — testable from workers, CLI.
-5. **Org scope inherited via joins.** Resources have `project_id` FK; policies check parent org via join.
-6. **No token expiry yet.** If you add `exp`, implement `/api/v1/auth/refresh`.
-## Before Commit
+
+Rules:
+
+- services take `orgId` explicitly
+- services do not depend on Express request objects
+- controllers own HTTP and Zod validation
+
+## Active product areas
+
+The repository currently supports:
+
+- customers
+- projects
+- site visit intake
+- estimate creation, duplication, comparison, and AI assist
+- proposals
+- contracts
+- invoices
+- change orders
+- project tasks
+- supplier review queue
+- knowledge runtime
+
+This is now one connected workflow, not a collection of isolated modules.
+
+## Database and migrations
+
+Source of truth:
+
+- `app/prisma/migrations/`
+
+Rules for new tables that need RLS:
+
+- write raw SQL inside the migration when Prisma schema language cannot express the policy
+- use `FORCE ROW LEVEL SECURITY`
+- parent-owned resources should inherit org scope through joins
+- always add a live integration test for new RLS-protected tables
+
+Deploy with:
+
 ```bash
-npm test                  # Unit
-npm run test:integration  # Live RLS
-npm run lint              # TypeScript
-npm run build             # Compile
-```
-All must pass. Fix code, not tests.
-## Common Commands
-```bash
-# Dev
-cd app && npm run db:deploy && npm run db:seed && npm run dev  # Terminal 1
-cd web && npm run dev                                            # Terminal 2
-# Deploy
+cd app
 npm run db:deploy
-# Test
+```
+
+## Testing
+
+Backend unit tests:
+
+```bash
+cd app
+npm test
+```
+
+Backend live integration tests:
+
+```bash
+cd app
+npm run test:integration
+```
+
+Important:
+
+- mocked Prisma tests do not prove RLS correctness
+- new RLS-backed tables need live integration coverage in `app/tests/rls.integration.ts`
+
+Frontend verification:
+
+```bash
+cd web
+npm run lint
+npm run build
+```
+
+## Production hardening already present
+
+Backend now includes:
+
+- centralized error handling
+- request IDs
+- structured JSON logging
+- security headers
+- health endpoint
+- auth/provisioning rate limiting
+- trust-proxy and HSTS configuration
+
+See:
+
+- `docs/DEPLOYMENT_GUIDE.md`
+
+## Frontend patterns
+
+Preferred data paths:
+
+- server components and server actions use `web/src/lib/api.ts`
+- interactive client components use `web/src/lib/clientApi.ts` through `web/src/app/api/proxy/[...path]/route.ts`
+- binary documents use `web/src/app/api/documents/[...path]/route.ts`
+
+Guidelines:
+
+- prefer server components unless interactivity requires a client component
+- keep page files thin
+- reuse existing shared/project/proposal/contract/intake component systems
+- do not create parallel UI systems for the same workflow
+
+## Key files
+
+- `app/backend/server.ts` — Express setup and route mounting
+- `app/backend/start.ts` — long-lived backend process entrypoint
+- `app/index.ts` — serverless backend entrypoint
+- `app/backend/middleware/auth.ts` — JWT and membership resolution
+- `app/backend/middleware/databaseSession.ts` — request-scoped DB session
+- `app/backend/middleware/errorHandler.ts` — API error mapping
+- `app/db/requestSession.ts` — async-local Prisma session routing
+- `app/tests/rls.integration.ts` — live RLS verification
+- `web/src/lib/api.ts` — server-side backend client
+- `web/src/app/api/proxy/[...path]/route.ts` — authenticated browser proxy
+- `web/src/app/api/documents/[...path]/route.ts` — binary document proxy
+
+## Release posture gotchas
+
+1. **RLS is forced.** App-side filtering is defense in depth, not the primary control.
+2. **Do not treat RC1 like a sprint backlog.** Finish and harden before inventing.
+3. **Placeholder UX matters.** Contractor-visible unfinished wording is a release issue, not just a copy issue.
+4. **Supplier integration is only partially complete.** Queue/review plumbing is real; live feed ingestion is still the question.
+5. **Integration tests require `psql` on `PATH`.** If `npm run test:integration` fails during role provisioning, check local tooling before assuming an app regression.
+6. **Project workspace is the hub.** Extend current project-centered flows instead of branching into separate subsystems.
+
+## Before commit
+
+Backend:
+
+```bash
+cd app
 npm test
 npm run test:integration
 npm run lint
 npm run build
-# Workers
-npm run jobs:supplier-price-sync
 ```
-## Help
-- **Architecture** → `docs/TradeOS-CostBook-Architecture.docx`
-- **Roadmap** → `docs/frontend-platform-completion-plan.md`
-- **Session** → `CLAUDE.md`
-- **RLS** → Grep `current_app_org_id()` in migrations
-- **Examples** → `cost-database/`, `estimate-engine/`, `proposals/`
+
+Frontend:
+
+```bash
+cd web
+npm run lint
+npm run build
+```
+
+All should pass, or the failure should be documented as a real blocker.

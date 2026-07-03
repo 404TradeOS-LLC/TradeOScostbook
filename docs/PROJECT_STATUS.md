@@ -1,46 +1,82 @@
 # Project Status
 
-## Sprint 11 status
+Last updated: 2026-07-03
 
-TradeOS now operates as a project-first construction workspace instead of stopping at estimating and document generation.
+## Release posture
 
-Completed in this sprint:
+TradeOS is in RC1 hardening.
 
-- Reworked the project detail route into a tabbed Project Workspace with operational views for overview, estimate history, proposals, contracts, invoices, photos, documents, site visits, tasks, change orders, timeline, warranty, notes, and activity
-- Added a tablet-friendly Field Dashboard with large touch targets for photo capture, intake, notes, estimate access, and change-order workflows
-- Expanded site visits into a richer structured capture flow with arrival, departure, GPS placeholder, customer notes, materials needed, safety notes, punch list, measurements, transcript-ready notes, and photo upload support
-- Added a lightweight persisted project task system with status, priority, assignee, due date, notes, and completion tracking
-- Extended change orders with schedule impact, approval and rejection timestamps, approval-history visibility, cost delta display, and project workspace controls
-- Expanded the project payload and timeline derivation so customer creation, project creation, estimates, site visits, proposals, contracts, invoices, change orders, files, and task completion can appear in one chronological feed
-- Upgraded the dashboard toward operations with active jobs, field-activity visibility, revenue pipeline, pending contracts, pending invoices, open change orders, knowledge coverage, and estimate lead-time metrics
-- Added backend unit tests for the new task module and live RLS coverage for the new project task table
-- Added Prisma schema and migration updates without rewriting the existing module boundaries or auth model
+The repository is no longer organized around sprint delivery or MVP feature chasing. The current objective is to stabilize, polish, verify, and document the product that already exists so it can be treated like a release candidate for a commercial software launch.
 
-## Current system posture
+## What is implemented
 
-- Backend, frontend, estimate assist, project intake, proposal workflow, contract workflow, invoice workflow, customer portal views, project tasks, structured site visits, and change orders are connected
-- The operational workspace reuses the existing REST API, server actions, JWT auth, Prisma, and forced PostgreSQL RLS model
-- Human review remains mandatory before estimate writes and before customer-facing proposal, contract, invoice, or change-order decisions
-- No scheduling, payroll, accounting, inventory, or CRM rewrite was introduced
-- Project documents and field photos continue to use the existing project-file storage model instead of a parallel document subsystem
+### Core platform
 
-## Still intentionally not connected
+- Express + TypeScript backend in `app/`
+- Next.js 16 frontend in `web/`
+- bearer-token auth with organization membership checks
+- forced PostgreSQL row-level security with request-scoped Prisma session state
+- tracked Prisma migrations and role-provisioning rollout scripts
+- structured API request/error logging, request IDs, and health endpoint
 
-- Scheduling and crew dispatch
-- Payroll, accounting, ERP sync, and payment processing
-- Dedicated warranty claims as a first-class backend domain
-- Persisted lifecycle event log tables separate from the derived activity timeline
-- AI suggestion acceptance telemetry and long-term knowledge feedback logging
-- Weather, inspection, equipment, and crew-log event sources beyond future-ready documentation
+### Active product workflow
 
-## Repo-state note
+TradeOS currently supports the primary contractor flow across:
 
-Documentation concerns improved in this sprint:
+- customer records
+- project creation and project workspace
+- site visit intake and field notes
+- estimate creation, duplication, comparison, and AI-assisted drafting
+- proposal drafting, review, preview, and lifecycle management
+- contract generation, portal review, and signature capture
+- invoice creation, issue, and payment-status workflow
+- change orders
+- project tasks
+- closeout and warranty-supporting document organization
 
-- `docs/PROJECT_LIFECYCLE.md` was added
-- `docs/EXECUTIVE_REPOSITORY_AUDIT.md` was added
+### UI and workflow posture
 
-The following documents are still useful future documentation gaps:
+- project detail is now a workspace rather than a single estimating page
+- field, office, and document activities reuse one shared frontend system
+- customer-facing document flows are connected to the same project record
+- empty states, loading states, and contractor-facing copy have been tightened for RC1
 
-- `docs/KNOWLEDGE_ENGINE_STATUS.md`
-- `docs/TECHNICAL_DEBT.md`
+## Current strengths
+
+- clear backend service/module boundaries
+- strong multi-tenant security model
+- good unit-test and live-RLS test coverage
+- reusable frontend component structure
+- deployment and migration story is documented and scriptable
+- estimate, proposal, contract, invoice, and project surfaces now feel like one product instead of isolated modules
+
+## RC1 blockers and active hardening themes
+
+The biggest remaining launch concerns are:
+
+- a few still-incomplete workflow surfaces that need final polish or clearer scoping
+- supplier integration plumbing being real while live feed ingestion is still stubbed
+- release documentation and repository hygiene still catching up to the actual product state
+
+See:
+
+- `docs/RC1_READINESS.md`
+- `docs/DEPLOYMENT_GUIDE.md`
+
+## Intentionally not in RC1
+
+The following are still out of scope for RC1 unless priorities change:
+
+- scheduling and crew dispatch
+- payroll and accounting integrations
+- ERP sync and payment processing
+- inventory management
+- full warranty claims as a dedicated backend module
+- persisted lifecycle event-log tables replacing all derived activity views
+- long-term AI suggestion telemetry and feedback persistence rewrites
+
+## Confidence summary
+
+TradeOS is beyond prototype stage.
+
+The system now behaves like a connected construction workflow platform, but RC1 still depends on finish quality: final documentation alignment, launch-safe workflow wording, and disciplined production hardening rather than new feature expansion.

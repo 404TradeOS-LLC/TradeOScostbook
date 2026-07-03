@@ -1,6 +1,6 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
-import { createEstimateAction, deleteProjectTaskAction, rejectChangeOrderAction, updateProjectStatusAction, updateProjectTaskStatusAction, approveChangeOrderAction } from "@/app/actions/projects";
+import { createEstimateAction, deleteProjectTaskAction, duplicateEstimateAction, rejectChangeOrderAction, updateProjectStatusAction, updateProjectTaskStatusAction, approveChangeOrderAction } from "@/app/actions/projects";
 import { ChangeOrderLineItemForm, ChangeOrderCreateForm } from "@/components/projects/change-order-forms";
 import { ProjectDocumentUpload } from "@/components/projects/project-document-upload";
 import { ProjectPhotoPanel } from "@/components/projects/project-photo-panel";
@@ -13,6 +13,7 @@ import { StatusBadge } from "@/components/shared/status-badge";
 import { SummaryMetricCard } from "@/components/shared/summary-metric-card";
 import { buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { EmptyState } from "@/components/ui/empty-state";
 import type { ChangeOrder, ChangeOrderLineItem, Contract, Customer, Estimate, Invoice, Project, ProjectFile, ProjectTask, Proposal, SiteVisit } from "@/lib/api";
 import {
   buildProjectActivity,
@@ -130,33 +131,79 @@ export async function ProjectWorkspace({
       );
     case "estimate-history":
       return (
-        <ListSection
-          title="Estimate history"
-          description="Track every estimate version tied to this project."
-          empty="No estimates yet."
-          action={
-            <form action={createEstimateAction}>
-              <input type="hidden" name="projectId" value={project.id} />
-              <button type="submit" className={buttonVariants()}>
-                New estimate
-              </button>
-            </form>
-          }
-          items={estimates.map((estimate) => ({
-            id: estimate.id,
-            title: `Estimate v${estimate.version}`,
-            subtitle: `${estimate.status} • ${formatCurrency(estimate.totalPrice)}`,
-            href: `/projects/${project.id}/estimates/${estimate.id}`,
-            badge: estimate.status,
-          }))}
-        />
+        <Card className="border-border/70">
+          <CardHeader className="flex flex-row flex-wrap items-start justify-between gap-4">
+            <div>
+              <CardTitle>Estimate history</CardTitle>
+              <p className="mt-1 text-sm text-muted-foreground">Track every estimate version tied to this project.</p>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {estimates.length >= 2 ? (
+                <Link href={`/projects/${project.id}/estimates/compare`} className={buttonVariants({ variant: "outline" })}>
+                  Compare versions
+                </Link>
+              ) : null}
+              <form action={createEstimateAction}>
+                <input type="hidden" name="projectId" value={project.id} />
+                <button type="submit" className={buttonVariants()}>
+                  New estimate
+                </button>
+              </form>
+            </div>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            {estimates.length === 0 ? (
+              <EmptyState
+                title="No estimates yet"
+                description="Create the first estimate so this project can move into proposal review and the customer approval flow."
+                action={
+                  <form action={createEstimateAction}>
+                    <input type="hidden" name="projectId" value={project.id} />
+                    <button type="submit" className={buttonVariants()}>
+                      Create first estimate
+                    </button>
+                  </form>
+                }
+              />
+            ) : (
+              estimates.map((estimate) => (
+                <div
+                  key={estimate.id}
+                  className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border/60 bg-muted/20 p-4"
+                >
+                  <div>
+                    <Link href={`/projects/${project.id}/estimates/${estimate.id}`} className="font-medium text-foreground hover:underline">
+                      Estimate v{estimate.version}
+                    </Link>
+                    <div className="text-sm text-muted-foreground">
+                      {estimate.status} • {formatCurrency(estimate.totalPrice)}
+                    </div>
+                  </div>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <StatusBadge status={estimate.status} />
+                    <form action={duplicateEstimateAction}>
+                      <input type="hidden" name="projectId" value={project.id} />
+                      <input type="hidden" name="estimateId" value={estimate.id} />
+                      <button type="submit" className={buttonVariants({ variant: "outline", size: "sm" })}>
+                        Duplicate
+                      </button>
+                    </form>
+                    <Link href={`/projects/${project.id}/estimates/${estimate.id}`} className={buttonVariants({ variant: "ghost", size: "sm" })}>
+                      Open
+                    </Link>
+                  </div>
+                </div>
+              ))
+            )}
+          </CardContent>
+        </Card>
       );
     case "proposals":
       return (
         <ListSection
           title="Proposals"
           description="Customer-facing scope and pricing history."
-          empty="No proposals yet."
+          empty="No proposals yet. Build the first draft when the estimate is ready for customer review."
           action={
             <Link href={`/projects/${project.id}/proposals/new`} className={buttonVariants()}>
               Build proposal draft
@@ -176,7 +223,7 @@ export async function ProjectWorkspace({
         <ListSection
           title="Contracts"
           description="Signed and pending project agreements."
-          empty="No contracts yet."
+          empty="No contracts yet. Create one from an accepted proposal to move the job into execution."
           items={contracts.map((contract) => ({
             id: contract.id,
             title: "Project contract",
@@ -191,7 +238,7 @@ export async function ProjectWorkspace({
         <ListSection
           title="Invoices"
           description="Billing history and outstanding balances."
-          empty="No invoices yet."
+          empty="No invoices yet. Create one after the contract or approved work scope is ready to bill."
           action={
             <Link href={`/projects/${project.id}/invoices/new`} className={buttonVariants()}>
               New invoice
@@ -273,9 +320,15 @@ export async function ProjectWorkspace({
             </CardContent>
           </Card>
           {siteVisits.length === 0 ? (
-            <Card className="border-border/70">
-              <CardContent className="pt-6 text-sm text-muted-foreground">No site visits saved yet.</CardContent>
-            </Card>
+            <EmptyState
+              title="No site visits saved yet"
+              description="Capture the first intake so measurements, photos, and field notes are available before the estimate is finalized."
+              action={
+                <Link href={`/projects/${project.id}/intake`} className={buttonVariants()}>
+                  Open intake workspace
+                </Link>
+              }
+            />
           ) : (
             siteVisits.map((visit) => (
               <Card key={visit.id} className="border-border/70">
@@ -290,7 +343,7 @@ export async function ProjectWorkspace({
                     pairs={[
                       { label: "Arrival", value: formatDateTime(visit.detailsJson?.arrivalAt ?? null) },
                       { label: "Departure", value: formatDateTime(visit.detailsJson?.departureAt ?? null) },
-                      { label: "GPS", value: visit.detailsJson?.gps ?? "Placeholder" },
+                      { label: "GPS", value: visit.detailsJson?.gps ?? "Not captured" },
                       { label: "Confidence", value: visit.confidenceScore != null ? `${visit.confidenceScore}%` : "Not scored" },
                     ]}
                   />
@@ -314,9 +367,10 @@ export async function ProjectWorkspace({
           <ProjectTaskForm projectId={project.id} />
           <div className="grid gap-4">
             {tasks.length === 0 ? (
-              <Card className="border-border/70">
-                <CardContent className="pt-6 text-sm text-muted-foreground">No tasks yet.</CardContent>
-              </Card>
+              <EmptyState
+                title="No tasks yet"
+                description="Add the first field or office task so the team knows what must happen next on this job."
+              />
             ) : (
               tasks.map((task) => (
                 <Card key={task.id} className="border-border/70">
@@ -374,9 +428,10 @@ export async function ProjectWorkspace({
             estimateOptions={estimates.map((estimate) => ({ id: estimate.id, label: `Estimate v${estimate.version} • ${formatCurrency(estimate.totalPrice)}` }))}
           />
           {changeOrders.length === 0 ? (
-            <Card className="border-border/70">
-              <CardContent className="pt-6 text-sm text-muted-foreground">No change orders yet.</CardContent>
-            </Card>
+            <EmptyState
+              title="No change orders yet"
+              description="If the scope changes after approval or work starts, create a change order here so price and schedule impacts stay documented."
+            />
           ) : (
             changeOrders.map((changeOrder) => {
               const baseEstimate = estimates.find((estimate) => estimate.id === changeOrder.estimateId) ?? null;
@@ -455,13 +510,13 @@ export async function ProjectWorkspace({
         <div className="grid gap-6 md:grid-cols-2">
           <Card className="border-border/70">
             <CardHeader>
-              <CardTitle>Warranty readiness</CardTitle>
+              <CardTitle>Closeout and warranty</CardTitle>
             </CardHeader>
             <CardContent className="space-y-3 text-sm text-muted-foreground">
-              <p>Closeout and warranty are now part of the workspace lifecycle, but standalone warranty claims are not yet a first-class backend domain.</p>
-              <p>Use this tab to track when the job reaches closeout, upload manufacturer documents, and keep the final signed artifacts together.</p>
+              <p>Use this tab to prepare the job for closeout, store handoff documents, and keep warranty-supporting records together for the customer file.</p>
+              <p>It is the final checkpoint before archiving the project: confirm closeout status, signed paperwork, and final billing readiness in one place.</p>
               <div className="rounded-xl border border-border/60 bg-muted/20 p-4">
-                <div className="font-medium text-foreground">Current readiness</div>
+                <div className="font-medium text-foreground">Current closeout snapshot</div>
                 <div className="mt-1">Project status: {project.status.replaceAll("_", " ")}</div>
                 <div>Contracts signed: {contracts.filter((contract) => contract.status === "signed").length}</div>
                 <div>Final invoices paid: {invoices.filter((invoice) => getInvoiceDisplayStatus(invoice) === "paid").length}</div>

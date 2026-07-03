@@ -1,17 +1,19 @@
 # System Architecture
 
+Last updated: 2026-07-03
+
 ## Overview
 
-TradeOS remains a two-application system:
+TradeOS is a two-application system:
 
-- `app/` is the Express and TypeScript backend API
-- `web/` is the Next.js front-end application
+- `app/` — Express + TypeScript backend API
+- `web/` — Next.js frontend
 
-The product shape now extends past estimating into operations:
+The current product shape is project-centered:
 
-`Lead -> Opportunity -> Estimate -> Proposal -> Contract -> Active Job -> Field Execution -> Change Orders -> Closeout -> Warranty -> Archived`
+`Lead -> Customer -> Project -> Site Visit -> Estimate -> Proposal -> Contract -> Invoice -> Closeout`
 
-Sprint 11 keeps that expansion inside the existing architecture rather than replacing it.
+The architecture deliberately keeps that lifecycle inside the existing backend/frontend split rather than introducing separate field, CRM, or document platforms.
 
 ## Backend architecture
 
@@ -21,69 +23,74 @@ Sprint 11 keeps that expansion inside the existing architecture rather than repl
 - Express
 - Prisma
 - PostgreSQL
-- Forced row-level security
+- forced row-level security
 
 ### Security model
 
-Every `/api/v1/*` request still depends on three layers:
+Every `/api/v1/*` request depends on three layers:
 
-1. Bearer JWT verification
-2. Organization-membership authorization
-3. PostgreSQL RLS inside a scoped request transaction
+1. bearer JWT verification
+2. organization-membership authorization
+3. PostgreSQL RLS inside a scoped database session
 
-The request transaction sets:
+The request-scoped transaction sets:
 
 - `app.user_id`
 - `app.org_id`
 - `app.role`
 
-That transaction-scoped context is what lets the database enforce tenant isolation even if application filtering were missed.
+This lets the database enforce tenant isolation even if an application filter were missed.
 
 ### Module pattern
 
-Business modules continue to live in `app/modules/<name>/` and use:
+Business logic lives in `app/modules/<name>/` with:
 
 - `types.ts`
 - `service.ts`
 
-Services take `orgId` explicitly and do not depend on Express request objects.
+Services take `orgId` explicitly and remain free of Express request objects.
+Controllers handle Zod validation and HTTP adaptation.
 
-### Operational workflow modules
+### Active backend modules
 
-Core lifecycle modules now include:
+Current primary modules include:
 
-- `app/modules/proposals/`
-- `app/modules/proposal-generator/`
-- `app/modules/contracts/`
-- `app/modules/invoices/`
-- `app/modules/change-orders/`
-- `app/modules/project-tasks/`
-- `app/modules/project-intake/`
+- `auth`
+- `organization-provisioning`
+- `cost-database`
+- `labor-database`
+- `material-database`
+- `equipment-database`
+- `assemblies-database`
+- `estimate-engine`
+- `ai-estimate-assist`
+- `knowledge-runtime`
+- `project-intake`
+- `project-tasks`
+- `proposals`
+- `proposal-generator`
+- `contracts`
+- `invoices`
+- `change-orders`
+- `supplier-database`
+- `supplier-integration`
+- `admin-dashboard`
 
-Sprint 11 extends these boundaries without changing ownership:
+### Request/session behavior
 
-- Proposal lifecycle stays in `proposals/service.ts`
-- Contract lifecycle stays in `contracts/service.ts`
-- Invoice lifecycle stays in `invoices/service.ts`
-- Change-order pricing and approvals stay in `change-orders/service.ts`
-- Task persistence lives in `project-tasks/service.ts`
-- Site-visit intelligence stays in `project-intake/service.ts` with richer structured payload capture in the project controller layer
+- authenticated requests enter `requireAuth`
+- request work is wrapped by `databaseSession`
+- Prisma is routed through async-local request context
+- background jobs use `runWithBackgroundDatabaseSession`
 
-### Persistence additions in Sprint 11
+### Production hardening already in place
 
-Sprint 11 adds or extends project-scoped storage with:
-
-- `project_tasks`
-- `site_visits.details_json`
-- `change_orders.schedule_impact_days`
-- `change_orders.approved_at`
-- `change_orders.rejected_at`
-
-Each new or extended project-owned record remains protected by the same RLS pattern:
-
-- visibility joins back through `projects`
-- writes require `current_app_can_write()`
-- live integration tests verify tenant isolation
+- centralized error handling
+- structured JSON logging
+- request IDs
+- health endpoint
+- auth and provisioning rate limiting
+- migration deploy script plus database-role provisioning script
 
 ## Frontend architecture
 
@@ -92,99 +99,115 @@ Each new or extended project-owned record remains protected by the same RLS patt
 - Next.js App Router
 - React Server Components by default
 - Server Actions for authenticated mutations
+- TanStack Query only where interactive client behavior genuinely needs it
 
 ### Data flow
 
-- Server components read the session token on the server
-- Authenticated requests use `web/src/lib/api.ts`
-- Binary PDFs route through `web/src/app/api/documents/[...path]/route.ts`
-- Mutations continue to use server actions in `web/src/app/actions/`
+There are three intended access paths:
+
+- server components and server actions call `web/src/lib/api.ts`
+- client components call `web/src/lib/clientApi.ts` through `web/src/app/api/proxy/[...path]/route.ts`
+- binary PDF/document downloads route through `web/src/app/api/documents/[...path]/route.ts`
+
+Bearer tokens stay server-side in all three cases.
 
 ### UI organization
 
-Sprint 11 keeps the UI compositional:
+Reusable UI is organized by concern:
 
-- `web/src/components/shared/` for workflow primitives
-- `web/src/components/projects/` for project workspace tabs, forms, field dashboard, and operational panels
-- `web/src/components/proposals/` for proposal lifecycle UI
-- `web/src/components/contracts/` for signing flow UI
+- `web/src/components/shared/`
+- `web/src/components/projects/`
+- `web/src/components/proposals/`
+- `web/src/components/contracts/`
+- `web/src/components/intake/`
+- `web/src/components/estimate-assist/`
+- `web/src/components/ui/`
 
-The project route remains the operational hub:
+### Route shape
 
-- `web/src/app/(app)/projects/[id]/page.tsx`
+The authenticated application shell lives under:
 
-That page now assembles:
+- `web/src/app/(app)/`
 
-- tab navigation
-- the main workspace content
-- the reusable right-rail project sidebar
+Current major app routes include:
 
-### Timeline and dashboard derivation
+- dashboard
+- customers
+- projects
+- project workspace
+- intake
+- estimate builder
+- estimate compare
+- AI estimate assist
+- proposal detail and preview
+- contract detail and portal signing
+- invoice detail and portal view
 
-`web/src/lib/document-workflow.ts` remains the shared derivation layer for:
+## Project workspace architecture
 
-- proposal display states
-- invoice display states
-- project activity timeline items
-- dashboard metrics
-- notification summaries
+The project workspace is the operational hub for the product.
 
-Sprint 11 expands those derivations to include:
+It is not a separate application. It is a project-detail expansion built from:
 
-- customer creation
-- site visits
-- change orders
-- task completion
-- project file additions
-
-These are still derived from source records rather than stored in a dedicated event-log table.
-
-## Project Workspace architecture
-
-The Project Workspace is intentionally not a separate application shell.
-
-It is an expansion of the existing project detail route using:
-
-- server-rendered project fetches
+- a server-rendered project fetch
 - project-scoped REST endpoints
-- server actions for create and status-change operations
-- reusable presentational components for each tab
+- server actions for mutations
+- reusable workspace panels and tabs
 
-Workspace tabs currently cover:
+Current workspace areas include:
 
-- Overview
-- Estimate History
-- Proposals
-- Contracts
-- Invoices
-- Photos
-- Documents
-- Site Visits
-- Tasks
-- Change Orders
-- Timeline
-- Warranty
-- Notes
-- Activity
+- overview
+- estimate history
+- proposals
+- contracts
+- invoices
+- photos
+- documents
+- site visits
+- tasks
+- change orders
+- timeline
+- closeout and warranty-supporting records
+- notes
+- activity
 
-## Field operations architecture
+## Document and lifecycle architecture
 
-Sprint 11 introduces field-oriented capabilities without adding a separate mobile backend:
+Proposal, contract, and invoice flows are separate modules, but they stay tied to one project lifecycle.
 
-- structured site-visit capture remains project-scoped
-- project files remain the shared document and photo storage layer
-- field dashboard actions deep-link into the existing project routes
-- task management is intentionally lightweight and project-owned
+Supporting patterns:
 
-This keeps field execution inside the same customer-project-estimate lifecycle instead of branching into a second system.
+- PDFs are generated on the backend
+- project files remain the shared storage layer for photos and documents
+- timeline and notification views are still derived from source records rather than a dedicated event-log table
+
+## Supplier sync architecture
+
+Supplier price updates are intentionally staged:
+
+- supplier-fed proposals go into a review queue
+- approval writes the actual material price change and audit trail
+- sync can run from an in-process cron schedule or an external scheduler
+
+The queue/review infrastructure is real.
+Live supplier feed ingestion is still the part that remains intentionally incomplete for RC1 unless explicitly finished.
 
 ## Known intentional gaps
 
-The following remain future work by design:
+The following are still outside the current launch scope:
 
 - scheduling and dispatch
 - payroll and accounting
 - inventory
-- dedicated warranty claims module
-- persisted event-log tables for timeline and activity
-- AI suggestion review telemetry for executive metrics
+- first-class warranty claims module
+- full event-log persistence replacing derived lifecycle views
+- long-term AI acceptance telemetry and knowledge feedback loops
+
+## Architectural direction
+
+The repository should continue to evolve by finishing and hardening the existing system:
+
+- preserve APIs where possible
+- preserve database compatibility
+- avoid speculative abstractions
+- expand through current module boundaries instead of inventing parallel platforms

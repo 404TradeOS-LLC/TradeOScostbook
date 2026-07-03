@@ -2,7 +2,7 @@ import { ProjectHeader } from "@/components/projects/project-header";
 import { ProjectSidebar } from "@/components/projects/project-sidebar";
 import { ProjectWorkspace } from "@/components/projects/project-workspace";
 import { ProjectWorkspaceTabs, resolveProjectWorkspaceTab } from "@/components/projects/project-workspace-tabs";
-import { getChangeOrder, getProject } from "@/lib/api";
+import { getProject } from "@/lib/api";
 import { getSessionToken } from "@/lib/session";
 
 export default async function ProjectDetailPage({
@@ -16,9 +16,6 @@ export default async function ProjectDetailPage({
   const token = await getSessionToken();
   const project = await getProject(token ?? "", id);
   const activeTab = resolveProjectWorkspaceTab(resolvedSearchParams.tab);
-  const detailedChangeOrders = token
-    ? await Promise.all(project.changeOrders.map((changeOrder) => getChangeOrder(token, changeOrder.id)))
-    : [];
 
   return (
     <div className="flex flex-col gap-6">
@@ -44,7 +41,7 @@ export default async function ProjectDetailPage({
           proposals={project.proposals}
           invoices={project.invoices}
           contracts={project.contracts}
-          changeOrders={detailedChangeOrders}
+          changeOrders={project.changeOrders}
           tasks={project.tasks}
         />
 

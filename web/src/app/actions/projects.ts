@@ -99,6 +99,20 @@ export async function createEstimateAction(formData: FormData): Promise<void> {
   redirect(`/projects/${projectId}/estimates/${estimate.id}`);
 }
 
+export async function duplicateEstimateAction(formData: FormData): Promise<void> {
+  const token = await getSessionToken();
+  const projectId = String(formData.get("projectId") ?? "");
+  const estimateId = String(formData.get("estimateId") ?? "");
+
+  const estimate = await apiFetch<Estimate>(`/api/v1/estimates/${estimateId}/duplicate`, {
+    method: "POST",
+    token: token ?? undefined,
+  });
+
+  revalidatePath(`/projects/${projectId}`);
+  redirect(`/projects/${projectId}/estimates/${estimate.id}`);
+}
+
 export async function createSiteVisitAction(_prev: FormActionState, formData: FormData): Promise<FormActionState> {
   const token = await getSessionToken();
   const projectId = String(formData.get("projectId") ?? "");

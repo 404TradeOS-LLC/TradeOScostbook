@@ -45,7 +45,7 @@ export default async function InvoiceDetailPage({ params }: { params: Promise<{ 
             <div className="rounded-xl border border-border/60 bg-muted/20 p-4">
               <div className="text-xs uppercase tracking-[0.18em] text-muted-foreground">Running balance</div>
               <div className="mt-2 text-2xl font-semibold">{formatCurrency(runningBalance)}</div>
-              <div className="mt-1 text-sm text-muted-foreground">Payment history and credit memo automation remain placeholders for a future sprint.</div>
+              <div className="mt-1 text-sm text-muted-foreground">Use this balance to confirm what is still outstanding on the job and whether the invoice is ready to close.</div>
             </div>
             <div className="rounded-xl border border-border/60 bg-muted/20 p-4">
               <div className="text-xs uppercase tracking-[0.18em] text-muted-foreground">Billing type</div>

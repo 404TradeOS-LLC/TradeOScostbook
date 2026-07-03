@@ -41,8 +41,122 @@ model Organization {
   customers      Customer[]
   projects       Project[]
   estimates      Estimate[]
+  settings       OrganizationSettings?
+  brandProfile   BrandProfile?
+  brandAssets    BrandAsset[]
+  brandDocumentSettings BrandDocumentSettings?
+  activityEvents ActivityEvent[]
+  notifications  Notification[]
+  attachments    Attachment[]
+  comments       Comment[]
+  tags           Tag[]
+  tagAssignments TagAssignment[]
+  savedViews     SavedView[]
+  recentItems    RecentItem[]
+  featureFlags   FeatureFlag[]
 
   @@map("organizations")
+}
+
+model OrganizationSettings {
+  id           String   @id @default(uuid())
+  orgId        String   @unique @map("org_id")
+  settingsJson Json     @map("settings_json")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @default(now()) @updatedAt @map("updated_at")
+
+  organization Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+
+  @@map("organization_settings")
+}
+
+model BrandProfile {
+  id                   String   @id @default(uuid())
+  organizationId       String   @unique @map("organization_id")
+  companyDisplayName   String?  @map("company_display_name")
+  tagline              String?
+  primaryColor         String?  @map("primary_color")
+  secondaryColor       String?  @map("secondary_color")
+  accentColor          String?  @map("accent_color")
+  logoUrl              String?  @map("logo_url")
+  logoDarkUrl          String?  @map("logo_dark_url")
+  logoLightUrl         String?  @map("logo_light_url")
+  iconUrl              String?  @map("icon_url")
+  watermarkUrl         String?  @map("watermark_url")
+  coverImageUrl        String?  @map("cover_image_url")
+  typographyStyle      String?  @map("typography_style")
+  defaultDocumentTheme String?  @map("default_document_theme")
+  proposalStyle        String?  @map("proposal_style")
+  invoiceStyle         String?  @map("invoice_style")
+  contractStyle        String?  @map("contract_style")
+  emailSignature       String?  @map("email_signature")
+  websiteUrl           String?  @map("website_url")
+  phone                String?
+  email                String?
+  addressLine1         String?  @map("address_line_1")
+  addressLine2         String?  @map("address_line_2")
+  city                 String?
+  state                String?
+  postalCode           String?  @map("postal_code")
+  licenseNumber        String?  @map("license_number")
+  insuranceSummary     String?  @map("insurance_summary")
+  bondingSummary       String?  @map("bonding_summary")
+  yearsInBusiness      Int?     @map("years_in_business")
+  serviceAreasJson     Json?    @map("service_areas_json")
+  certificationsJson   Json?    @map("certifications_json")
+  socialLinksJson      Json?    @map("social_links_json")
+  reviewLinksJson      Json?    @map("review_links_json")
+  financingLinksJson   Json?    @map("financing_links_json")
+  createdAt            DateTime @default(now()) @map("created_at")
+  updatedAt            DateTime @default(now()) @updatedAt @map("updated_at")
+
+  organization     Organization            @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  assets           BrandAsset[]
+  documentSettings BrandDocumentSettings?
+
+  @@map("brand_profiles")
+}
+
+model BrandAsset {
+  id             String   @id @default(uuid())
+  organizationId String   @map("organization_id")
+  brandProfileId String   @map("brand_profile_id")
+  type           String
+  label          String?
+  url            String
+  mimeType       String?  @map("mime_type")
+  sizeBytes      Int?     @map("size_bytes")
+  width          Int?
+  height         Int?
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  brandProfile BrandProfile @relation(fields: [brandProfileId], references: [id], onDelete: Cascade)
+
+  @@index([organizationId, type])
+  @@index([brandProfileId])
+  @@map("brand_assets")
+}
+
+model BrandDocumentSettings {
+  id                  String   @id @default(uuid())
+  organizationId      String   @unique @map("organization_id")
+  brandProfileId      String   @unique @map("brand_profile_id")
+  showPoweredByTradeOS Boolean @default(false) @map("show_powered_by_tradeos")
+  showLicenseNumber   Boolean  @default(true) @map("show_license_number")
+  showInsuranceSummary Boolean @default(true) @map("show_insurance_summary")
+  showGoogleRating    Boolean  @default(false) @map("show_google_rating")
+  showSocialLinks     Boolean  @default(true) @map("show_social_links")
+  defaultCoverMode    String?  @map("default_cover_mode")
+  defaultHeaderStyle  String?  @map("default_header_style")
+  defaultFooterStyle  String?  @map("default_footer_style")
+  createdAt           DateTime @default(now()) @map("created_at")
+  updatedAt           DateTime @default(now()) @updatedAt @map("updated_at")
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  brandProfile BrandProfile @relation(fields: [brandProfileId], references: [id], onDelete: Cascade)
+
+  @@map("brand_document_settings")
 }
 
 model AppUser {
@@ -57,6 +171,13 @@ model AppUser {
 
   memberships  OrganizationMembership[]
   reviewedSupplierPriceUpdates SupplierPriceUpdate[]
+  activityEvents ActivityEvent[]
+  notifications Notification[]
+  attachments   Attachment[]
+  comments      Comment[]
+  savedViews    SavedView[]
+  recentItems   RecentItem[]
+  tagAssignments TagAssignment[]
 
   @@map("users")
 }
@@ -666,4 +787,198 @@ model Contract {
   @@index([projectId])
   @@index([proposalId])
   @@map("contracts")
+}
+
+model ActivityEvent {
+  id           String   @id @default(uuid())
+  orgId        String   @map("org_id")
+  entityType   String   @map("entity_type")
+  entityId     String   @map("entity_id")
+  eventType    String   @map("event_type")
+  title        String
+  description  String?
+  actorUserId  String?  @map("actor_user_id")
+  metadataJson Json?    @map("metadata_json")
+  occurredAt   DateTime @default(now()) @map("occurred_at")
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  organization Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  actorUser    AppUser?     @relation(fields: [actorUserId], references: [id], onDelete: SetNull)
+  notifications Notification[]
+
+  @@index([orgId, entityType, entityId, occurredAt])
+  @@index([orgId, eventType, occurredAt])
+  @@map("activity_events")
+}
+
+model Notification {
+  id              String    @id @default(uuid())
+  orgId           String    @map("org_id")
+  entityType      String    @map("entity_type")
+  entityId        String    @map("entity_id")
+  category        String
+  title           String
+  body            String
+  priority        String    @default("medium")
+  actionUrl       String?   @map("action_url")
+  activityEventId String?   @map("activity_event_id")
+  createdByUserId String?   @map("created_by_user_id")
+  readAt          DateTime? @map("read_at")
+  archivedAt      DateTime? @map("archived_at")
+  createdAt       DateTime  @default(now()) @map("created_at")
+
+  organization Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  activityEvent ActivityEvent? @relation(fields: [activityEventId], references: [id], onDelete: SetNull)
+  createdByUser AppUser? @relation(fields: [createdByUserId], references: [id], onDelete: SetNull)
+
+  @@index([orgId, createdAt])
+  @@index([orgId, readAt, archivedAt])
+  @@index([orgId, entityType, entityId])
+  @@map("notifications")
+}
+
+model Attachment {
+  id               String   @id @default(uuid())
+  orgId            String   @map("org_id")
+  entityType       String   @map("entity_type")
+  entityId         String   @map("entity_id")
+  kind             String
+  fileName         String   @map("file_name")
+  mimeType         String?  @map("mime_type")
+  fileUrl          String   @map("file_url")
+  previewUrl       String?  @map("preview_url")
+  storagePath      String?  @map("storage_path")
+  sizeBytes        Int?     @map("size_bytes")
+  durationSeconds  Int?     @map("duration_seconds")
+  metadataJson     Json?    @map("metadata_json")
+  uploadedByUserId String?  @map("uploaded_by_user_id")
+  createdAt        DateTime @default(now()) @map("created_at")
+
+  organization Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  uploadedByUser AppUser? @relation(fields: [uploadedByUserId], references: [id], onDelete: SetNull)
+
+  @@index([orgId, entityType, entityId, createdAt])
+  @@index([orgId, kind, createdAt])
+  @@map("attachments")
+}
+
+model Comment {
+  id              String    @id @default(uuid())
+  orgId           String    @map("org_id")
+  entityType      String    @map("entity_type")
+  entityId        String    @map("entity_id")
+  parentCommentId String?   @map("parent_comment_id")
+  body            String
+  authorUserId    String?   @map("author_user_id")
+  mentionsJson    Json?     @map("mentions_json")
+  reactionsJson   Json?     @map("reactions_json")
+  resolvedAt      DateTime? @map("resolved_at")
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @default(now()) @updatedAt @map("updated_at")
+
+  organization Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  parentComment Comment? @relation("CommentThread", fields: [parentCommentId], references: [id], onDelete: SetNull)
+  replies       Comment[] @relation("CommentThread")
+  authorUser    AppUser? @relation(fields: [authorUserId], references: [id], onDelete: SetNull)
+
+  @@index([orgId, entityType, entityId, createdAt])
+  @@index([orgId, parentCommentId])
+  @@map("comments")
+}
+
+model Tag {
+  id          String   @id @default(uuid())
+  orgId       String   @map("org_id")
+  name        String
+  slug        String
+  color       String?
+  description String?
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  organization Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  assignments  TagAssignment[]
+
+  @@unique([orgId, slug])
+  @@index([orgId, name])
+  @@map("tags")
+}
+
+model TagAssignment {
+  id               String   @id @default(uuid())
+  orgId            String   @map("org_id")
+  tagId            String   @map("tag_id")
+  entityType       String   @map("entity_type")
+  entityId         String   @map("entity_id")
+  assignedByUserId String?  @map("assigned_by_user_id")
+  createdAt        DateTime @default(now()) @map("created_at")
+
+  organization Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  tag          Tag          @relation(fields: [tagId], references: [id], onDelete: Cascade)
+  assignedByUser AppUser?   @relation(fields: [assignedByUserId], references: [id], onDelete: SetNull)
+
+  @@unique([orgId, tagId, entityType, entityId])
+  @@index([orgId, entityType, entityId])
+  @@map("tag_assignments")
+}
+
+model SavedView {
+  id              String   @id @default(uuid())
+  orgId           String   @map("org_id")
+  entityType      String   @map("entity_type")
+  name            String
+  description     String?
+  filterJson      Json     @map("filter_json")
+  sortJson        Json?    @map("sort_json")
+  isShared        Boolean  @default(false) @map("is_shared")
+  createdByUserId String?  @map("created_by_user_id")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @default(now()) @updatedAt @map("updated_at")
+
+  organization Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  createdByUser AppUser? @relation(fields: [createdByUserId], references: [id], onDelete: SetNull)
+
+  @@index([orgId, entityType, updatedAt])
+  @@map("saved_views")
+}
+
+model RecentItem {
+  id          String   @id @default(uuid())
+  orgId       String   @map("org_id")
+  userId      String   @map("user_id")
+  entityType  String   @map("entity_type")
+  entityId    String   @map("entity_id")
+  title       String
+  subtitle    String?
+  href        String
+  keywordsJson Json?   @map("keywords_json")
+  metadataJson Json?   @map("metadata_json")
+  updatedAtIso String? @map("updated_at_iso")
+  lastViewedAt DateTime @default(now()) @map("last_viewed_at")
+  viewCount   Int      @default(1) @map("view_count")
+
+  organization Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  user         AppUser      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([orgId, userId, entityType, entityId])
+  @@index([orgId, userId, lastViewedAt])
+  @@map("recent_items")
+}
+
+model FeatureFlag {
+  id          String   @id @default(uuid())
+  orgId       String   @map("org_id")
+  key         String
+  description String?
+  enabled     Boolean  @default(false)
+  scopeType   String   @default("org") @map("scope_type")
+  scopeKey    String?  @map("scope_key")
+  metadataJson Json?   @map("metadata_json")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @default(now()) @updatedAt @map("updated_at")
+
+  organization Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+
+  @@unique([orgId, key, scopeType, scopeKey])
+  @@index([orgId, key])
+  @@map("feature_flags")
 }
