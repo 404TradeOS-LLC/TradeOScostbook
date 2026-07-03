@@ -1,0 +1,346 @@
+{
+  "exportVersion": "1.0.0",
+  "generatedAt": "2026-07-03T05:02:00.077Z",
+  "description": "Deduplicated catalog of future priced-catalog placeholders (pricingHooks) named across all exported assemblies. Each entry is NOT a priced Prisma record -- refSlug is a human-readable handle a future sync/import step uses to find-or-create the matching CostItem, Material, LaborRate, Equipment, Subcontractor, or child Assembly row in an org's catalog. See docs/platform-field-mapping.md.",
+  "count": 29,
+  "countByKind": {
+    "childAssembly": 2,
+    "equipment": 12,
+    "laborRate": 10,
+    "material": 3,
+    "subcontractor": 2
+  },
+  "items": [
+    {
+      "kind": "childAssembly",
+      "refSlug": "tree-service.hauling.debris-haul-standard",
+      "description": "Follow-up full debris haul-off, if not completed same visit",
+      "occurrences": 1,
+      "referencedByAssemblyIds": [
+        "tree-service.emergency-response.storm-hanger-leaner-removal"
+      ]
+    },
+    {
+      "kind": "childAssembly",
+      "refSlug": "tree-service.stump-grinding.standard-stump-grinding",
+      "description": "Optional bundled stump grind",
+      "occurrences": 1,
+      "referencedByAssemblyIds": [
+        "tree-service.removal.medium-tree-open-access"
+      ]
+    },
+    {
+      "kind": "equipment",
+      "refSlug": "tree-service.aerial-lift",
+      "description": "Bucket truck / aerial lift, when substituted for a climb",
+      "descriptionVariants": [
+        "Bucket truck / aerial lift, when substituted for a climb",
+        "Aerial lift, preferred access method for compromised trees"
+      ],
+      "estimatedUnitOfMeasure": "HR",
+      "occurrences": 2,
+      "referencedByAssemblyIds": [
+        "tree-service.removal.medium-tree-open-access",
+        "tree-service.hazard-removal.dead-standing-hazard-tree"
+      ]
+    },
+    {
+      "kind": "equipment",
+      "refSlug": "tree-service.brush-chipper",
+      "description": "Brush chipper ownership/operating cost",
+      "estimatedUnitOfMeasure": "HR",
+      "occurrences": 5,
+      "referencedByAssemblyIds": [
+        "tree-service.removal.small-tree-open-access",
+        "tree-service.removal.medium-tree-open-access",
+        "tree-service.removal.large-tree-open-access",
+        "tree-service.pruning.crown-reduction-structural",
+        "tree-service.pruning.deadwooding-crown-cleaning"
+      ]
+    },
+    {
+      "kind": "equipment",
+      "refSlug": "tree-service.chainsaw",
+      "description": "Chainsaw ownership/operating cost",
+      "estimatedUnitOfMeasure": "HR",
+      "occurrences": 1,
+      "referencedByAssemblyIds": [
+        "tree-service.removal.small-tree-open-access"
+      ]
+    },
+    {
+      "kind": "equipment",
+      "refSlug": "tree-service.chip-truck",
+      "description": "Chip truck / dump trailer for haul-off",
+      "estimatedUnitOfMeasure": "HR",
+      "occurrences": 1,
+      "referencedByAssemblyIds": [
+        "tree-service.removal.small-tree-open-access"
+      ]
+    },
+    {
+      "kind": "equipment",
+      "refSlug": "tree-service.compact-stump-grinder",
+      "description": "Compact/mini grinder for restricted access",
+      "estimatedUnitOfMeasure": "HR",
+      "occurrences": 1,
+      "referencedByAssemblyIds": [
+        "tree-service.stump-grinding.standard-stump-grinding"
+      ]
+    },
+    {
+      "kind": "equipment",
+      "refSlug": "tree-service.crane",
+      "description": "Crane, for severely compromised trees where lift access is insufficient",
+      "estimatedUnitOfMeasure": "HR",
+      "occurrences": 1,
+      "referencedByAssemblyIds": [
+        "tree-service.hazard-removal.dead-standing-hazard-tree"
+      ]
+    },
+    {
+      "kind": "equipment",
+      "refSlug": "tree-service.grapple-truck",
+      "description": "Grapple truck / knuckle-boom loader for large log handling",
+      "descriptionVariants": [
+        "Grapple truck / knuckle-boom loader for large log handling",
+        "Grapple truck / loader for processing crane-set sections"
+      ],
+      "estimatedUnitOfMeasure": "HR",
+      "occurrences": 2,
+      "referencedByAssemblyIds": [
+        "tree-service.removal.large-tree-open-access",
+        "tree-service.removal.crane-assisted-removal"
+      ]
+    },
+    {
+      "kind": "equipment",
+      "refSlug": "tree-service.log-truck",
+      "description": "Log truck for trunk-wood haul-off",
+      "estimatedUnitOfMeasure": "HR",
+      "occurrences": 1,
+      "referencedByAssemblyIds": [
+        "tree-service.removal.large-tree-open-access"
+      ]
+    },
+    {
+      "kind": "equipment",
+      "refSlug": "tree-service.pole-pruner",
+      "description": "Pole saw / pole pruner equipment allowance",
+      "estimatedUnitOfMeasure": "EA",
+      "occurrences": 1,
+      "referencedByAssemblyIds": [
+        "tree-service.pruning.deadwooding-crown-cleaning"
+      ]
+    },
+    {
+      "kind": "equipment",
+      "refSlug": "tree-service.portable-lighting",
+      "description": "Portable floodlighting for after-dark response",
+      "estimatedUnitOfMeasure": "HR",
+      "occurrences": 1,
+      "referencedByAssemblyIds": [
+        "tree-service.emergency-response.storm-hanger-leaner-removal"
+      ]
+    },
+    {
+      "kind": "equipment",
+      "refSlug": "tree-service.rigging-kit",
+      "description": "Rigging block, rope, and hardware wear allowance",
+      "descriptionVariants": [
+        "Rigging block, rope, and hardware wear allowance",
+        "Heavy rigging block/lowering device and hardware"
+      ],
+      "estimatedUnitOfMeasure": "EA",
+      "occurrences": 2,
+      "referencedByAssemblyIds": [
+        "tree-service.removal.medium-tree-open-access",
+        "tree-service.removal.technical-rigging-restricted-access"
+      ]
+    },
+    {
+      "kind": "equipment",
+      "refSlug": "tree-service.stump-grinder",
+      "description": "Stump grinder ownership/operating cost",
+      "estimatedUnitOfMeasure": "HR",
+      "occurrences": 1,
+      "referencedByAssemblyIds": [
+        "tree-service.stump-grinding.standard-stump-grinding"
+      ]
+    },
+    {
+      "kind": "laborRate",
+      "refSlug": "tree-service.certified-climber",
+      "description": "Certified climbing arborist hourly rate",
+      "descriptionVariants": [
+        "Certified climbing arborist hourly rate",
+        "Lead climbing arborist hourly rate",
+        "Climbing arborist hourly rate, when climbing is deemed safe",
+        "Climbing arborist hourly rate for aloft rigging attachment"
+      ],
+      "estimatedUnitOfMeasure": "HR",
+      "occurrences": 6,
+      "referencedByAssemblyIds": [
+        "tree-service.removal.medium-tree-open-access",
+        "tree-service.removal.large-tree-open-access",
+        "tree-service.removal.technical-rigging-restricted-access",
+        "tree-service.hazard-removal.dead-standing-hazard-tree",
+        "tree-service.removal.crane-assisted-removal",
+        "tree-service.pruning.crown-reduction-structural"
+      ]
+    },
+    {
+      "kind": "laborRate",
+      "refSlug": "tree-service.certified-rigger-signal-person",
+      "description": "Certified rigger / signal person hourly rate",
+      "estimatedUnitOfMeasure": "HR",
+      "occurrences": 1,
+      "referencedByAssemblyIds": [
+        "tree-service.removal.crane-assisted-removal"
+      ]
+    },
+    {
+      "kind": "laborRate",
+      "refSlug": "tree-service.crew-foreman",
+      "description": "Job supervisor / foreman hourly rate",
+      "descriptionVariants": [
+        "Job supervisor / foreman hourly rate",
+        "Job supervisor hourly rate"
+      ],
+      "estimatedUnitOfMeasure": "HR",
+      "occurrences": 2,
+      "referencedByAssemblyIds": [
+        "tree-service.removal.large-tree-open-access",
+        "tree-service.removal.technical-rigging-restricted-access"
+      ]
+    },
+    {
+      "kind": "laborRate",
+      "refSlug": "tree-service.crew-lead-climber",
+      "description": "Lead chainsaw operator / crew lead hourly rate",
+      "estimatedUnitOfMeasure": "HR",
+      "occurrences": 1,
+      "referencedByAssemblyIds": [
+        "tree-service.removal.small-tree-open-access"
+      ]
+    },
+    {
+      "kind": "laborRate",
+      "refSlug": "tree-service.emergency-crew-lead",
+      "description": "Emergency-response crew lead / climber hourly rate (after-hours premium)",
+      "estimatedUnitOfMeasure": "HR",
+      "occurrences": 1,
+      "referencedByAssemblyIds": [
+        "tree-service.emergency-response.storm-hanger-leaner-removal"
+      ]
+    },
+    {
+      "kind": "laborRate",
+      "refSlug": "tree-service.grinder-operator",
+      "description": "Stump grinder operator hourly rate",
+      "estimatedUnitOfMeasure": "HR",
+      "occurrences": 1,
+      "referencedByAssemblyIds": [
+        "tree-service.stump-grinding.standard-stump-grinding"
+      ]
+    },
+    {
+      "kind": "laborRate",
+      "refSlug": "tree-service.ground-laborer",
+      "description": "Ground crew / chipper-feed laborer hourly rate",
+      "descriptionVariants": [
+        "Ground crew / chipper-feed laborer hourly rate",
+        "Ground/rigging crew hourly rate",
+        "Ground crew hourly rate",
+        "Ground crew hourly rate (after-hours premium)"
+      ],
+      "estimatedUnitOfMeasure": "HR",
+      "occurrences": 4,
+      "referencedByAssemblyIds": [
+        "tree-service.removal.small-tree-open-access",
+        "tree-service.removal.medium-tree-open-access",
+        "tree-service.pruning.crown-reduction-structural",
+        "tree-service.emergency-response.storm-hanger-leaner-removal"
+      ]
+    },
+    {
+      "kind": "laborRate",
+      "refSlug": "tree-service.isa-certified-arborist",
+      "description": "ISA Certified Arborist hazard-assessment rate",
+      "estimatedUnitOfMeasure": "HR",
+      "occurrences": 1,
+      "referencedByAssemblyIds": [
+        "tree-service.hazard-removal.dead-standing-hazard-tree"
+      ]
+    },
+    {
+      "kind": "laborRate",
+      "refSlug": "tree-service.pruning-technician",
+      "description": "Pruning technician / climber hourly rate",
+      "estimatedUnitOfMeasure": "HR",
+      "occurrences": 1,
+      "referencedByAssemblyIds": [
+        "tree-service.pruning.deadwooding-crown-cleaning"
+      ]
+    },
+    {
+      "kind": "laborRate",
+      "refSlug": "tree-service.second-climber-rigger",
+      "description": "Second climber / rigging specialist hourly rate",
+      "estimatedUnitOfMeasure": "HR",
+      "occurrences": 1,
+      "referencedByAssemblyIds": [
+        "tree-service.removal.large-tree-open-access"
+      ]
+    },
+    {
+      "kind": "material",
+      "refSlug": "tree-service.bar-chain-lube",
+      "description": "Bar and chain lubricant consumed per job",
+      "estimatedUnitOfMeasure": "EA",
+      "occurrences": 1,
+      "referencedByAssemblyIds": [
+        "tree-service.removal.small-tree-open-access"
+      ]
+    },
+    {
+      "kind": "material",
+      "refSlug": "tree-service.target-protection-materials",
+      "description": "Plywood/blanket staging materials",
+      "estimatedUnitOfMeasure": "EA",
+      "occurrences": 1,
+      "referencedByAssemblyIds": [
+        "tree-service.removal.technical-rigging-restricted-access"
+      ]
+    },
+    {
+      "kind": "material",
+      "refSlug": "tree-service.topsoil-backfill",
+      "description": "Topsoil backfill, when requested instead of chip fill",
+      "estimatedUnitOfMeasure": "CY",
+      "occurrences": 1,
+      "referencedByAssemblyIds": [
+        "tree-service.stump-grinding.standard-stump-grinding"
+      ]
+    },
+    {
+      "kind": "subcontractor",
+      "refSlug": "tree-service.crane-service",
+      "description": "Crane and certified operator, typically subcontracted",
+      "estimatedUnitOfMeasure": "day",
+      "occurrences": 1,
+      "referencedByAssemblyIds": [
+        "tree-service.removal.crane-assisted-removal"
+      ]
+    },
+    {
+      "kind": "subcontractor",
+      "refSlug": "tree-service.line-clearance-utility-coordination",
+      "description": "Utility line-clearance coordination or de-energization, when required",
+      "occurrences": 1,
+      "referencedByAssemblyIds": [
+        "tree-service.removal.technical-rigging-restricted-access"
+      ]
+    }
+  ]
+}

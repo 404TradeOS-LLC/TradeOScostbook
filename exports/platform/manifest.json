@@ -1,0 +1,50 @@
+{
+  "exportVersion": "1.0.0",
+  "generatedAt": "2026-07-03T05:02:00.077Z",
+  "generatedBy": "pipelines/export/generate-platform-exports.ts",
+  "sourceKnowledgeEngineGitRevision": "823304cc588b5aa1b97c8fda4ba47757b2dafde7",
+  "recordCounts": {
+    "trades": 1,
+    "assemblies": 10,
+    "categories": 5,
+    "subcategories": 10,
+    "uniquePricingHooks": 29,
+    "pricingHooksByKind": {
+      "childAssembly": 2,
+      "equipment": 12,
+      "laborRate": 10,
+      "material": 3,
+      "subcontractor": 2
+    },
+    "assemblyDependencyEdges": 25,
+    "unresolvedDependencyTargets": 4
+  },
+  "tradesIncluded": [
+    "Tree Service"
+  ],
+  "schemaVersions": {
+    "knowledgeAssemblySchemaVersion": 1,
+    "platformExportContractVersion": "1.0.0"
+  },
+  "knownLimitations": [
+    "Only one trade (Tree Service) and one batch (10 of ~100 planned assemblies) exist -- this is an early, partial export, not a complete catalog.",
+    "pricingHooks are placeholders only (kind + human-readable refSlug); none are wired to a real CostItem/Material/LaborRate/Equipment/Subcontractor/Assembly id in any org's Prisma-backed catalog.",
+    "4 assembly dependency target id(s) are forward references to assemblies not yet authored (tracked in docs/knowledge-engine/tree-service-progress.md): tree-service.hauling.debris-haul-standard, tree-service.pruning.crown-raising, tree-service.root-flare-excavation.root-flare-excavation-standard, tree-service.utility-clearance.service-drop-clearance.",
+    "No costItem-kind pricingHooks exist yet in the source data -- every hook so far is laborRate, equipment, material, subcontractor, or childAssembly.",
+    "trade/category/subcategory/projectTypes/constructionPhase/requiredInputs/dependencies/proposalIntelligence have no dedicated Prisma columns or tables today; the runtime Assembly model only has id/orgId/code/name/unitOfMeasure/description/isTemplate/isActive. See docs/prisma-gap-analysis.md.",
+    "This content has no orgId and is not read by any TradeOS request path today -- it is a standalone versioned layer pending a future sync/import job (see docs/platform-runtime-bridge-plan.md)."
+  ],
+  "importReadiness": {
+    "score": 41,
+    "scale": "0-100 (higher = closer to safe automated import)",
+    "components": {
+      "contentCompletenessPct": 100,
+      "dependencyGraphIntegrityPct": 80,
+      "catalogCoveragePct": 10,
+      "pricingHookResolutionPct": 0,
+      "prismaSchemaAlignmentPct": 16.1
+    },
+    "methodology": "Unweighted average of five 0-100 sub-scores: (1) fraction of assemblies with every required narrative/array field populated, (2) fraction of dependency edges whose target id exists in this export, (3) fraction of each trade's ~100-assembly target already authored, (4) fraction of pricingHooks resolved to a real catalog id (0 today), (5) fraction of KnowledgeAssembly field-groups already supported by an existing Prisma column without new schema work (see docs/prisma-gap-analysis.md).",
+    "recommendation": "Not ready for automated/unattended import. Suitable today only as a reviewed, manually-curated reference catalog (e.g. for an estimator UI or an AI intake prompt), not as a direct write path into the Prisma-backed catalog."
+  }
+}

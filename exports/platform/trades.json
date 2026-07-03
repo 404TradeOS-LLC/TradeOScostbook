@@ -1,0 +1,60 @@
+{
+  "exportVersion": "1.0.0",
+  "generatedAt": "2026-07-03T05:02:00.077Z",
+  "count": 1,
+  "trades": [
+    {
+      "trade": "Tree Service",
+      "tradeSlug": "tree-service",
+      "assemblyCount": 10,
+      "targetAssemblyCount": 100,
+      "completionPct": 10,
+      "categories": [
+        {
+          "category": "Emergency Response",
+          "subcategories": [
+            "Storm Damage — Hangers and Leaners"
+          ],
+          "assemblyCount": 1
+        },
+        {
+          "category": "Hazard Tree Removal",
+          "subcategories": [
+            "Dead or Structurally Compromised Standing Tree"
+          ],
+          "assemblyCount": 1
+        },
+        {
+          "category": "Pruning",
+          "subcategories": [
+            "Crown Reduction",
+            "Deadwooding / Crown Cleaning"
+          ],
+          "assemblyCount": 2
+        },
+        {
+          "category": "Stump Grinding",
+          "subcategories": [
+            "Standard Stump Grinding"
+          ],
+          "assemblyCount": 1
+        },
+        {
+          "category": "Tree Removal",
+          "subcategories": [
+            "Crane-Assisted Removal",
+            "Standard Removal — Large Tree",
+            "Standard Removal — Medium Tree",
+            "Standard Removal — Small Tree",
+            "Technical Removal — Restricted Access"
+          ],
+          "assemblyCount": 5
+        }
+      ],
+      "csiDivisions": [
+        "31 13 13",
+        "31 13 16"
+      ]
+    }
+  ]
+}

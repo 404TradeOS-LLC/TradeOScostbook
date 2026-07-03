@@ -1,0 +1,365 @@
+{
+  "exportVersion": "1.0.0",
+  "generatedAt": "2026-07-03T05:02:00.077Z",
+  "description": "Graph edges between exported records: assembly-to-assembly dependencies (KnowledgeAssembly.dependencies) and assembly-to-pricing-hook references (KnowledgeAssembly.pricingHooks). targetExistsInExport is false for forward-referenced assembly ids that are documented as planned but not yet authored -- see docs/knowledge-engine/tree-service-progress.md.",
+  "assemblyDependencies": [
+    {
+      "fromAssemblyId": "tree-service.removal.small-tree-open-access",
+      "toAssemblyId": "tree-service.stump-grinding.standard-stump-grinding",
+      "targetExistsInExport": true
+    },
+    {
+      "fromAssemblyId": "tree-service.removal.small-tree-open-access",
+      "toAssemblyId": "tree-service.hauling.debris-haul-standard",
+      "targetExistsInExport": false
+    },
+    {
+      "fromAssemblyId": "tree-service.removal.medium-tree-open-access",
+      "toAssemblyId": "tree-service.removal.small-tree-open-access",
+      "targetExistsInExport": true
+    },
+    {
+      "fromAssemblyId": "tree-service.removal.medium-tree-open-access",
+      "toAssemblyId": "tree-service.stump-grinding.standard-stump-grinding",
+      "targetExistsInExport": true
+    },
+    {
+      "fromAssemblyId": "tree-service.removal.medium-tree-open-access",
+      "toAssemblyId": "tree-service.pruning.deadwooding-crown-cleaning",
+      "targetExistsInExport": true
+    },
+    {
+      "fromAssemblyId": "tree-service.removal.large-tree-open-access",
+      "toAssemblyId": "tree-service.removal.crane-assisted-removal",
+      "targetExistsInExport": true
+    },
+    {
+      "fromAssemblyId": "tree-service.removal.large-tree-open-access",
+      "toAssemblyId": "tree-service.stump-grinding.standard-stump-grinding",
+      "targetExistsInExport": true
+    },
+    {
+      "fromAssemblyId": "tree-service.removal.large-tree-open-access",
+      "toAssemblyId": "tree-service.hauling.debris-haul-standard",
+      "targetExistsInExport": false
+    },
+    {
+      "fromAssemblyId": "tree-service.removal.technical-rigging-restricted-access",
+      "toAssemblyId": "tree-service.removal.medium-tree-open-access",
+      "targetExistsInExport": true
+    },
+    {
+      "fromAssemblyId": "tree-service.removal.technical-rigging-restricted-access",
+      "toAssemblyId": "tree-service.removal.crane-assisted-removal",
+      "targetExistsInExport": true
+    },
+    {
+      "fromAssemblyId": "tree-service.removal.technical-rigging-restricted-access",
+      "toAssemblyId": "tree-service.utility-clearance.service-drop-clearance",
+      "targetExistsInExport": false
+    },
+    {
+      "fromAssemblyId": "tree-service.hazard-removal.dead-standing-hazard-tree",
+      "toAssemblyId": "tree-service.emergency-response.storm-hanger-leaner-removal",
+      "targetExistsInExport": true
+    },
+    {
+      "fromAssemblyId": "tree-service.hazard-removal.dead-standing-hazard-tree",
+      "toAssemblyId": "tree-service.removal.crane-assisted-removal",
+      "targetExistsInExport": true
+    },
+    {
+      "fromAssemblyId": "tree-service.removal.crane-assisted-removal",
+      "toAssemblyId": "tree-service.removal.large-tree-open-access",
+      "targetExistsInExport": true
+    },
+    {
+      "fromAssemblyId": "tree-service.removal.crane-assisted-removal",
+      "toAssemblyId": "tree-service.removal.technical-rigging-restricted-access",
+      "targetExistsInExport": true
+    },
+    {
+      "fromAssemblyId": "tree-service.removal.crane-assisted-removal",
+      "toAssemblyId": "tree-service.hazard-removal.dead-standing-hazard-tree",
+      "targetExistsInExport": true
+    },
+    {
+      "fromAssemblyId": "tree-service.stump-grinding.standard-stump-grinding",
+      "toAssemblyId": "tree-service.removal.small-tree-open-access",
+      "targetExistsInExport": true
+    },
+    {
+      "fromAssemblyId": "tree-service.stump-grinding.standard-stump-grinding",
+      "toAssemblyId": "tree-service.removal.medium-tree-open-access",
+      "targetExistsInExport": true
+    },
+    {
+      "fromAssemblyId": "tree-service.stump-grinding.standard-stump-grinding",
+      "toAssemblyId": "tree-service.root-flare-excavation.root-flare-excavation-standard",
+      "targetExistsInExport": false
+    },
+    {
+      "fromAssemblyId": "tree-service.pruning.crown-reduction-structural",
+      "toAssemblyId": "tree-service.pruning.deadwooding-crown-cleaning",
+      "targetExistsInExport": true
+    },
+    {
+      "fromAssemblyId": "tree-service.pruning.crown-reduction-structural",
+      "toAssemblyId": "tree-service.pruning.crown-raising",
+      "targetExistsInExport": false
+    },
+    {
+      "fromAssemblyId": "tree-service.pruning.deadwooding-crown-cleaning",
+      "toAssemblyId": "tree-service.pruning.crown-reduction-structural",
+      "targetExistsInExport": true
+    },
+    {
+      "fromAssemblyId": "tree-service.pruning.deadwooding-crown-cleaning",
+      "toAssemblyId": "tree-service.emergency-response.storm-hanger-leaner-removal",
+      "targetExistsInExport": true
+    },
+    {
+      "fromAssemblyId": "tree-service.emergency-response.storm-hanger-leaner-removal",
+      "toAssemblyId": "tree-service.hazard-removal.dead-standing-hazard-tree",
+      "targetExistsInExport": true
+    },
+    {
+      "fromAssemblyId": "tree-service.emergency-response.storm-hanger-leaner-removal",
+      "toAssemblyId": "tree-service.pruning.deadwooding-crown-cleaning",
+      "targetExistsInExport": true
+    }
+  ],
+  "assemblyPricingHookReferences": [
+    {
+      "assemblyId": "tree-service.removal.small-tree-open-access",
+      "kind": "laborRate",
+      "refSlug": "tree-service.crew-lead-climber"
+    },
+    {
+      "assemblyId": "tree-service.removal.small-tree-open-access",
+      "kind": "laborRate",
+      "refSlug": "tree-service.ground-laborer"
+    },
+    {
+      "assemblyId": "tree-service.removal.small-tree-open-access",
+      "kind": "equipment",
+      "refSlug": "tree-service.chainsaw"
+    },
+    {
+      "assemblyId": "tree-service.removal.small-tree-open-access",
+      "kind": "equipment",
+      "refSlug": "tree-service.brush-chipper"
+    },
+    {
+      "assemblyId": "tree-service.removal.small-tree-open-access",
+      "kind": "equipment",
+      "refSlug": "tree-service.chip-truck"
+    },
+    {
+      "assemblyId": "tree-service.removal.small-tree-open-access",
+      "kind": "material",
+      "refSlug": "tree-service.bar-chain-lube"
+    },
+    {
+      "assemblyId": "tree-service.removal.medium-tree-open-access",
+      "kind": "laborRate",
+      "refSlug": "tree-service.certified-climber"
+    },
+    {
+      "assemblyId": "tree-service.removal.medium-tree-open-access",
+      "kind": "laborRate",
+      "refSlug": "tree-service.ground-laborer"
+    },
+    {
+      "assemblyId": "tree-service.removal.medium-tree-open-access",
+      "kind": "equipment",
+      "refSlug": "tree-service.rigging-kit"
+    },
+    {
+      "assemblyId": "tree-service.removal.medium-tree-open-access",
+      "kind": "equipment",
+      "refSlug": "tree-service.aerial-lift"
+    },
+    {
+      "assemblyId": "tree-service.removal.medium-tree-open-access",
+      "kind": "equipment",
+      "refSlug": "tree-service.brush-chipper"
+    },
+    {
+      "assemblyId": "tree-service.removal.medium-tree-open-access",
+      "kind": "childAssembly",
+      "refSlug": "tree-service.stump-grinding.standard-stump-grinding"
+    },
+    {
+      "assemblyId": "tree-service.removal.large-tree-open-access",
+      "kind": "laborRate",
+      "refSlug": "tree-service.certified-climber"
+    },
+    {
+      "assemblyId": "tree-service.removal.large-tree-open-access",
+      "kind": "laborRate",
+      "refSlug": "tree-service.second-climber-rigger"
+    },
+    {
+      "assemblyId": "tree-service.removal.large-tree-open-access",
+      "kind": "laborRate",
+      "refSlug": "tree-service.crew-foreman"
+    },
+    {
+      "assemblyId": "tree-service.removal.large-tree-open-access",
+      "kind": "equipment",
+      "refSlug": "tree-service.grapple-truck"
+    },
+    {
+      "assemblyId": "tree-service.removal.large-tree-open-access",
+      "kind": "equipment",
+      "refSlug": "tree-service.log-truck"
+    },
+    {
+      "assemblyId": "tree-service.removal.large-tree-open-access",
+      "kind": "equipment",
+      "refSlug": "tree-service.brush-chipper"
+    },
+    {
+      "assemblyId": "tree-service.removal.technical-rigging-restricted-access",
+      "kind": "laborRate",
+      "refSlug": "tree-service.certified-climber"
+    },
+    {
+      "assemblyId": "tree-service.removal.technical-rigging-restricted-access",
+      "kind": "laborRate",
+      "refSlug": "tree-service.crew-foreman"
+    },
+    {
+      "assemblyId": "tree-service.removal.technical-rigging-restricted-access",
+      "kind": "material",
+      "refSlug": "tree-service.target-protection-materials"
+    },
+    {
+      "assemblyId": "tree-service.removal.technical-rigging-restricted-access",
+      "kind": "equipment",
+      "refSlug": "tree-service.rigging-kit"
+    },
+    {
+      "assemblyId": "tree-service.removal.technical-rigging-restricted-access",
+      "kind": "subcontractor",
+      "refSlug": "tree-service.line-clearance-utility-coordination"
+    },
+    {
+      "assemblyId": "tree-service.hazard-removal.dead-standing-hazard-tree",
+      "kind": "laborRate",
+      "refSlug": "tree-service.isa-certified-arborist"
+    },
+    {
+      "assemblyId": "tree-service.hazard-removal.dead-standing-hazard-tree",
+      "kind": "laborRate",
+      "refSlug": "tree-service.certified-climber"
+    },
+    {
+      "assemblyId": "tree-service.hazard-removal.dead-standing-hazard-tree",
+      "kind": "equipment",
+      "refSlug": "tree-service.aerial-lift"
+    },
+    {
+      "assemblyId": "tree-service.hazard-removal.dead-standing-hazard-tree",
+      "kind": "equipment",
+      "refSlug": "tree-service.crane"
+    },
+    {
+      "assemblyId": "tree-service.removal.crane-assisted-removal",
+      "kind": "subcontractor",
+      "refSlug": "tree-service.crane-service"
+    },
+    {
+      "assemblyId": "tree-service.removal.crane-assisted-removal",
+      "kind": "laborRate",
+      "refSlug": "tree-service.certified-rigger-signal-person"
+    },
+    {
+      "assemblyId": "tree-service.removal.crane-assisted-removal",
+      "kind": "laborRate",
+      "refSlug": "tree-service.certified-climber"
+    },
+    {
+      "assemblyId": "tree-service.removal.crane-assisted-removal",
+      "kind": "equipment",
+      "refSlug": "tree-service.grapple-truck"
+    },
+    {
+      "assemblyId": "tree-service.stump-grinding.standard-stump-grinding",
+      "kind": "laborRate",
+      "refSlug": "tree-service.grinder-operator"
+    },
+    {
+      "assemblyId": "tree-service.stump-grinding.standard-stump-grinding",
+      "kind": "equipment",
+      "refSlug": "tree-service.stump-grinder"
+    },
+    {
+      "assemblyId": "tree-service.stump-grinding.standard-stump-grinding",
+      "kind": "equipment",
+      "refSlug": "tree-service.compact-stump-grinder"
+    },
+    {
+      "assemblyId": "tree-service.stump-grinding.standard-stump-grinding",
+      "kind": "material",
+      "refSlug": "tree-service.topsoil-backfill"
+    },
+    {
+      "assemblyId": "tree-service.pruning.crown-reduction-structural",
+      "kind": "laborRate",
+      "refSlug": "tree-service.certified-climber"
+    },
+    {
+      "assemblyId": "tree-service.pruning.crown-reduction-structural",
+      "kind": "laborRate",
+      "refSlug": "tree-service.ground-laborer"
+    },
+    {
+      "assemblyId": "tree-service.pruning.crown-reduction-structural",
+      "kind": "equipment",
+      "refSlug": "tree-service.brush-chipper"
+    },
+    {
+      "assemblyId": "tree-service.pruning.deadwooding-crown-cleaning",
+      "kind": "laborRate",
+      "refSlug": "tree-service.pruning-technician"
+    },
+    {
+      "assemblyId": "tree-service.pruning.deadwooding-crown-cleaning",
+      "kind": "equipment",
+      "refSlug": "tree-service.pole-pruner"
+    },
+    {
+      "assemblyId": "tree-service.pruning.deadwooding-crown-cleaning",
+      "kind": "equipment",
+      "refSlug": "tree-service.brush-chipper"
+    },
+    {
+      "assemblyId": "tree-service.emergency-response.storm-hanger-leaner-removal",
+      "kind": "laborRate",
+      "refSlug": "tree-service.emergency-crew-lead"
+    },
+    {
+      "assemblyId": "tree-service.emergency-response.storm-hanger-leaner-removal",
+      "kind": "laborRate",
+      "refSlug": "tree-service.ground-laborer"
+    },
+    {
+      "assemblyId": "tree-service.emergency-response.storm-hanger-leaner-removal",
+      "kind": "equipment",
+      "refSlug": "tree-service.portable-lighting"
+    },
+    {
+      "assemblyId": "tree-service.emergency-response.storm-hanger-leaner-removal",
+      "kind": "childAssembly",
+      "refSlug": "tree-service.hauling.debris-haul-standard"
+    }
+  ],
+  "unresolvedDependencyTargets": [
+    "tree-service.hauling.debris-haul-standard",
+    "tree-service.pruning.crown-raising",
+    "tree-service.root-flare-excavation.root-flare-excavation-standard",
+    "tree-service.utility-clearance.service-drop-clearance"
+  ]
+}
