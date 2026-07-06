@@ -57,7 +57,7 @@ See:
 ## Repository structure
 
 ```text
-.github/workflows/                 CI and migration rollout workflow
+.github/workflows/                 repository verification and migration rollout workflows
 docs/                              release docs, architecture docs, planning artifacts
 app/                               backend API, Prisma schema/migrations, tests, deployment scripts
 web/                               Next.js frontend
@@ -104,6 +104,11 @@ cd web
 npm run lint
 npm run build
 ```
+
+GitHub Actions mirrors this baseline automatically:
+
+- `.github/workflows/verify-repository.yml` runs app lint, unit tests, build, integration, plus web lint and build
+- `.github/workflows/deploy-migrations.yml` handles production migration rollout
 
 ## Scope guardrails
 

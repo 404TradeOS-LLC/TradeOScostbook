@@ -230,19 +230,19 @@ export function AIEstimateAssist({
               <div className="rounded-2xl border border-border/70 bg-background/80 p-4">
                 <div className="flex items-center gap-2 text-sm font-medium text-foreground">
                   <Mic className="size-4 text-electric" />
-                  Voice-ready intake
+                  Voice note workflow
                 </div>
                 <p className="mt-2 text-sm text-muted-foreground">
-                  The layout is ready for spoken scopes and transcript capture. Typed scopes work today; mic capture stays out of Sprint 9.
+                  Typed scopes work now, and dictated field notes can be pasted into intake transcripts before review.
                 </p>
               </div>
               <div className="rounded-2xl border border-dashed border-border/70 bg-background/80 p-4">
                 <div className="flex items-center gap-2 text-sm font-medium text-foreground">
                   <Paperclip className="size-4 text-electric" />
-                  Photo upload placeholder
+                  Photo context
                 </div>
                 <p className="mt-2 text-sm text-muted-foreground">
-                  Field photo context is planned next. This sprint keeps photo-assisted retrieval and RAG out of scope on purpose.
+                  Jobsite photos can stay attached to the project record while AI Estimate Assist uses scope and field notes for reviewed suggestions.
                 </p>
               </div>
             </div>

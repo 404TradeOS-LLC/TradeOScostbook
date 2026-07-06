@@ -136,6 +136,8 @@ npm test
 npm run test:integration
 ```
 
+GitHub Actions runs the same backend verification path in [`../.github/workflows/verify-repository.yml`](../.github/workflows/verify-repository.yml), including live integration with `psql` installed on the runner.
+
 `npm run test:integration` recreates a disposable PostgreSQL 16 Docker container, applies migrations `0001` then `0002`, creates a restricted non-superuser application role, and proves RLS behavior against the live database. Coverage includes same-org access, cross-org read/write denial, viewer write denial, admin audit access, provisioning, background-job scope, and material price history visibility.
 
 The internal admin shell is available at `/admin`, `/admin/pricing-history`, and `/admin/member-history`. The first two provide stale-price summaries, filtered immutable material price history, and recent membership activity; the third is the focused membership audit utility (filter by action type/date range, paginated, with per-membership before/after snapshots) — all three now share one visual system (`api/views/adminShell.view.ts`'s CSS and layout), not separately-styled pages.

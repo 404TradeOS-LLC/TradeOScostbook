@@ -28,8 +28,8 @@ const sourceSans = Source_Sans_3({ subsets: ["latin"], variable: "--font-source-
 const jetBrainsMono = JetBrains_Mono({ subsets: ["latin"], variable: "--font-jetbrains-mono" });
 
 export const metadata: Metadata = {
-  title: "TradeOS Trainingless AI Estimating Demo",
-  description: "Interactive local demo of the TradeOS estimating workflow",
+  title: "TradeOS",
+  description: "TradeOS helps contractors manage projects, estimating, documents, and field operations in one workflow.",
 };
 
 export default function RootLayout({

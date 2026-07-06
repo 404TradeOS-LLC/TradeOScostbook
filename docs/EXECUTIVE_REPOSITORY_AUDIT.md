@@ -39,3 +39,21 @@ The next highest-value work is not a rewrite. It is operational hardening:
 3. Add warranty records
 4. Add document metadata and versioning
 5. Add AI review telemetry
+
+## Phase 3 follow-up
+
+For the product-area architecture review covering CRM, Customers, Projects, CostBook, Estimate Builder, Documents, Brand Studio, Knowledge Engine, Customer Portal, AI Services, Weather, Notifications, and Activity Timeline, see:
+
+- `docs/ARCHITECTURE_REVIEW.md`
+
+## Phase 4 follow-up
+
+For the prioritized engineering sprint sequence based on the current repository state, see:
+
+- `docs/ENGINEERING_ROADMAP.md`
+
+## Phase 5 follow-up
+
+For the current working-tree commit recommendation and repository-safe-to-commit assessment, see:
+
+- `docs/GIT_READINESS.md`

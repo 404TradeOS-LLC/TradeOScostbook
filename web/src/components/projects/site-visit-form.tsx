@@ -30,7 +30,7 @@ export function SiteVisitForm({ projectId }: { projectId: string }) {
               <Input id="departureAt" name="departureAt" type="datetime-local" />
             </div>
             <div className="flex flex-col gap-2">
-              <Label htmlFor="gps">GPS placeholder</Label>
+              <Label htmlFor="gps">GPS coordinates</Label>
               <Input id="gps" name="gps" placeholder="39.7684, -86.1581" />
             </div>
           </div>
@@ -61,12 +61,12 @@ export function SiteVisitForm({ projectId }: { projectId: string }) {
           </div>
 
           <div className="flex flex-col gap-2">
-            <Label htmlFor="transcript">Transcript-ready field</Label>
+            <Label htmlFor="transcript">Transcript or dictated notes</Label>
             <Textarea
               id="transcript"
               name="transcript"
               rows={5}
-              placeholder="Paste voice transcription here later. For now, typed notes work too."
+              placeholder="Paste dictated notes or a voice transcript if the field team captured one during the visit."
             />
           </div>
 
@@ -102,7 +102,7 @@ export function SiteVisitForm({ projectId }: { projectId: string }) {
             <div className="flex flex-col gap-2">
               <Label htmlFor="photos">Jobsite photos</Label>
               <Input id="photos" name="photos" type="file" accept="image/*" multiple />
-              <p className="text-sm text-muted-foreground">Standard Supabase uploads are best for smaller files, so keep this first-pass MVP flow to lightweight photos.</p>
+              <p className="text-sm text-muted-foreground">For the smoothest upload experience, keep each photo lightweight and focused on conditions, access, and materials.</p>
             </div>
           </div>
 

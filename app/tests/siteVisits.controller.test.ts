@@ -1,6 +1,9 @@
 import { Request, Response } from "express";
 
 const mockPrisma = {
+  activityEvent: {
+    create: jest.fn(),
+  },
   project: {
     findFirst: jest.fn(),
     update: jest.fn(),
@@ -17,7 +20,17 @@ jest.mock("../db/client", () => ({ prisma: mockPrisma }));
 import { siteVisitsController } from "../backend/controllers/projects.controller";
 
 function mockReqRes(orgId: string, params: Record<string, string>, body: unknown = {}) {
-  const req = { orgId, params, body } as unknown as Request;
+  const req = {
+    orgId,
+    params,
+    body,
+    auth: {
+      userId: "user-1",
+      orgId,
+      role: "owner",
+      email: "owner@tradeos.test",
+    },
+  } as unknown as Request;
   const res = { status: jest.fn(), json: jest.fn() } as unknown as Response;
   (res.status as jest.Mock).mockReturnValue(res);
   return { req, res };
@@ -27,6 +40,13 @@ describe("siteVisitsController.create", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockPrisma.siteVisit.create.mockImplementation(({ data }) => Promise.resolve({ id: "visit-1", ...data }));
+    mockPrisma.activityEvent.create.mockImplementation(({ data }) =>
+      Promise.resolve({
+        id: "activity-1",
+        createdAt: new Date("2026-07-05T12:00:00.000Z"),
+        ...data,
+      })
+    );
   });
 
   it("classifies the project's scope and persists the full IntakeResult against the site visit", async () => {

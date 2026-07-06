@@ -148,7 +148,7 @@ export async function createSiteVisitAction(_prev: FormActionState, formData: Fo
       return { error: "Project photo uploads must be image files." };
     }
     if (file.size > MAX_STANDARD_UPLOAD_BYTES) {
-      return { error: `Each photo must be 6MB or smaller for this MVP upload flow.` };
+      return { error: `Each photo must be 6MB or smaller for this upload flow.` };
     }
   }
 

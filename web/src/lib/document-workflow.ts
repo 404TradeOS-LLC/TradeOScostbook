@@ -23,7 +23,7 @@ export function formatCurrency(value: number | null | undefined) {
 }
 
 export function formatDateTime(value: string | null | undefined) {
-  if (!value) return "Not yet";
+  if (!value) return "Not recorded";
   return new Intl.DateTimeFormat("en-US", { dateStyle: "medium", timeStyle: "short" }).format(new Date(value));
 }
 
@@ -347,7 +347,7 @@ export function buildProjectNotifications(project: Project & { proposals: Propos
       notices.push({
         id: `${invoice.id}-invoice-due`,
         title: "Invoice due",
-        description: "Mock reminder is queued for outstanding balance follow-up.",
+        description: "Outstanding balance needs follow-up with the customer.",
         at: invoice.dueDate,
         status: "attention",
       });
@@ -356,7 +356,7 @@ export function buildProjectNotifications(project: Project & { proposals: Propos
       notices.push({
         id: `${invoice.id}-invoice-paid`,
         title: "Invoice paid",
-        description: "Payment receipt placeholder is ready for future automation.",
+        description: "Payment was recorded and the invoice balance is closed.",
         at: invoice.paidAt,
         status: "completed",
       });
