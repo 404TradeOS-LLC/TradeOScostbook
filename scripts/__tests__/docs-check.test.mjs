@@ -34,6 +34,21 @@ const config = {
       explanation: "crm",
     },
     { paths: ["app/domain/contracts.ts"], requires: ["docs/RBAC_MATRIX.md", "docs/WORKFLOW_LIFECYCLES.md"], explanation: "contracts" },
+    {
+      paths: ["docs/ROADMAP.md"],
+      requires: ["docs/ENGINEERING_COMMAND_CENTER.md"],
+      explanation: "roadmap",
+    },
+    {
+      paths: ["AGENTS.md", "docs/agent-prompts/**"],
+      requires: ["docs/REPOSITORY_GOVERNANCE.md", "docs/ENGINEERING_COMMAND_CENTER.md"],
+      explanation: "governance",
+    },
+    {
+      paths: ["docs/README.md", "docs/DOC_OWNERSHIP.yml"],
+      requires: ["docs/REPOSITORY_GOVERNANCE.md", "docs/ENGINEERING_COMMAND_CENTER.md"],
+      explanation: "hierarchy",
+    },
   ],
   exemptions: [{ paths: ["app/tests/**"], reason: "tests only" }],
 };
@@ -140,6 +155,48 @@ exemptions: []
   });
   assert.deepEqual(result.requiredDocs, []);
   assert.deepEqual(result.missingDocs, []);
+});
+
+test("roadmap changes require command center update", () => {
+  const result = evaluateOwnership({
+    changedFiles: ["docs/ROADMAP.md"],
+    config,
+  });
+  assert.deepEqual(result.requiredDocs, ["docs/ENGINEERING_COMMAND_CENTER.md"]);
+  assert.deepEqual(result.missingDocs, ["docs/ENGINEERING_COMMAND_CENTER.md"]);
+});
+
+test("governance workflow changes require governance docs and command center", () => {
+  const result = evaluateOwnership({
+    changedFiles: ["AGENTS.md", "docs/REPOSITORY_GOVERNANCE.md"],
+    config,
+  });
+  assert.deepEqual(result.requiredDocs, [
+    "docs/ENGINEERING_COMMAND_CENTER.md",
+    "docs/REPOSITORY_GOVERNANCE.md",
+  ]);
+  assert.deepEqual(result.missingDocs, ["docs/ENGINEERING_COMMAND_CENTER.md"]);
+});
+
+test("session handoff edits do not require unrelated docs by themselves", () => {
+  const result = evaluateOwnership({
+    changedFiles: ["docs/SESSION_HANDOFF.md"],
+    config,
+  });
+  assert.deepEqual(result.requiredDocs, []);
+  assert.deepEqual(result.missingDocs, []);
+});
+
+test("source-of-truth hierarchy changes require governance docs and command center", () => {
+  const result = evaluateOwnership({
+    changedFiles: ["docs/README.md", "docs/REPOSITORY_GOVERNANCE.md"],
+    config,
+  });
+  assert.deepEqual(result.requiredDocs, [
+    "docs/ENGINEERING_COMMAND_CENTER.md",
+    "docs/REPOSITORY_GOVERNANCE.md",
+  ]);
+  assert.deepEqual(result.missingDocs, ["docs/ENGINEERING_COMMAND_CENTER.md"]);
 });
 
 test("all required docs changed passes", () => {
