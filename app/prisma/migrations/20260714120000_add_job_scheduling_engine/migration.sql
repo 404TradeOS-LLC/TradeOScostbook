@@ -130,13 +130,6 @@ for select using (
   and (
     current_app_can_administer()
     or user_id = current_app_user_id()
-    or exists (
-      select 1
-      from job_assignments as sibling
-      where sibling.job_id = job_assignments.job_id
-        and sibling.user_id = current_app_user_id()
-        and sibling.removed_at is null
-    )
   )
 );
 
