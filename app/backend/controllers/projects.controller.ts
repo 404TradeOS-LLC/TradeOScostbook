@@ -64,6 +64,7 @@ const siteVisitDetailsSchema = z.object({
 });
 
 const siteVisitSchema = z.object({
+  jobId: z.string().uuid().optional(),
   transcript: z.string().optional(),
   notes: z.string().optional(),
   detailsJson: siteVisitDetailsSchema.optional(),
@@ -162,11 +163,18 @@ export const projectsController = {
         estimates: { orderBy: { version: "desc" } },
         siteVisits: { orderBy: { createdAt: "desc" } },
         projectFiles: { orderBy: { createdAt: "desc" } },
-        proposals: { orderBy: { createdAt: "desc" } },
-        invoices: { orderBy: { createdAt: "desc" }, include: { lineItems: { orderBy: { sortOrder: "asc" } } } },
-        contracts: { orderBy: { createdAt: "desc" } },
+        proposals: { orderBy: { createdAt: "desc" }, include: { deliveries: { orderBy: { occurredAt: "desc" } } } },
+        invoices: {
+          orderBy: { createdAt: "desc" },
+          include: {
+            lineItems: { orderBy: { sortOrder: "asc" } },
+            deliveries: { orderBy: { occurredAt: "desc" } },
+          },
+        },
+        contracts: { orderBy: { createdAt: "desc" }, include: { events: { orderBy: { occurredAt: "desc" } } } },
         changeOrders: { orderBy: { createdAt: "desc" }, include: { lineItems: { orderBy: { sortOrder: "asc" } } } },
         tasks: { orderBy: [{ status: "asc" }, { dueDate: "asc" }, { createdAt: "desc" }] },
+        jobs: { orderBy: [{ archivedAt: "asc" }, { scheduledStart: "asc" }, { createdAt: "desc" }] },
       },
     });
     if (!row) throw new ApiError(404, `Project ${req.params.id} not found`);
@@ -199,6 +207,17 @@ export const projectsController = {
           unitCost: toNullableNumber(lineItem.unitCost) ?? 0,
           lineCost: toNullableNumber(lineItem.lineCost) ?? 0,
         })),
+      })),
+      jobs: (row.jobs ?? []).map((job) => ({
+        id: job.id,
+        jobNumber: job.jobNumber,
+        title: job.title,
+        jobType: job.jobType,
+        status: job.status,
+        priority: job.priority,
+        scheduledStart: job.scheduledStart?.toISOString() ?? null,
+        scheduledEnd: job.scheduledEnd?.toISOString() ?? null,
+        archivedAt: job.archivedAt?.toISOString() ?? null,
       })),
     });
   },
@@ -272,11 +291,16 @@ export const siteVisitsController = {
     if (!project) throw new ApiError(404, `Project ${req.params.id} not found`);
 
     const input = siteVisitSchema.parse(req.body);
+    if (input.jobId) {
+      const job = await prisma.job.findFirst({ where: { id: input.jobId, orgId: requireOrgId(req), projectId: project.id, archivedAt: null } });
+      if (!job) throw new ApiError(404, `Job ${input.jobId} not found`);
+    }
     const intakeResult = buildProjectIntake(buildIntakeScopeText(project.simpleScope, input.notes, input.transcript));
 
     const visit = await prisma.siteVisit.create({
       data: {
         projectId: project.id,
+        jobId: input.jobId,
         transcript: input.transcript,
         notes: input.notes,
         detailsJson: toInputJson(input.detailsJson),
@@ -316,6 +340,12 @@ export const siteVisitsController = {
     if (!existing) throw new ApiError(404, `Site visit ${req.params.siteVisitId} not found`);
 
     const input = siteVisitUpdateSchema.parse(req.body);
+    if (input.jobId) {
+      const job = await prisma.job.findFirst({
+        where: { id: input.jobId, orgId: requireOrgId(req), projectId: existing.projectId, archivedAt: null },
+      });
+      if (!job) throw new ApiError(404, `Job ${input.jobId} not found`);
+    }
     const mergedMeasurements = (input.measurementsJson ?? asRecord(existing.measurementsJson) ?? undefined) as Record<string, unknown> | undefined;
     const mergedNotes = input.notes ?? existing.notes;
     const mergedTranscript = input.transcript ?? existing.transcript;
@@ -324,6 +354,7 @@ export const siteVisitsController = {
     const updated = await prisma.siteVisit.update({
       where: { id: existing.id },
       data: {
+        jobId: input.jobId ?? existing.jobId,
         transcript: mergedTranscript,
         notes: mergedNotes,
         detailsJson: toInputJson(input.detailsJson ?? asRecord(existing.detailsJson) ?? undefined),

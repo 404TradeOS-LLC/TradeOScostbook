@@ -22,10 +22,12 @@ const orgA = "10000000-0000-0000-0000-000000000001";
 const orgB = "20000000-0000-0000-0000-000000000002";
 const adminUser = "10000000-0000-0000-0000-000000000011";
 const viewerUser = "10000000-0000-0000-0000-000000000012";
+const technicianUser = "10000000-0000-0000-0000-000000000014";
 const otherUser = "20000000-0000-0000-0000-000000000021";
 const estimatorUser = "10000000-0000-0000-0000-000000000013";
 const adminMembership = "10000000-0000-0000-0000-000000000031";
 const viewerMembership = "10000000-0000-0000-0000-000000000032";
+const technicianMembership = "10000000-0000-0000-0000-000000000034";
 const otherMembership = "20000000-0000-0000-0000-000000000041";
 const estimatorMembership = "10000000-0000-0000-0000-000000000033";
 const divisionA = "10000000-0000-0000-0000-000000000051";
@@ -62,6 +64,9 @@ const featureFlagA = "10000000-0000-0000-0000-000000000108";
 const serviceAgreementA = "10000000-0000-0000-0000-000000000109";
 const invoiceForPaymentA = "10000000-0000-0000-0000-000000000110";
 const paymentA = "10000000-0000-0000-0000-000000000111";
+const jobA = "10000000-0000-0000-0000-000000000112";
+const jobB = "20000000-0000-0000-0000-000000000113";
+const technicianAssignmentA = "10000000-0000-0000-0000-000000000114";
 
 describe("live organization row-level security", () => {
   beforeAll(async () => {
@@ -75,6 +80,7 @@ describe("live organization row-level security", () => {
       data: [
         { id: adminUser, authSubject: "rls-admin", email: "rls-admin@example.com" },
         { id: viewerUser, authSubject: "rls-viewer", email: "rls-viewer@example.com" },
+        { id: technicianUser, authSubject: "rls-technician", email: "rls-tech@example.com", fullName: "Assigned Technician" },
         { id: otherUser, authSubject: "rls-other", email: "rls-other@example.com" },
         { id: estimatorUser, authSubject: "rls-estimator", email: "rls-estimator@example.com" },
       ],
@@ -83,6 +89,7 @@ describe("live organization row-level security", () => {
       data: [
         { id: adminMembership, orgId: orgA, userId: adminUser, role: "admin", status: "active" },
         { id: viewerMembership, orgId: orgA, userId: viewerUser, role: "viewer", status: "active" },
+        { id: technicianMembership, orgId: orgA, userId: technicianUser, role: "technician", status: "active" },
         { id: otherMembership, orgId: orgB, userId: otherUser, role: "owner", status: "active" },
         { id: estimatorMembership, orgId: orgA, userId: estimatorUser, role: "estimator", status: "active" },
       ],
@@ -185,6 +192,55 @@ describe("live organization row-level security", () => {
         title: "Initial mobilization",
         status: "todo",
         priority: "medium",
+      },
+    });
+    await adminClient.job.createMany({
+      data: [
+        {
+          id: jobA,
+          orgId: orgA,
+          projectId: projectA,
+          customerId: customerA,
+          serviceAddressId: serviceAddressA,
+          jobNumber: "JOB-2026-000001",
+          title: "Org A Scheduled Job",
+          description: "Assigned technician should be able to see this job only.",
+          jobType: "HVAC Service",
+          status: "scheduled",
+          priority: "high",
+          scheduledStart: new Date("2026-07-16T13:00:00.000Z"),
+          scheduledEnd: new Date("2026-07-16T15:00:00.000Z"),
+          estimatedDurationMinutes: 120,
+          createdById: adminUser,
+        },
+        {
+          id: jobB,
+          orgId: orgB,
+          projectId: projectB,
+          customerId: customerB,
+          serviceAddressId: serviceAddressB,
+          jobNumber: "JOB-2026-000001",
+          title: "Org B Scheduled Job",
+          description: "Cross-tenant job isolation check.",
+          jobType: "Electrical Service",
+          status: "scheduled",
+          priority: "medium",
+          scheduledStart: new Date("2026-07-16T16:00:00.000Z"),
+          scheduledEnd: new Date("2026-07-16T18:00:00.000Z"),
+          estimatedDurationMinutes: 120,
+          createdById: otherUser,
+        },
+      ],
+    });
+    await adminClient.jobAssignment.create({
+      data: {
+        id: technicianAssignmentA,
+        orgId: orgA,
+        jobId: jobA,
+        userId: technicianUser,
+        assignmentRole: "lead",
+        isLead: true,
+        assignedById: adminUser,
       },
     });
     await adminClient.assembly.create({
@@ -510,6 +566,47 @@ describe("live organization row-level security", () => {
             status: "todo",
             priority: "low",
           },
+        })
+      )
+    ).rejects.toThrow();
+  });
+
+  it("limits technician job visibility to assigned jobs while preserving tenant isolation", async () => {
+    const visibleJobs = await inSession(technicianUser, orgA, "technician", async () =>
+      currentTransaction().job.findMany({ orderBy: { createdAt: "asc" } })
+    );
+    expect(visibleJobs.map((row) => row.id)).toEqual([jobA]);
+
+    const hiddenOtherOrgJob = await inSession(technicianUser, orgA, "technician", async () =>
+      currentTransaction().job.findUnique({ where: { id: jobB } })
+    );
+    expect(hiddenOtherOrgJob).toBeNull();
+
+    const hiddenUnassignedJob = await inSession(viewerUser, orgA, "viewer", async () =>
+      currentTransaction().job.findUnique({ where: { id: jobA } })
+    );
+    expect(hiddenUnassignedJob).toBeNull();
+  });
+
+  it("lets technicians read their assigned team and update only their own assignment rows", async () => {
+    const visibleAssignments = await inSession(technicianUser, orgA, "technician", async () =>
+      currentTransaction().jobAssignment.findMany({ where: { jobId: jobA }, orderBy: { createdAt: "asc" } })
+    );
+    expect(visibleAssignments.map((row) => row.id)).toEqual([technicianAssignmentA]);
+
+    const accepted = await inSession(technicianUser, orgA, "technician", async () =>
+      currentTransaction().jobAssignment.update({
+        where: { id: technicianAssignmentA },
+        data: { acceptedAt: new Date("2026-07-16T12:45:00.000Z") },
+      })
+    );
+    expect(accepted.acceptedAt?.toISOString()).toBe("2026-07-16T12:45:00.000Z");
+
+    await expect(
+      inSession(viewerUser, orgA, "viewer", async () =>
+        currentTransaction().jobAssignment.update({
+          where: { id: technicianAssignmentA },
+          data: { declinedAt: new Date("2026-07-16T12:46:00.000Z") },
         })
       )
     ).rejects.toThrow();
@@ -854,6 +951,22 @@ describe("live organization row-level security", () => {
     expect(sent.status).toBe("sent");
     const accepted = await inSession(adminUser, orgA, "admin", async () => new ProposalsService().accept(proposal.id, orgA));
     expect(accepted.status).toBe("accepted");
+    expect(accepted.deliveries.map((delivery) => delivery.eventType)).toEqual(["proposal.accepted", "proposal.sent"]);
+
+    const visibleDeliveries = await inSession(adminUser, orgA, "admin", async () =>
+      currentTransaction().proposalDelivery.findMany({
+        where: { proposalId: proposal.id },
+        orderBy: { occurredAt: "desc" },
+      })
+    );
+    expect(visibleDeliveries.map((delivery) => delivery.eventType)).toEqual(["proposal.accepted", "proposal.sent"]);
+
+    const hiddenDeliveries = await inSession(otherUser, orgB, "owner", async () =>
+      currentTransaction().proposalDelivery.findMany({
+        where: { proposalId: proposal.id },
+      })
+    );
+    expect(hiddenDeliveries).toEqual([]);
 
     await expect(
       inSession(viewerUser, orgA, "viewer", async () =>
@@ -869,36 +982,79 @@ describe("live organization row-level security", () => {
       new InvoicesService().create({
         orgId: orgA,
         projectId: projectA,
+        actorUserId: adminUser,
+        actorRole: "admin",
         proposalId: proposal.id,
         lineItems: [{ description: "Deposit", quantity: 1, unitOfMeasure: "EA", unitCost: 1000 }],
       })
     );
     expect(invoice.amount).toBe(1000);
+    expect(invoice.deliveries.map((delivery) => delivery.eventType)).toEqual(["invoice.created"]);
+
+    const sentInvoice = await inSession(adminUser, orgA, "admin", async () => new InvoicesService().send(invoice.id, orgA, adminUser, "admin"));
+    expect(sentInvoice.status).toBe("sent");
+    const paidInvoice = await inSession(adminUser, orgA, "admin", async () => new InvoicesService().markPaid(invoice.id, orgA, adminUser, "admin"));
+    expect(paidInvoice.status).toBe("paid");
+    expect(paidInvoice.deliveries.map((delivery) => delivery.eventType)).toEqual(["invoice.paid", "invoice.sent", "invoice.created"]);
 
     const invoiceCrossOrgLookup = await inSession(otherUser, orgB, "owner", async () =>
       currentTransaction().invoice.findUnique({ where: { id: invoice.id } })
     );
     expect(invoiceCrossOrgLookup).toBeNull();
 
+    const visibleInvoiceDeliveries = await inSession(adminUser, orgA, "admin", async () =>
+      currentTransaction().invoiceDelivery.findMany({
+        where: { invoiceId: invoice.id },
+        orderBy: { occurredAt: "desc" },
+      })
+    );
+    expect(visibleInvoiceDeliveries.map((delivery) => delivery.eventType)).toEqual(["invoice.paid", "invoice.sent", "invoice.created"]);
+
+    const hiddenInvoiceDeliveries = await inSession(otherUser, orgB, "owner", async () =>
+      currentTransaction().invoiceDelivery.findMany({ where: { invoiceId: invoice.id } })
+    );
+    expect(hiddenInvoiceDeliveries).toEqual([]);
+
     await expect(
       inSession(viewerUser, orgA, "viewer", async () => new ContractsService().create({ orgId: orgA, proposalId: proposal.id }))
     ).rejects.toThrow();
 
     const contract = await inSession(adminUser, orgA, "admin", async () =>
-      new ContractsService().create({ orgId: orgA, proposalId: proposal.id })
+      new ContractsService().create({ orgId: orgA, actorUserId: adminUser, actorRole: "admin", proposalId: proposal.id })
     );
     expect(contract.status).toBe("pending_signature");
+    expect(contract.events.map((event) => event.eventType)).toEqual(["contract.created"]);
 
     const signed = await inSession(adminUser, orgA, "admin", async () =>
-      new ContractsService().sign(contract.id, { orgId: orgA, signerName: "Jane Doe", signerEmail: "jane@example.com" })
+      new ContractsService().sign(contract.id, {
+        orgId: orgA,
+        actorUserId: adminUser,
+        actorRole: "admin",
+        signerName: "Jane Doe",
+        signerEmail: "jane@example.com",
+      })
     );
     expect(signed.status).toBe("signed");
     expect(signed.signerName).toBe("Jane Doe");
+    expect(signed.events.map((event) => event.eventType)).toEqual(["contract.signed", "contract.created"]);
 
     const contractCrossOrgLookup = await inSession(otherUser, orgB, "owner", async () =>
       currentTransaction().contract.findUnique({ where: { id: contract.id } })
     );
     expect(contractCrossOrgLookup).toBeNull();
+
+    const visibleContractEvents = await inSession(adminUser, orgA, "admin", async () =>
+      currentTransaction().contractEvent.findMany({
+        where: { contractId: contract.id },
+        orderBy: { occurredAt: "desc" },
+      })
+    );
+    expect(visibleContractEvents.map((event) => event.eventType)).toEqual(["contract.signed", "contract.created"]);
+
+    const hiddenContractEvents = await inSession(otherUser, orgB, "owner", async () =>
+      currentTransaction().contractEvent.findMany({ where: { contractId: contract.id } })
+    );
+    expect(hiddenContractEvents).toEqual([]);
   });
 });
 
