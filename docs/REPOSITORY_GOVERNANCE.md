@@ -8,6 +8,8 @@ related_code:
   - .github/workflows/docs-consistency.yml
   - .github/workflows/verify-repository.yml
   - .github/pull_request_template.md
+  - docs/ENGINEERING_COMMAND_CENTER.md
+  - docs/SESSION_HANDOFF.md
   - docs/agent-prompts/AGENT_STARTUP_CHECKLIST.md
   - docs/agent-prompts/AGENT_COMPLETION_CHECKLIST.md
   - docs/decisions/ADR-004-worktree-policy.md
@@ -78,7 +80,7 @@ Use manual configuration until repository-admin automation is intentionally intr
 
 ### Branch ruleset for `main`
 
-1. Open `BillyKShowalter/TradeOScostbook` on GitHub.
+1. Open `404TradeOS-LLC/TradeOScostbook` on GitHub.
 2. Go to `Settings`.
 3. In the left sidebar, open `Rules`, then `Rulesets`.
 4. Click `New ruleset`, then `New branch ruleset`.
@@ -106,6 +108,22 @@ Use manual configuration until repository-admin automation is intentionally intr
 3. Under `Pull Requests`, keep `Allow squash merging` enabled.
 4. If the team decides to enforce squash-only merges, disable `Allow merge commits` and `Allow rebase merging`.
 5. Enable `Automatically delete head branches`.
+
+## Engineering Command Center and session continuity
+
+After environment verification, every human or AI contributor should read:
+
+1. `docs/ENGINEERING_COMMAND_CENTER.md`
+2. `docs/CURRENT_STATE.md`
+3. `docs/SESSION_HANDOFF.md`
+
+Session policy:
+
+- `ENGINEERING_COMMAND_CENTER.md` is the shared operational overview, not a running log
+- update it only when phase, milestone, priorities, blockers, CI expectations, or operating protocol changed
+- `SESSION_HANDOFF.md` is the living current-session closeout document
+- replace `SESSION_HANDOFF.md` at the end of every substantive or PR-ready engineering session
+- do not create a chronological journal inside either document
 
 ## Standard worktree lifecycle
 

@@ -21,7 +21,9 @@ This directory is the documentation entry point for implementation truth in Trad
 
 Use these files first:
 
+- `docs/ENGINEERING_COMMAND_CENTER.md` for the current engineering mission, verified priorities, and startup/completion protocol
 - `docs/CURRENT_STATE.md` for verified implementation status
+- `docs/SESSION_HANDOFF.md` for the latest completed-session context and next exact task
 - `docs/PRODUCT_SCOPE.md` for product boundaries and non-goals
 - `docs/ARCHITECTURE.md` for repository and tenancy architecture
 - `docs/DOMAIN_MODEL.md` for canonical entity definitions and relationships
@@ -54,6 +56,8 @@ If a file is not in the authoritative list above, treat it as supporting materia
 Global source-of-truth files define shared rules.
 
 - `CURRENT_STATE.md` answers what exists now
+- `ENGINEERING_COMMAND_CENTER.md` answers where engineering should start right now
+- `SESSION_HANDOFF.md` answers what the last completed session did and what should happen next
 - `PRODUCT_SCOPE.md` answers what TradeOS is and is not trying to do
 - `ARCHITECTURE.md` answers how the system is structured
 - `DOMAIN_MODEL.md` answers what entities mean
@@ -117,6 +121,8 @@ Rename handling:
 ## Source-of-truth files
 
 - [CURRENT_STATE.md](CURRENT_STATE.md)
+- [ENGINEERING_COMMAND_CENTER.md](ENGINEERING_COMMAND_CENTER.md)
+- [SESSION_HANDOFF.md](SESSION_HANDOFF.md)
 - [PRODUCT_SCOPE.md](PRODUCT_SCOPE.md)
 - [ARCHITECTURE.md](ARCHITECTURE.md)
 - [DOMAIN_MODEL.md](DOMAIN_MODEL.md)

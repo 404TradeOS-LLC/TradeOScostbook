@@ -19,7 +19,9 @@ The focus is no longer feature chasing. Current work is centered on:
 Start here for current implementation truth:
 
 - [docs/README.md](docs/README.md)
+- [docs/ENGINEERING_COMMAND_CENTER.md](docs/ENGINEERING_COMMAND_CENTER.md)
 - [docs/CURRENT_STATE.md](docs/CURRENT_STATE.md)
+- [docs/SESSION_HANDOFF.md](docs/SESSION_HANDOFF.md)
 - [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
 - [docs/DEPLOYMENT_GUIDE.md](docs/DEPLOYMENT_GUIDE.md)
 - [docs/REPOSITORY_GOVERNANCE.md](docs/REPOSITORY_GOVERNANCE.md)
