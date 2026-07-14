@@ -20,6 +20,10 @@ function writeTempConfig(contents) {
   return filePath;
 }
 
+function loadTempConfig(contents) {
+  return loadOwnershipConfig(writeTempConfig(contents));
+}
+
 const config = {
   rules: [
     { paths: ["app/prisma/schema.prisma"], requires: ["docs/DOMAIN_MODEL.md"], explanation: "schema" },
@@ -50,6 +54,40 @@ test("glob matching works", () => {
   });
   assert.deepEqual(result.requiredDocs, ["docs/modules/jobs-and-scheduling.md"]);
   assert.deepEqual(result.missingDocs, ["docs/modules/jobs-and-scheduling.md"]);
+});
+
+test("phase-3 scenario: backend change without required docs fails", () => {
+  const tempConfig = loadTempConfig(`
+rules:
+  - paths:
+      - app/modules/jobs/**
+    requires:
+      - docs/modules/jobs-and-scheduling.md
+exemptions: []
+`);
+  const result = evaluateOwnership({
+    changedFiles: ["app/modules/jobs/service.ts"],
+    config: tempConfig,
+  });
+  assert.deepEqual(result.requiredDocs, ["docs/modules/jobs-and-scheduling.md"]);
+  assert.deepEqual(result.missingDocs, ["docs/modules/jobs-and-scheduling.md"]);
+});
+
+test("phase-3 scenario: backend change with required docs passes", () => {
+  const tempConfig = loadTempConfig(`
+rules:
+  - paths:
+      - app/modules/jobs/**
+    requires:
+      - docs/modules/jobs-and-scheduling.md
+exemptions: []
+`);
+  const result = evaluateOwnership({
+    changedFiles: ["app/modules/jobs/service.ts", "docs/modules/jobs-and-scheduling.md"],
+    config: tempConfig,
+  });
+  assert.deepEqual(result.requiredDocs, ["docs/modules/jobs-and-scheduling.md"]);
+  assert.deepEqual(result.missingDocs, []);
 });
 
 test("multiple matching rules union required docs", () => {
@@ -83,6 +121,27 @@ test("docs-only module edits do not require docs README", () => {
   assert.deepEqual(result.missingDocs, []);
 });
 
+test("phase-3 scenario: harmless module-doc edit does not require docs README", () => {
+  const tempConfig = loadTempConfig(`
+rules:
+  - paths:
+      - .github/workflows/**
+    requires:
+      - docs/README.md
+  - paths:
+      - app/modules/jobs/**
+    requires:
+      - docs/modules/jobs-and-scheduling.md
+exemptions: []
+`);
+  const result = evaluateOwnership({
+    changedFiles: ["docs/modules/jobs-and-scheduling.md"],
+    config: tempConfig,
+  });
+  assert.deepEqual(result.requiredDocs, []);
+  assert.deepEqual(result.missingDocs, []);
+});
+
 test("all required docs changed passes", () => {
   const result = evaluateOwnership({
     changedFiles: ["app/domain/contracts.ts", "docs/RBAC_MATRIX.md", "docs/WORKFLOW_LIFECYCLES.md"],
@@ -94,6 +153,17 @@ test("all required docs changed passes", () => {
 test("malformed YAML config throws", () => {
   const filePath = writeTempConfig("rules: nope");
   assert.throws(() => loadOwnershipConfig(filePath), /must be an array/);
+});
+
+test("phase-3 scenario: malformed ownership configuration fails clearly", () => {
+  const filePath = writeTempConfig(`
+rules:
+  - paths:
+      - app/modules/jobs/**
+    requires: nope
+exemptions: []
+`);
+  assert.throws(() => loadOwnershipConfig(filePath), /rules\[0\]\.requires must be a non-empty string array/);
 });
 
 test("base-ref resolution respects explicit and CI base refs", () => {
@@ -149,6 +219,38 @@ test("rename within same owned path requires the same docs", () => {
     config,
   });
   assert.deepEqual(result.requiredDocs, ["docs/modules/jobs-and-scheduling.md"]);
+  assert.deepEqual(result.missingDocs, []);
+});
+
+test("phase-3 scenario: renamed source file checks both old and new paths", () => {
+  const tempConfig = loadTempConfig(`
+rules:
+  - paths:
+      - app/modules/jobs/**
+    requires:
+      - docs/modules/jobs-and-scheduling.md
+  - paths:
+      - app/modules/crm/**
+    requires:
+      - docs/modules/crm.md
+      - docs/API_REFERENCE.md
+exemptions: []
+`);
+  const result = evaluateOwnership({
+    changedFiles: [
+      "app/modules/jobs/service.ts",
+      "app/modules/crm/service.ts",
+      "docs/modules/jobs-and-scheduling.md",
+      "docs/modules/crm.md",
+      "docs/API_REFERENCE.md",
+    ],
+    config: tempConfig,
+  });
+  assert.deepEqual(result.requiredDocs, [
+    "docs/API_REFERENCE.md",
+    "docs/modules/crm.md",
+    "docs/modules/jobs-and-scheduling.md",
+  ]);
   assert.deepEqual(result.missingDocs, []);
 });
 
@@ -232,6 +334,27 @@ test("malformed rename input fails clearly", () => {
   ]);
   const git = (args) => responses.get(args.join(" ")) ?? "";
   assert.throws(() => getChangedFiles("origin/main", git), /Malformed rename\/copy git diff --name-status line/);
+});
+
+test("phase-3 scenario: no matching rule follows documented behavior", () => {
+  const tempConfig = loadTempConfig(`
+rules:
+  - paths:
+      - app/modules/jobs/**
+    requires:
+      - docs/modules/jobs-and-scheduling.md
+exemptions: []
+`);
+  const result = evaluateOwnership({
+    changedFiles: ["web/public/logo.svg"],
+    config: tempConfig,
+  });
+  assert.deepEqual(result.requiredDocs, []);
+  assert.deepEqual(result.missingDocs, []);
+  assert.match(
+    formatReport({ baseRef: "origin/main", result }),
+    /Required documentation files: none/,
+  );
 });
 
 test("multiple simultaneous renames include every old and new path", () => {
