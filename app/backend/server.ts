@@ -30,7 +30,8 @@ import { knowledgeRuntimeRouter } from "./routes/knowledgeRuntime.routes";
 import { settingsRouter } from "./routes/settings.routes";
 import { brandStudioRouter } from "./routes/brandStudio.routes";
 import { intelligenceRouter } from "./routes/intelligence.routes";
-import { companyRouter, customerImportRouter, customersRouter as crmCustomersRouter, invoicePaymentsRouter, jobsRouter, notesRouter } from "./routes/crm.routes";
+import { companyRouter, customerImportRouter, customersRouter as crmCustomersRouter, invoicePaymentsRouter, notesRouter } from "./routes/crm.routes";
+import { jobsRouter, scheduleRouter } from "./routes/jobs.routes";
 
 export function createServer() {
   const app = express();
@@ -86,6 +87,7 @@ export function createServer() {
   app.use("/api/v1/customers", crmCustomersRouter);
   app.use("/api/v1/projects", projectsRouter);
   app.use("/api/v1/jobs", jobsRouter);
+  app.use("/api/v1/schedule", scheduleRouter);
   app.use("/api/v1/notes", notesRouter);
   app.use("/api/v1/change-orders", changeOrdersRouter);
   app.use("/api/v1/supplier-integrations", supplierIntegrationRouter);

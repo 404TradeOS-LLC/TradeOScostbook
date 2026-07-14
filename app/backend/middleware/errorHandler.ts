@@ -4,7 +4,11 @@ import { ZodError } from "zod";
 import { logError } from "../logging";
 
 export class ApiError extends Error {
-  constructor(public statusCode: number, message: string) {
+  constructor(
+    public statusCode: number,
+    message: string,
+    public details?: unknown
+  ) {
     super(message);
   }
 }
@@ -58,7 +62,11 @@ export function errorHandler(err: unknown, req: Request, res: Response, _next: N
   const requestId = typeof res.locals.requestId === "string" ? res.locals.requestId : undefined;
 
   if (err instanceof ApiError) {
-    res.status(err.statusCode).json({ error: err.message, ...(requestId ? { requestId } : {}) });
+    res.status(err.statusCode).json({
+      error: err.message,
+      ...(err.details !== undefined ? { details: err.details } : {}),
+      ...(requestId ? { requestId } : {}),
+    });
     return;
   }
   if (err instanceof ZodError) {
