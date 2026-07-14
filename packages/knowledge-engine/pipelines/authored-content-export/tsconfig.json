@@ -12,5 +12,5 @@
   "ts-node": {
     "transpileOnly": true
   },
-  "include": ["./**/*.ts", "../../app/modules/assemblies-database/knowledge/**/*.ts"]
+  "include": ["./**/*.ts", "../../authored-content/**/*.ts"]
 }

@@ -1,13 +1,13 @@
 # Platform Import Contract
 
-What the TradeOS application should consume from `exports/platform/`, in
+What the TradeOS application should consume from `packages/knowledge-engine/exports/authored-content/`, in
 what order, and what it should validate before trusting any of it. This is
 a contract for a future consumer — no importer exists in `app/` yet (see
-`docs/platform-runtime-bridge-plan.md` for the plan to build one).
+`packages/knowledge-engine/docs/authored-content/platform-runtime-bridge-plan.md` for the plan to build one).
 
 ## Before anything else: read `manifest.json`
 
-Every consumer should load `exports/platform/manifest.json` first and check
+Every consumer should load `packages/knowledge-engine/exports/authored-content/manifest.json` first and check
 three things before touching any other file:
 
 1. `schemaVersions.platformExportContractVersion` matches a version this
@@ -40,14 +40,14 @@ threaded through every export file — it appears verbatim in
 `toAssemblyId` / `assemblyPricingHookReferences[].assemblyId`, and
 `cost-items.json`'s `referencedByAssemblyIds`. A consumer can safely use
 this id as a stable cross-file join key and, per
-`docs/prisma-gap-analysis.md`, as the value for `Assembly.code` if and when
+`packages/knowledge-engine/docs/authored-content/prisma-gap-analysis.md`, as the value for `Assembly.code` if and when
 a knowledge assembly is materialized into a real org's catalog (subject to
 that org not already having a `code` collision — not possible today since
 every knowledge id is globally unique).
 
 `pricingHooks[].refSlug` (e.g. `tree-service.certified-climber`) is the
 second identifier a consumer must track, but it is explicitly **not** a
-Prisma id — see `docs/platform-field-mapping.md`'s `cost-items.json`
+Prisma id — see `packages/knowledge-engine/docs/authored-content/platform-field-mapping.md`'s `cost-items.json`
 section. Treat it as a lookup key into a future org-scoped
 find-or-create step, never as something to write directly into a foreign
 key column.
@@ -91,7 +91,7 @@ Run these checks in this order and stop at the first failure category
    with `targetExistsInExport: false` edges *before* import: either (a)
    import anyway and leave a dangling reference for a later batch to
    resolve (recommended — this is exactly what
-   `docs/knowledge-engine/tree-service-progress.md` already tracks as
+   `packages/knowledge-engine/docs/authored-content/tree-service-progress.md` already tracks as
    planned future batches, not a defect), or (b) strip unresolved edges at
    import time and re-add them once the target assembly exists. Do not
    silently drop the whole source assembly because one of its dependency
@@ -112,7 +112,7 @@ Run these checks in this order and stop at the first failure category
 
 ## Which fields map to existing vs. future Prisma models
 
-Full detail lives in `docs/prisma-gap-analysis.md`. Summary: 5 of 31
+Full detail lives in `packages/knowledge-engine/docs/authored-content/prisma-gap-analysis.md`. Summary: 5 of 31
 `KnowledgeAssembly` field-groups (`id`/`slug` -> `Assembly.code`, `name`,
 `unitOfMeasure`, `description`) map onto existing columns with zero schema
 change. The rest need either a new generic JSON metadata column (17
@@ -129,8 +129,8 @@ losslessly parked, unqueried, in a single new `metadata Json?` column added
 to `Assembly` — **if and when** that column is added (it does not exist
 today, and adding it is Prisma-schema work explicitly out of scope for this
 task). Until that column exists, the only safe place for this content is
-**outside Prisma entirely** — as the standalone `exports/platform/*.json`
+**outside Prisma entirely** — as the standalone `packages/knowledge-engine/exports/authored-content/*.json`
 files themselves, read by the application at runtime as a bundled reference
 dataset rather than persisted per-org. See
-`docs/platform-runtime-bridge-plan.md`'s "Phase A" for why this is the
+`packages/knowledge-engine/docs/authored-content/platform-runtime-bridge-plan.md`'s "Phase A" for why this is the
 recommended starting point rather than rushing to a schema change.

@@ -266,3 +266,21 @@ the intended future sync path into the priced tables.
 - 2026-07-02 (Batch 01, Tree Service): Established the knowledge-layer
   structure described above as the resolution to the Prisma-schema
   constraint. See the README in the knowledge folder for the full schema.
+- 2026-07-14: Relocated. This prompt now lives at
+  `packages/knowledge-engine/prompts/agents/agent-costbook-architect-typescript-authoring.md`
+  (renamed from `prompts/agent-costbook-architect.md` to avoid colliding
+  with the pre-existing, differently-scoped
+  `packages/knowledge-engine/prompts/agents/agent-costbook-architect.md`).
+  The authored content itself moved from
+  `app/modules/assemblies-database/knowledge/` to
+  `packages/knowledge-engine/authored-content/` — it was never runtime
+  module code, and living inside `app/modules/assemblies-database/`
+  incorrectly implied runtime-module ownership. See
+  `packages/knowledge-engine/authored-content/README.md`'s "Location and
+  status" section for the full explanation, including the pre-existing,
+  unreconciled second tree-service dataset under
+  `packages/knowledge-engine/knowledge/knowledge/assemblies/tree-service/`.
+  Steps 1-2 above and the `app/modules/assemblies-database/knowledge/`
+  reference in the "Resolution" paragraph describe the original authoring
+  session and are left as historical record rather than edited, per this
+  file's own header note not to casually edit the verbatim prompt body.

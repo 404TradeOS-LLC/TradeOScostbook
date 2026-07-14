@@ -1,8 +1,8 @@
 # Tree Service — Knowledge Engine Progress
 
 Tracks batch-by-batch progress toward ~100 production-quality Tree Service
-assemblies, per `prompts/agent-costbook-architect.md`. Content lives in
-`app/modules/assemblies-database/knowledge/trades/tree-service/`.
+assemblies, per `packages/knowledge-engine/prompts/agents/agent-costbook-architect-typescript-authoring.md`. Content lives in
+`packages/knowledge-engine/authored-content/trades/tree-service/`.
 
 ## Status
 

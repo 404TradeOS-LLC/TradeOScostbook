@@ -1,7 +1,7 @@
 {
   "exportVersion": "1.0.0",
   "generatedAt": "2026-07-03T05:02:00.077Z",
-  "description": "Deduplicated catalog of future priced-catalog placeholders (pricingHooks) named across all exported assemblies. Each entry is NOT a priced Prisma record -- refSlug is a human-readable handle a future sync/import step uses to find-or-create the matching CostItem, Material, LaborRate, Equipment, Subcontractor, or child Assembly row in an org's catalog. See docs/platform-field-mapping.md.",
+  "description": "Deduplicated catalog of future priced-catalog placeholders (pricingHooks) named across all exported assemblies. Each entry is NOT a priced Prisma record -- refSlug is a human-readable handle a future sync/import step uses to find-or-create the matching CostItem, Material, LaborRate, Equipment, Subcontractor, or child Assembly row in an org's catalog. See packages/knowledge-engine/docs/authored-content/platform-field-mapping.md.",
   "count": 29,
   "countByKind": {
     "childAssembly": 2,

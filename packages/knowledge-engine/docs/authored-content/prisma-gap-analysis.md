@@ -1,9 +1,9 @@
 # Prisma Gap Analysis — Construction Knowledge Engine vs. `app/prisma/schema.prisma`
 
 Compares every field on `KnowledgeAssembly`
-(`app/modules/assemblies-database/knowledge/types.ts`) against the runtime
+(`packages/knowledge-engine/authored-content/types.ts`) against the runtime
 schema (`app/prisma/schema.prisma`) as of the Knowledge Engine's current
-branch point (git revision `823304c`, see `exports/platform/manifest.json ->
+branch point (git revision `823304c`, see `packages/knowledge-engine/exports/authored-content/manifest.json ->
 sourceKnowledgeEngineGitRevision`). This is analysis only — no schema file
 was touched to produce it.
 
@@ -27,7 +27,7 @@ bucket:
   consumer needs it.
 
 This same bucket count drives the `prismaSchemaAlignmentPct` sub-score in
-`exports/platform/manifest.json` (5 of 31 fields already supported = 16.1%).
+`packages/knowledge-engine/exports/authored-content/manifest.json` (5 of 31 fields already supported = 16.1%).
 
 ## Already-supported (5 of 31)
 
@@ -90,7 +90,7 @@ query, filter, or join on them specifically.
   a `dbhInches` input" or drive a generic intake-question renderer off a
   blob efficiently. This is also the field most directly relevant to
   `app/modules/project-intake/` — see
-  `docs/platform-runtime-bridge-plan.md` for how its existing
+  `packages/knowledge-engine/docs/authored-content/platform-runtime-bridge-plan.md` for how its existing
   `FieldCheck` shape (`field`/`question`/`reason`/`importance`/
   `isAnswered`) compares.
 - **`dependencies`** — a same-trade-or-cross-trade assembly graph. This is
@@ -144,5 +144,5 @@ pricing), `csiDivision` (drives catalog placement), `constructionPhase`
 (drives scheduling), and `proposalIntelligence` (drives document
 generation, and is nearly solved already on `main`). None of that schema
 work was done as part of this task — it is out of scope by design (see
-`prompts/agent-costbook-architect.md`, which forbids touching the Prisma
+`packages/knowledge-engine/prompts/agents/agent-costbook-architect-typescript-authoring.md`, which forbids touching the Prisma
 schema, and this task's own instructions, which forbid it too).

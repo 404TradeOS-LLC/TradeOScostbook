@@ -1,7 +1,7 @@
 {
   "exportVersion": "1.0.0",
   "generatedAt": "2026-07-03T05:02:00.077Z",
-  "description": "Graph edges between exported records: assembly-to-assembly dependencies (KnowledgeAssembly.dependencies) and assembly-to-pricing-hook references (KnowledgeAssembly.pricingHooks). targetExistsInExport is false for forward-referenced assembly ids that are documented as planned but not yet authored -- see docs/knowledge-engine/tree-service-progress.md.",
+  "description": "Graph edges between exported records: assembly-to-assembly dependencies (KnowledgeAssembly.dependencies) and assembly-to-pricing-hook references (KnowledgeAssembly.pricingHooks). targetExistsInExport is false for forward-referenced assembly ids that are documented as planned but not yet authored -- see packages/knowledge-engine/docs/authored-content/tree-service-progress.md.",
   "assemblyDependencies": [
     {
       "fromAssemblyId": "tree-service.removal.small-tree-open-access",

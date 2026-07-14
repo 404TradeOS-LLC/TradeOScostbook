@@ -2,17 +2,18 @@
  * Knowledge Engine -> platform export pipeline.
  *
  * Reads the approved, versioned assembly content from
- * app/modules/assemblies-database/knowledge/ (read-only; this script never
+ * packages/knowledge-engine/authored-content/ (read-only; this script never
  * writes there, and never invents new assemblies) and emits platform-ready
- * JSON snapshots into exports/platform/.
+ * JSON snapshots into packages/knowledge-engine/exports/authored-content/.
  *
  * Usage (from repo root):
- *   app/node_modules/.bin/ts-node --project pipelines/export/tsconfig.json \
- *     pipelines/export/generate-platform-exports.ts
+ *   app/node_modules/.bin/ts-node --project packages/knowledge-engine/pipelines/authored-content-export/tsconfig.json \
+ *     packages/knowledge-engine/pipelines/authored-content-export/generate-platform-exports.ts
  *
- * See docs/platform-import-contract.md for how TradeOS should consume the
- * output, and docs/prisma-gap-analysis.md for where the sub-score constants
- * below (schemaAlignmentPct) come from.
+ * See packages/knowledge-engine/docs/authored-content/platform-import-contract.md
+ * for how TradeOS should consume the output, and
+ * packages/knowledge-engine/docs/authored-content/prisma-gap-analysis.md for
+ * where the sub-score constants below (schemaAlignmentPct) come from.
  */
 import * as fs from "fs";
 import * as path from "path";
@@ -21,16 +22,16 @@ import {
   listAll,
   listTrades,
   listByTrade,
-} from "../../app/modules/assemblies-database/knowledge/registry";
+} from "../../authored-content/registry";
 import type {
   KnowledgeAssembly,
   AssemblyPricingHook,
-} from "../../app/modules/assemblies-database/knowledge/types";
+} from "../../authored-content/types";
 
 const EXPORT_VERSION = "1.0.0";
-const TARGET_ASSEMBLIES_PER_TRADE = 100; // per prompts/agent-costbook-architect.md "LONG-TERM GOAL"
-const OUT_DIR = path.resolve(__dirname, "../../exports/platform");
-const REPO_ROOT = path.resolve(__dirname, "../..");
+const TARGET_ASSEMBLIES_PER_TRADE = 100; // per packages/knowledge-engine/prompts/agents/agent-costbook-architect-typescript-authoring.md "LONG-TERM GOAL"
+const OUT_DIR = path.resolve(__dirname, "../../exports/authored-content");
+const REPO_ROOT = path.resolve(__dirname, "../../../..");
 
 function tradeSlug(trade: string): string {
   return trade
@@ -154,7 +155,7 @@ function main(): void {
     exportVersion: EXPORT_VERSION,
     generatedAt,
     description:
-      "Deduplicated catalog of future priced-catalog placeholders (pricingHooks) named across all exported assemblies. Each entry is NOT a priced Prisma record -- refSlug is a human-readable handle a future sync/import step uses to find-or-create the matching CostItem, Material, LaborRate, Equipment, Subcontractor, or child Assembly row in an org's catalog. See docs/platform-field-mapping.md.",
+      "Deduplicated catalog of future priced-catalog placeholders (pricingHooks) named across all exported assemblies. Each entry is NOT a priced Prisma record -- refSlug is a human-readable handle a future sync/import step uses to find-or-create the matching CostItem, Material, LaborRate, Equipment, Subcontractor, or child Assembly row in an org's catalog. See packages/knowledge-engine/docs/authored-content/platform-field-mapping.md.",
     count: hookEntries.length,
     countByKind: kindCounts,
     items: hookEntries,
@@ -191,7 +192,7 @@ function main(): void {
     exportVersion: EXPORT_VERSION,
     generatedAt,
     description:
-      "Graph edges between exported records: assembly-to-assembly dependencies (KnowledgeAssembly.dependencies) and assembly-to-pricing-hook references (KnowledgeAssembly.pricingHooks). targetExistsInExport is false for forward-referenced assembly ids that are documented as planned but not yet authored -- see docs/knowledge-engine/tree-service-progress.md.",
+      "Graph edges between exported records: assembly-to-assembly dependencies (KnowledgeAssembly.dependencies) and assembly-to-pricing-hook references (KnowledgeAssembly.pricingHooks). targetExistsInExport is false for forward-referenced assembly ids that are documented as planned but not yet authored -- see packages/knowledge-engine/docs/authored-content/tree-service-progress.md.",
     assemblyDependencies,
     assemblyPricingHookReferences,
     unresolvedDependencyTargets: Array.from(unresolvedTargets).sort(),
@@ -251,7 +252,7 @@ function main(): void {
 
   // 5 of 31 KnowledgeAssembly field-groups already map onto an existing
   // Prisma column with zero schema change (id/slug->code, name, unitOfMeasure,
-  // description). See docs/prisma-gap-analysis.md "Already-supported" table.
+  // description). See packages/knowledge-engine/docs/authored-content/prisma-gap-analysis.md "Already-supported" table.
   const schemaAlignmentPct = Math.round((5 / 31) * 1000) / 10;
 
   const importReadinessScore = Math.round(
@@ -261,7 +262,7 @@ function main(): void {
   writeJson("manifest.json", {
     exportVersion: EXPORT_VERSION,
     generatedAt,
-    generatedBy: "pipelines/export/generate-platform-exports.ts",
+    generatedBy: "packages/knowledge-engine/pipelines/authored-content-export/generate-platform-exports.ts",
     sourceKnowledgeEngineGitRevision: gitRevision(),
     recordCounts: {
       trades: tradesOut.length,
@@ -284,12 +285,12 @@ function main(): void {
     knownLimitations: [
       "Only one trade (Tree Service) and one batch (10 of ~100 planned assemblies) exist -- this is an early, partial export, not a complete catalog.",
       "pricingHooks are placeholders only (kind + human-readable refSlug); none are wired to a real CostItem/Material/LaborRate/Equipment/Subcontractor/Assembly id in any org's Prisma-backed catalog.",
-      `${unresolvedTargets.size} assembly dependency target id(s) are forward references to assemblies not yet authored (tracked in docs/knowledge-engine/tree-service-progress.md): ${
+      `${unresolvedTargets.size} assembly dependency target id(s) are forward references to assemblies not yet authored (tracked in packages/knowledge-engine/docs/authored-content/tree-service-progress.md): ${
         Array.from(unresolvedTargets).sort().join(", ") || "none"
       }.`,
       "No costItem-kind pricingHooks exist yet in the source data -- every hook so far is laborRate, equipment, material, subcontractor, or childAssembly.",
-      "trade/category/subcategory/projectTypes/constructionPhase/requiredInputs/dependencies/proposalIntelligence have no dedicated Prisma columns or tables today; the runtime Assembly model only has id/orgId/code/name/unitOfMeasure/description/isTemplate/isActive. See docs/prisma-gap-analysis.md.",
-      "This content has no orgId and is not read by any TradeOS request path today -- it is a standalone versioned layer pending a future sync/import job (see docs/platform-runtime-bridge-plan.md).",
+      "trade/category/subcategory/projectTypes/constructionPhase/requiredInputs/dependencies/proposalIntelligence have no dedicated Prisma columns or tables today; the runtime Assembly model only has id/orgId/code/name/unitOfMeasure/description/isTemplate/isActive. See packages/knowledge-engine/docs/authored-content/prisma-gap-analysis.md.",
+      "This content has no orgId and is not read by any TradeOS request path today -- it is a standalone versioned layer pending a future sync/import job (see packages/knowledge-engine/docs/authored-content/platform-runtime-bridge-plan.md).",
     ],
     importReadiness: {
       score: importReadinessScore,
@@ -302,7 +303,7 @@ function main(): void {
         prismaSchemaAlignmentPct: schemaAlignmentPct,
       },
       methodology:
-        "Unweighted average of five 0-100 sub-scores: (1) fraction of assemblies with every required narrative/array field populated, (2) fraction of dependency edges whose target id exists in this export, (3) fraction of each trade's ~100-assembly target already authored, (4) fraction of pricingHooks resolved to a real catalog id (0 today), (5) fraction of KnowledgeAssembly field-groups already supported by an existing Prisma column without new schema work (see docs/prisma-gap-analysis.md).",
+        "Unweighted average of five 0-100 sub-scores: (1) fraction of assemblies with every required narrative/array field populated, (2) fraction of dependency edges whose target id exists in this export, (3) fraction of each trade's ~100-assembly target already authored, (4) fraction of pricingHooks resolved to a real catalog id (0 today), (5) fraction of KnowledgeAssembly field-groups already supported by an existing Prisma column without new schema work (see packages/knowledge-engine/docs/authored-content/prisma-gap-analysis.md).",
       recommendation:
         importReadinessScore < 60
           ? "Not ready for automated/unattended import. Suitable today only as a reviewed, manually-curated reference catalog (e.g. for an estimator UI or an AI intake prompt), not as a direct write path into the Prisma-backed catalog."

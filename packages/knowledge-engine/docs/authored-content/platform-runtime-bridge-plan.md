@@ -19,7 +19,7 @@ two different ways:
    knowledge content's size/growth directly to every backend deploy, and
    bypasses the versioned export contract entirely (no `manifest.json`
    readiness gate, no stable snapshot to point a non-Node consumer at).
-2. **Read the generated `exports/platform/*.json` snapshot** — decoupled
+2. **Read the generated `packages/knowledge-engine/exports/authored-content/*.json` snapshot** — decoupled
    from the source TypeScript, versioned via
    `manifest.json.exportVersion`, cacheable, and usable by any future
    non-Node consumer (a static CDN-hosted copy, a separate content service,
@@ -27,7 +27,7 @@ two different ways:
 
 **Recommendation: use the generated export, not the direct import**, via a
 small `KnowledgeCatalogBridge` module in the backend. The whole point of
-running `pipelines/export/generate-platform-exports.ts` as a real pipeline
+running `packages/knowledge-engine/pipelines/authored-content-export/generate-platform-exports.ts` as a real pipeline
 step (rather than just importing the registry ad hoc) is to make the
 export — not the raw source module — the actual integration boundary. That
 keeps "what the runtime is allowed to depend on" identical to "what this
@@ -39,7 +39,7 @@ before trusting the content, the same way any other consumer would.
 
 A read-only backend module (not built yet) that:
 
-- Loads `exports/platform/manifest.json`, `trades.json`, `assemblies.json`,
+- Loads `packages/knowledge-engine/exports/authored-content/manifest.json`, `trades.json`, `assemblies.json`,
   `relationships.json`, and `cost-items.json` at startup (or on a cache-bust
   signal), refusing to serve content if `manifest.json`'s
   `platformExportContractVersion` doesn't match what the bridge expects.
@@ -65,7 +65,7 @@ A read-only backend module (not built yet) that:
   -> assemblyPricingHookReferences`). The bridge does **not** attempt to
   resolve a `refSlug` to a real `Material`/`LaborRate`/`Equipment`/
   `Subcontractor`/`CostItem` row automatically — see Phase C below for why
-  that's deliberately deferred, and `docs/platform-import-contract.md`'s
+  that's deliberately deferred, and `packages/knowledge-engine/docs/authored-content/platform-import-contract.md`'s
   validation-order section for why a human belongs in that loop.
 
 ## How estimation and proposals will eventually consume this
@@ -98,7 +98,7 @@ target shape clear:
   assemblies to an estimate) is the natural landing spot for a future
   "install this knowledge assembly into my org's catalog" action: copy
   `name`/`unitOfMeasure`/`description` directly (already-supported fields,
-  per `docs/prisma-gap-analysis.md`), set `isTemplate = true`, and leave
+  per `packages/knowledge-engine/docs/authored-content/prisma-gap-analysis.md`), set `isTemplate = true`, and leave
   `AssemblyItem` rows to be built manually against the `pricingHooks`
   checklist until Phase C exists.
 

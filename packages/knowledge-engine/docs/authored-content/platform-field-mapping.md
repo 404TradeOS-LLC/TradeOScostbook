@@ -1,13 +1,13 @@
 # Platform Field Mapping
 
-How each field in `exports/platform/*.json` traces back to
-`KnowledgeAssembly` (`app/modules/assemblies-database/knowledge/types.ts`)
-and forward into TradeOS. Read `docs/prisma-gap-analysis.md` first for the
+How each field in `packages/knowledge-engine/exports/authored-content/*.json` traces back to
+`KnowledgeAssembly` (`packages/knowledge-engine/authored-content/types.ts`)
+and forward into TradeOS. Read `packages/knowledge-engine/docs/authored-content/prisma-gap-analysis.md` first for the
 supported / JSON-metadata / new-schema / defer categorization this doc
-builds on; read `docs/platform-import-contract.md` for the ordering and
+builds on; read `packages/knowledge-engine/docs/authored-content/platform-import-contract.md` for the ordering and
 validation rules that consume these mappings.
 
-## `exports/platform/assemblies.json`
+## `packages/knowledge-engine/exports/authored-content/assemblies.json`
 
 One entry per `KnowledgeAssembly`, exported close to verbatim (every source
 field preserved) plus one derived field:
@@ -15,12 +15,12 @@ field preserved) plus one derived field:
 | Export field | Source | Notes |
 |---|---|---|
 | `tradeSlug` | derived from `trade` | kebab-case, e.g. `"Tree Service"` -> `"tree-service"`. Not present on the source record; added so a consumer can route/URL by trade without re-deriving the slug rule. |
-| everything else | `KnowledgeAssembly`, unchanged | See the per-field table in `docs/prisma-gap-analysis.md` for where each one maps today. |
+| everything else | `KnowledgeAssembly`, unchanged | See the per-field table in `packages/knowledge-engine/docs/authored-content/prisma-gap-analysis.md` for where each one maps today. |
 
 `id` is the stable identifier across every export file and across future
-imports — see "ID preservation" in `docs/platform-import-contract.md`.
+imports — see "ID preservation" in `packages/knowledge-engine/docs/authored-content/platform-import-contract.md`.
 
-## `exports/platform/cost-items.json`
+## `packages/knowledge-engine/exports/authored-content/cost-items.json`
 
 This is **not** a list of priced `CostItem` rows. It is the deduplicated
 catalog of every `pricingHooks` entry across every exported assembly — the
@@ -49,7 +49,7 @@ future importer uses to route the entry.
 | `referencedByAssemblyIds` | derived | Which assemblies reference it — the same edges also appear in `relationships.json -> assemblyPricingHookReferences`; kept here too so this file is independently useful without a join. |
 
 Forward path into TradeOS (none of this is built yet — see
-`docs/platform-runtime-bridge-plan.md`):
+`packages/knowledge-engine/docs/authored-content/platform-runtime-bridge-plan.md`):
 
 | `kind` | Eventual Prisma target |
 |---|---|
@@ -60,35 +60,35 @@ Forward path into TradeOS (none of this is built yet — see
 | `subcontractor` | `Subcontractor` |
 | `childAssembly` | `Assembly` (as a child, via `AssemblyItem.childAssemblyId`) |
 
-## `exports/platform/relationships.json`
+## `packages/knowledge-engine/exports/authored-content/relationships.json`
 
 | Export field | Source | Notes |
 |---|---|---|
 | `assemblyDependencies[].fromAssemblyId` / `.toAssemblyId` | `KnowledgeAssembly.dependencies` | One edge per dependency-array entry. |
-| `assemblyDependencies[].targetExistsInExport` | derived | `false` when `toAssemblyId` is a forward reference to an assembly not yet authored (tracked today in `docs/knowledge-engine/tree-service-progress.md`'s "Forward-reference IDs" section). As of this export, 4 of 25 edges are unresolved. |
+| `assemblyDependencies[].targetExistsInExport` | derived | `false` when `toAssemblyId` is a forward reference to an assembly not yet authored (tracked today in `packages/knowledge-engine/docs/authored-content/tree-service-progress.md`'s "Forward-reference IDs" section). As of this export, 4 of 25 edges are unresolved. |
 | `assemblyPricingHookReferences[]` | `KnowledgeAssembly.pricingHooks` | Same `(assemblyId, kind, refSlug)` edges as `cost-items.json`'s `referencedByAssemblyIds`, in graph-edge shape instead of grouped-by-hook shape. |
 | `unresolvedDependencyTargets` | derived | Deduplicated list of `toAssemblyId` values with no matching record in this export — a punch list for the next authoring batch, not an error. |
 
-## `exports/platform/trades.json`
+## `packages/knowledge-engine/exports/authored-content/trades.json`
 
 | Export field | Source | Notes |
 |---|---|---|
 | `trade` / `tradeSlug` | `KnowledgeAssembly.trade`, derived slug | |
-| `assemblyCount` / `targetAssemblyCount` / `completionPct` | derived (count vs. the ~100/trade target in `prompts/agent-costbook-architect.md`) | |
+| `assemblyCount` / `targetAssemblyCount` / `completionPct` | derived (count vs. the ~100/trade target in `packages/knowledge-engine/prompts/agents/agent-costbook-architect-typescript-authoring.md`) | |
 | `categories[].category` / `.subcategories` / `.assemblyCount` | `KnowledgeAssembly.category` / `.subcategory` | Grouped and deduplicated. |
 | `csiDivisions` | `KnowledgeAssembly.csiDivision` | Deduplicated, sorted; omits assemblies with no `csiDivision`. |
 
-## `exports/platform/manifest.json`
+## `packages/knowledge-engine/exports/authored-content/manifest.json`
 
-See `docs/platform-import-contract.md` for how to use `importReadiness` and
+See `packages/knowledge-engine/docs/authored-content/platform-import-contract.md` for how to use `importReadiness` and
 `knownLimitations` before attempting any import, and
-`docs/prisma-gap-analysis.md` for where the `prismaSchemaAlignmentPct`
+`packages/knowledge-engine/docs/authored-content/prisma-gap-analysis.md` for where the `prismaSchemaAlignmentPct`
 sub-score's 5-of-31 count comes from.
 
 ## Fields with no export representation at all
 
 Every `KnowledgeAssembly` field is exported somewhere (in `assemblies.json`
 if nowhere more specific). Nothing was dropped. What's genuinely missing is
-on the *target* side — see `docs/prisma-gap-analysis.md`'s "New Prisma
+on the *target* side — see `packages/knowledge-engine/docs/authored-content/prisma-gap-analysis.md`'s "New Prisma
 columns or tables" section for the seven field-groups that don't yet have
 anywhere real to land in `app/prisma/schema.prisma`.
