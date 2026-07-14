@@ -20,7 +20,7 @@ Every task report must include:
 - checks failed
 - checks blocked by environment
 - commit list
-- exact Git status
+- exact final `git status --short --branch`
 - upstream state
 - PR readiness
 - known limitations
@@ -29,6 +29,7 @@ Every task report must include:
 Always include:
 
 - whether scope stayed inside the allowed paths
+- whether explicit exclusions stayed untouched
 - whether any stop condition was encountered
 - whether final branch state is ready for review without extra documentation work
 

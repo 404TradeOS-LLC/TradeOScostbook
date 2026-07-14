@@ -16,10 +16,12 @@ Use one linked worktree for one backend task.
 Before editing:
 
 - verify path, branch, status, upstream, and worktree list
+- fetch origin before trusting the upstream comparison
 - confirm allowed backend paths
 - confirm forbidden paths that are out of scope for the task
 - load the relevant global docs and module docs
 - record the exact task scope and stop conditions
+- record explicit exclusions
 - identify documentation impact before code changes
 
 Required startup checks:
@@ -34,7 +36,7 @@ Required startup checks:
 
 Required completion checks:
 
-- report exact Git status
+- report exact final `git status --short --branch`
 - report commits created
 - report PR readiness
 - report whether required docs changed in the same branch

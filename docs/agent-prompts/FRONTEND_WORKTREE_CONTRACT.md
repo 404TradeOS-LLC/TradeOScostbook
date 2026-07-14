@@ -16,10 +16,12 @@ Use one linked worktree for one frontend task.
 Before editing:
 
 - verify path, branch, status, upstream, and worktree list
+- fetch origin before trusting the upstream comparison
 - confirm allowed frontend paths
 - confirm forbidden backend, schema, and migration paths
 - identify whether the change affects module docs, current state, API reference, RBAC, or lifecycle docs
 - record exact task scope and stop conditions
+- record explicit exclusions
 
 Required startup checks:
 
@@ -33,7 +35,7 @@ Required startup checks:
 
 Required completion checks:
 
-- report exact Git status
+- report exact final `git status --short --branch`
 - report commits created
 - report PR readiness
 - confirm required docs were updated with the same branch when implementation status changed

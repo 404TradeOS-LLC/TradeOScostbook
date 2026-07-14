@@ -20,7 +20,9 @@ Every agent must verify:
 - allowed paths
 - forbidden paths
 - task scope
+- explicit exclusions and no-scope-expansion rule
 - source-of-truth documents
+- documentation impact review
 - stop conditions
 
 Required rule:
@@ -32,8 +34,8 @@ Minimum startup commands:
 - `pwd`
 - `git branch --show-current`
 - `git status --short --branch`
-- `git rev-parse --abbrev-ref --symbolic-full-name @{upstream}`
 - `git fetch origin`
+- `git rev-parse --abbrev-ref --symbolic-full-name @{upstream}`
 - `git worktree list`
 
 Stop immediately if:
@@ -42,5 +44,6 @@ Stop immediately if:
 - the branch is wrong
 - the working tree is dirty when the task requires a clean start
 - the upstream branch is not the expected branch for the task
+- the allowed paths, forbidden paths, or explicit exclusions are unclear
 - the requested scope reaches forbidden paths
 - the source-of-truth documents needed for the task have not been identified

@@ -8,6 +8,24 @@ Documentation source of truth:
 - verify current implementation claims in `docs/CURRENT_STATE.md`
 - use `docs/agent-prompts/AGENT_STARTUP_CHECKLIST.md` before substantial work
 - use `docs/agent-prompts/AGENT_COMPLETION_CHECKLIST.md` before handoff
+- use `docs/REPOSITORY_GOVERNANCE.md` for protected-branch policy, worktree lifecycle, and PR-readiness expectations
+
+## Worktree discipline
+
+Before substantial work:
+
+- verify the exact worktree path, exact branch, clean working tree requirement, upstream branch, and active worktree list
+- confirm the allowed paths, forbidden paths, and explicit task scope before editing
+- review likely documentation impact before code or workflow changes
+
+Required rule:
+
+- do not interpret `continue` as permission to select another task or broaden scope
+
+Before handoff:
+
+- report the exact final `git status --short --branch`
+- report PR readiness and any remaining documentation work in the same branch
 
 ## Big picture
 

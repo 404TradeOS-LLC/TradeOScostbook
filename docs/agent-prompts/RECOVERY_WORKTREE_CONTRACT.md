@@ -20,9 +20,11 @@ Use them only to:
 Required checks:
 
 - verify exact path, branch, status, upstream, and worktree list
+- fetch origin before trusting the upstream comparison
 - define the narrow recovery scope and explicit stop conditions
+- define explicit exclusions so recovery work does not turn into feature work
 - do not broaden recovery work into feature delivery without a fresh task boundary
-- report exact Git status and PR readiness before handing the branch back
+- report exact final `git status --short --branch` and PR readiness before handing the branch back
 
 Policy:
 
