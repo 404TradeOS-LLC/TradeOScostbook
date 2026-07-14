@@ -68,6 +68,17 @@ Only two rate limiters exist in the whole backend: `authRateLimit` (signup/login
 **Fix:** Add a general per-user/org-keyed rate limiter applied globally after `requireAuth`, with a tighter limit specifically on `/pdf`, `/bulk-import`, and `/calculate` routes.
 
 ### H3. `trust proxy` is never configured, likely breaking both existing IP-based controls on Vercel
+
+**Status: Resolved** (verified against `main` as of `app/backend/server.ts:39`, current tip `cfe781d`)
+
+`main` now configures:
+```ts
+app.set("trust proxy", parseTrustProxy(process.env.TRUST_PROXY));
+```
+This addresses the specific gap described below — `req.ip` is no longer computed from the raw socket address unconditionally. This does **not** mean IP-based controls are now unconditionally safe: correctness still depends on the deployed `TRUST_PROXY` value actually matching the real reverse-proxy topology (hop count/trusted CIDR) in whatever environment this is deployed to. A misconfigured `TRUST_PROXY` value (too permissive or pointed at the wrong hop count) can reintroduce the same spoofing/collapsed-bucket risk described below. Re-verify the deployed value against the actual proxy chain before relying on this for the IP allowlist or rate limiting.
+
+**Original finding (historical context, preserved as written 2026-07-03):**
+
 **Files:** `app/backend/server.ts` (missing setting, confirmed absent repo-wide via grep); `app/backend/middleware/authRateLimit.ts`; `app/backend/middleware/platformProvisioningIpAllowlist.ts`; `app/vercel.json` (`"framework": "express"`, confirming Vercel deployment)
 
 Express's `req.ip` defaults to the raw socket address unless `app.set("trust proxy", ...)` is configured to read `X-Forwarded-For` from a trusted hop. This app is deployed on Vercel (per `vercel.json`), which sits its own proxy in front of every request — meaning `req.ip` as currently computed will not reflect real client IPs in production. Both existing IP-keyed controls depend on this being correct:
@@ -218,7 +229,7 @@ These were specifically checked against real exploit classes and found to be cor
 ## Recommended Fixes — Priority Order
 
 1. **C1** — Hard-fail startup on `AUTH_ALLOW_HEADER_ORG_ID=true` in production; consider removing the fallback from deployed builds entirely.
-2. **H3** — Set `trust proxy` correctly for the Vercel deployment; this silently affects two existing controls (auth rate limit, provisioning IP allowlist), so it's a multiplier fix.
+2. **H3** — *(Resolved — see finding above)* Set `trust proxy` correctly for the Vercel deployment; this silently affects two existing controls (auth rate limit, provisioning IP allowlist), so it's a multiplier fix.
 3. **H2 / M6** — Add a general per-user/org rate limiter after `requireAuth`, with tighter limits on `/pdf`, `/bulk-import`, `/calculate`.
 4. **H1** — Fix the `orgId` spread order in both bulk-import call sites; add real per-row zod schemas.
 5. **H4** — Set explicit `cookieOptions` on the Supabase server client (or otherwise stop treating the session token as httpOnly in comments/docs when it isn't); update the stale comment in the proxy route.
