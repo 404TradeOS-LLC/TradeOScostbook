@@ -59,21 +59,20 @@ Explicitly out of scope:
 - `cd app && npm test`: passed, 53 suites / 358 tests
 - `cd app && npm run lint`: passed
 - `cd app && npm run build`: passed
+- `cd app && npm run test:integration`: passed, 1 suite / 20 live RLS tests
 - `git diff --check`: passed before handoff refresh
 
 ## Blocked Validation
 
-- `cd app && npm run test:integration`: blocked by Docker daemon/socket availability
-- exact error: `failed to connect to the docker API at unix:///Users/showb/.docker/run/docker.sock; check if the path is correct and if the daemon is running: dial unix /Users/showb/.docker/run/docker.sock: connect: no such file or directory`
+- none
 
 ## Known Issues or Blockers
 
 - branch `feature/ai-estimator-engine` has no upstream configured
 - changes are not pushed
-- live RLS/integration verification must be rerun after Docker is available
 - structured apply now has signed per-line draft provenance but still does not persist a full draft-run record or store the full contractor prompt
 - broader manual estimate line-item sort-order races remain outside this sprint
 
 ## Next Exact Task
 
-Start Docker, rerun `cd app && npm run test:integration`, then inspect local commits and open a human review PR when ready. If pushing from this worktree, use `git push -u origin feature/ai-estimator-engine`.
+Inspect local commits and open a human review PR when ready. If pushing from this worktree, use `git push -u origin feature/ai-estimator-engine`.
