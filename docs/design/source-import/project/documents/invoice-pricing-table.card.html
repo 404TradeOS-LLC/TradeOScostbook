@@ -1,0 +1,33 @@
+<!-- @dsCard group="Documents" viewport="700x480" name="System 2 — invoice + pricing table" subtitle="Frame-owned table: tabular numerals, hairline rows, one bold total" -->
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8">
+<link rel="stylesheet" href="frame.css">
+<style>
+  body { margin:0; background:#eee; padding:20px; font-family: ui-sans-serif, system-ui, sans-serif; }
+  .card { max-width:640px; margin:0 auto; border-radius:8px; overflow:hidden; box-shadow:0 4px 20px rgba(0,0,0,0.1); }
+</style></head>
+<body>
+  <div class="card doc-frame" style="--doc-primary:#2f6b46;">
+    <div class="doc-header">
+      <div class="doc-logo-sm"><span class="mark"></span>Wabash Roofing Co.</div>
+      <span class="doc-doc-id">Invoice #WR-2044</span>
+    </div>
+    <div class="doc-section" style="border-bottom:none">
+      <table class="doc-table">
+        <thead><tr><th>Item</th><th class="num">Qty</th><th class="num">Rate</th><th class="num">Amount</th></tr></thead>
+        <tbody>
+          <tr><td><div class="doc-item-name">Tear-off &amp; disposal</div><div class="doc-item-desc">30-year architectural shingle, full tear-off</div></td><td class="num">28 sq</td><td class="num">$85</td><td class="num">$2,380</td></tr>
+          <tr><td><div class="doc-item-name">Materials — shingles &amp; underlayment</div></td><td class="num">1</td><td class="num">$6,140</td><td class="num">$6,140</td></tr>
+          <tr><td><div class="doc-item-name">Labor — crew of 4</div></td><td class="num">3 days</td><td class="num">$1,200</td><td class="num">$3,600</td></tr>
+          <tr><td><div class="doc-item-name">Permit &amp; disposal fee</div></td><td class="num">1</td><td class="num">$340</td><td class="num">$340</td></tr>
+        </tbody>
+        <tfoot>
+          <tr><td colspan="3" style="font-weight:400;color:var(--doc-muted);font-size:13px">Subtotal</td><td class="num" style="font-weight:400;color:var(--doc-muted);font-size:13px">$12,460</td></tr>
+          <tr class="doc-total-row"><td colspan="3">Total due</td><td class="num" style="color:var(--doc-primary)">$12,460</td></tr>
+        </tfoot>
+      </table>
+      <div style="margin-top:20px; display:flex; justify-content:flex-end;"><span class="doc-cta">Pay invoice →</span></div>
+    </div>
+    <div class="doc-footer"><span>Wabash Roofing Co. · License #IN-4471</span><span class="doc-powered">Powered by TradeOS</span></div>
+  </div>
+</body></html>

@@ -1,0 +1,17 @@
+<svg width="640" height="320" viewBox="0 0 640 320" xmlns="http://www.w3.org/2000/svg" role="img">
+<title>TradeOS — Equipment Nameplate (monochrome, one-color)</title>
+
+<g fill="#B87333">
+<polygon points="16,0 624,0 640,16 640,304 624,320 16,320 0,304 0,16" fill="none" stroke="#B87333" stroke-width="2"></polygon>
+<rect x="24" y="24" width="592" height="272" fill="none" stroke="#B87333" stroke-width="1"></rect>
+<circle cx="40" cy="40" r="10" fill="none" stroke="#B87333" stroke-width="2"></circle>
+<circle cx="600" cy="40" r="10" fill="none" stroke="#B87333" stroke-width="2"></circle>
+<circle cx="40" cy="280" r="10" fill="none" stroke="#B87333" stroke-width="2"></circle>
+<circle cx="600" cy="280" r="10" fill="none" stroke="#B87333" stroke-width="2"></circle>
+<text x="320" y="118" text-anchor="middle" font-family="&#39;Roboto Mono&#39;,monospace" font-size="12" letter-spacing="6">404 · INDUSTRIAL IDENTIFICATION</text>
+<text x="245" y="188" text-anchor="middle" font-family="&#39;Space Grotesk&#39;,sans-serif" font-weight="700" font-size="62" letter-spacing="2">TRADE</text>
+<line x1="452" y1="150" x2="452" y2="196" stroke="#B87333" stroke-width="2"></line>
+<text x="520" y="188" text-anchor="middle" font-family="&#39;Space Grotesk&#39;,sans-serif" font-weight="700" font-size="48" letter-spacing="2">OS</text>
+<text x="320" y="220" text-anchor="middle" font-family="&#39;Roboto Mono&#39;,monospace" font-size="11" letter-spacing="4">CONSTRUCTION INTELLIGENCE PLATFORM</text>
+</g>
+</svg>

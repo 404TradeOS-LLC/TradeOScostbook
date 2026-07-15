@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>TradeOS Nameplate — Production Refinement Pass</title>
+<meta name="design_doc_mode" content="canvas">
+<link rel="stylesheet" href="../styles.css">
+<style>
+  * { box-sizing: border-box; }
+  body { margin:0; background:#0a0a0a; }
+  .frame { position:absolute; }
+  .label { color:#888; font-family:var(--font-mono); font-size:11px; letter-spacing:0.1em; text-transform:uppercase; margin-bottom:10px; display:flex; align-items:center; gap:8px; }
+  .badge-id { background:var(--color-copper); color:#000; font-weight:700; border-radius:3px; padding:2px 8px; font-size:10px; }
+  .note { color:#666; font-family:var(--font-sans); font-size:11.5px; max-width:520px; margin-top:9px; line-height:1.5; }
+  .plate-box { border-radius:6px; overflow:hidden; box-shadow:0 20px 50px rgba(0,0,0,0.5); }
+</style>
+</head>
+<body>
+
+<div class="frame" style="left:40px; top:40px;">
+  <div class="label"><span class="badge-id">R1</span>Baseline — wide format, 3:1 (current approved)</div>
+  <div class="plate-box"><img src="../assets/logos/v2/tradeos-nameplate-primary.svg" width="520"></div>
+  <div class="note">Reference point, unchanged, for comparison against every refinement below.</div>
+</div>
+
+<div class="frame" style="left:600px; top:40px;">
+  <div class="label"><span class="badge-id">R2</span>Tighter chamfer, thinner rivets — refined proportions</div>
+  <div class="plate-box">
+<svg width="520" height="260" viewBox="0 0 640 320" xmlns="http://www.w3.org/2000/svg">
+<defs>
+  <linearGradient id="p2" x1="0" y1="0" x2="0.3" y2="1"><stop offset="0" stop-color="#5a5d5f"/><stop offset="0.4" stop-color="#2c2e30"/><stop offset="0.75" stop-color="#161717"/><stop offset="1" stop-color="#0a0a0a"/></linearGradient>
+  <linearGradient id="s2" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fcfaf5"/><stop offset="0.4" stop-color="#d8cfba"/><stop offset="0.75" stop-color="#a49685"/><stop offset="1" stop-color="#756a5a"/></linearGradient>
+  <linearGradient id="c2" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#E8C99A"/><stop offset="0.55" stop-color="#B87333"/><stop offset="1" stop-color="#8A5620"/></linearGradient>
+  <radialGradient id="r2" cx="0.35" cy="0.3" r="0.75"><stop offset="0" stop-color="#f2f2f2"/><stop offset="0.42" stop-color="#9c9c9c"/><stop offset="0.78" stop-color="#4a4a4a"/><stop offset="1" stop-color="#222"/></radialGradient>
+</defs>
+<polygon points="10,0 630,0 640,10 640,310 630,320 10,320 0,310 0,10" fill="url(#p2)"/>
+<rect x="20" y="20" width="600" height="280" fill="none" stroke="rgba(255,255,255,0.13)" stroke-width="1"/>
+<circle cx="34" cy="34" r="7" fill="url(#r2)"/><circle cx="606" cy="34" r="7" fill="url(#r2)"/>
+<circle cx="34" cy="286" r="7" fill="url(#r2)"/><circle cx="606" cy="286" r="7" fill="url(#r2)"/>
+<text x="245" y="185" text-anchor="middle" font-family="'Space Grotesk',sans-serif" font-weight="700" font-size="60" letter-spacing="2" fill="url(#s2)">TRADE</text>
+<line x1="452" y1="150" x2="452" y2="192" stroke="#B87333" stroke-width="1.5"/>
+<text x="520" y="185" text-anchor="middle" font-family="'Space Grotesk',sans-serif" font-weight="700" font-size="46" letter-spacing="2" fill="url(#c2)">OS</text>
+<text x="320" y="216" text-anchor="middle" font-family="'Roboto Mono',monospace" font-size="10" letter-spacing="4" fill="#948a79">CONSTRUCTION INTELLIGENCE PLATFORM</text>
+</svg>
+  </div>
+  <div class="note">Rivets reduced 7px → smaller, quieter presence; chamfer tightened to 10px for a crisper machined edge; tick-rulers removed for a cleaner read at small sizes (app icon, favicon-adjacent contexts).</div>
+</div>
+
+<div class="frame" style="left:1160px; top:40px;">
+  <div class="label"><span class="badge-id">R3</span>Deeper engraving — heavier bevel &amp; drop</div>
+  <div class="plate-box">
+<svg width="520" height="260" viewBox="0 0 640 320" xmlns="http://www.w3.org/2000/svg">
+<defs>
+  <linearGradient id="p3" x1="0" y1="0" x2="0.3" y2="1"><stop offset="0" stop-color="#4c4e50"/><stop offset="0.4" stop-color="#222325"/><stop offset="0.75" stop-color="#101111"/><stop offset="1" stop-color="#050505"/></linearGradient>
+  <linearGradient id="s3" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fefcf8"/><stop offset="0.35" stop-color="#d8cfba"/><stop offset="0.7" stop-color="#8f8272"/><stop offset="1" stop-color="#5a5044"/></linearGradient>
+  <linearGradient id="c3" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f0d4a8"/><stop offset="0.5" stop-color="#B87333"/><stop offset="1" stop-color="#6e3f16"/></linearGradient>
+  <filter id="deep" x="-30%" y="-30%" width="160%" height="160%"><feDropShadow dx="0" dy="6" stdDeviation="0" flood-color="#000" flood-opacity="0.9"/><feDropShadow dx="0" dy="-1" stdDeviation="0" flood-color="#fff" flood-opacity="0.35"/></filter>
+</defs>
+<polygon points="16,0 624,0 640,16 640,304 624,320 16,320 0,304 0,16" fill="url(#p3)"/>
+<rect x="24" y="24" width="592" height="272" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
+<text x="245" y="188" text-anchor="middle" font-family="'Space Grotesk',sans-serif" font-weight="700" font-size="62" letter-spacing="2" fill="url(#s3)" filter="url(#deep)">TRADE</text>
+<line x1="452" y1="150" x2="452" y2="196" stroke="#B87333" stroke-width="2"/>
+<text x="520" y="188" text-anchor="middle" font-family="'Space Grotesk',sans-serif" font-weight="700" font-size="48" letter-spacing="2" fill="url(#c3)" filter="url(#deep)">OS</text>
+</svg>
+  </div>
+  <div class="note">Stacked drop-shadow (dark below, light rim above) reads as a deeper cut into the plate — more "recessed into metal," less "printed on metal." Best at large/hero scale where the depth registers.</div>
+</div>
+
+<div class="frame" style="left:40px; top:420px;">
+  <div class="label"><span class="badge-id">R4</span>Compressed square format — for app icon / avatar contexts</div>
+  <div class="plate-box">
+<svg width="260" height="260" viewBox="0 0 320 320" xmlns="http://www.w3.org/2000/svg">
+<defs>
+  <linearGradient id="p4" x1="0" y1="0" x2="0.3" y2="1"><stop offset="0" stop-color="#5a5d5f"/><stop offset="0.4" stop-color="#2c2e30"/><stop offset="1" stop-color="#0a0a0a"/></linearGradient>
+  <linearGradient id="c4" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#E8C99A"/><stop offset="0.55" stop-color="#B87333"/><stop offset="1" stop-color="#8A5620"/></linearGradient>
+</defs>
+<polygon points="14,0 306,0 320,14 320,306 306,320 14,320 0,306 0,14" fill="url(#p4)"/>
+<rect x="18" y="18" width="284" height="284" fill="none" stroke="rgba(255,255,255,0.13)" stroke-width="1"/>
+<circle cx="30" cy="30" r="6" fill="#8a8a8a"/><circle cx="290" cy="30" r="6" fill="#8a8a8a"/><circle cx="30" cy="290" r="6" fill="#8a8a8a"/><circle cx="290" cy="290" r="6" fill="#8a8a8a"/>
+<text x="160" y="150" text-anchor="middle" font-family="'Roboto Mono',monospace" font-size="16" letter-spacing="3" fill="#cfc6b4">404</text>
+<text x="160" y="220" text-anchor="middle" font-family="'Space Grotesk',sans-serif" font-weight="700" font-size="72" fill="url(#c4)">OS</text>
+</svg>
+  </div>
+  <div class="note">A distinct square construction — not the wide nameplate squeezed into a box. "404" mono + copper "OS" stacked, same fasteners/chamfer language, purpose-built for icon/favicon/avatar slots where the full wordmark can't fit.</div>
+</div>
+
+<div class="frame" style="left:400px; top:420px;">
+  <div class="label"><span class="badge-id">R5</span>Single-line compact lockup — for nav bars &amp; headers</div>
+  <div class="plate-box" style="background:var(--color-forge-black); padding:16px 20px; display:inline-flex;">
+<svg width="200" height="48" viewBox="0 0 400 96" xmlns="http://www.w3.org/2000/svg">
+<defs><linearGradient id="s5" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fcfaf5"/><stop offset="0.5" stop-color="#c9bfab"/><stop offset="1" stop-color="#8f8275"/></linearGradient>
+<linearGradient id="c5" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#E8C99A"/><stop offset="0.55" stop-color="#B87333"/><stop offset="1" stop-color="#8A5620"/></linearGradient></defs>
+<rect x="4" y="30" width="10" height="36" rx="1" fill="url(#s5)"/>
+<text x="26" y="60" font-family="'Space Grotesk',sans-serif" font-weight="700" font-size="46" letter-spacing="1" fill="url(#s5)">TRADE<tspan fill="url(#c5)">OS</tspan></text>
+</svg>
+  </div>
+  <div class="note">No plate/rivets at this scale — a thin steel "tab" accent on the left stands in for the fastener language, keeping nav bars uncluttered while still nodding to the fabricated-metal identity.</div>
+</div>
+
+<div class="frame" style="left:40px; top:760px;">
+  <div class="label"><span class="badge-id">R6</span>Vertical/stacked format — for narrow surfaces (business card, hang tag)</div>
+  <div class="plate-box">
+<svg width="220" height="320" viewBox="0 0 260 380" xmlns="http://www.w3.org/2000/svg">
+<defs><linearGradient id="p6" x1="0" y1="0" x2="0.3" y2="1"><stop offset="0" stop-color="#5a5d5f"/><stop offset="0.4" stop-color="#2c2e30"/><stop offset="1" stop-color="#0a0a0a"/></linearGradient>
+<linearGradient id="s6" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fcfaf5"/><stop offset="0.5" stop-color="#c9bfab"/><stop offset="1" stop-color="#8f8275"/></linearGradient>
+<linearGradient id="c6" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#E8C99A"/><stop offset="0.55" stop-color="#B87333"/><stop offset="1" stop-color="#8A5620"/></linearGradient></defs>
+<polygon points="12,0 248,0 260,12 260,368 248,380 12,380 0,368 0,12" fill="url(#p6)"/>
+<rect x="16" y="16" width="228" height="348" fill="none" stroke="rgba(255,255,255,0.13)" stroke-width="1"/>
+<circle cx="26" cy="26" r="5" fill="#8a8a8a"/><circle cx="234" cy="26" r="5" fill="#8a8a8a"/><circle cx="26" cy="354" r="5" fill="#8a8a8a"/><circle cx="234" cy="354" r="5" fill="#8a8a8a"/>
+<text x="130" y="175" text-anchor="middle" font-family="'Space Grotesk',sans-serif" font-weight="700" font-size="42" fill="url(#s6)">TRADE</text>
+<line x1="90" y1="200" x2="170" y2="200" stroke="#B87333" stroke-width="1.5"/>
+<text x="130" y="238" text-anchor="middle" font-family="'Space Grotesk',sans-serif" font-weight="700" font-size="42" fill="url(#c6)">OS</text>
+</svg>
+  </div>
+  <div class="note">Divider rotates from vertical to horizontal for the stacked lockup — same construction logic, adapted rather than shrunk, so it never looks like an afterthought crop of the horizontal mark.</div>
+</div>
+
+<div class="frame" style="left:400px; top:760px;">
+  <div class="label"><span class="badge-id">R7</span>Low-contrast field variant — for on-photo / on-fabric use</div>
+  <div class="plate-box" style="background:#3a3a3a; padding:30px; display:flex; align-items:center; justify-content:center;">
+<svg width="300" height="90" viewBox="0 0 400 96" xmlns="http://www.w3.org/2000/svg">
+<text x="0" y="60" font-family="'Space Grotesk',sans-serif" font-weight="700" font-size="46" letter-spacing="1" fill="#e9e4da" opacity="0.92">TRADE<tspan fill="#B87333">OS</tspan></text>
+</svg>
+  </div>
+  <div class="note">Flat, no plate, no bevel &#8212; for contexts where the metal treatment would fight the substrate (screen-printed on dark fabric, debossed on leather, embroidered patches at small scale where gradients don't survive).</div>
+</div>
+
+<div class="frame" style="left:940px; top:760px;">
+  <div class="label"><span class="badge-id">R8</span>Extreme small-size legibility test (32px height)</div>
+  <div class="plate-box" style="background:var(--color-forge-black); padding:20px; display:flex; align-items:center; gap:20px;">
+    <img src="../assets/logos/v2/tradeos-favicon-v2.svg" width="32" height="32">
+    <img src="../assets/logos/v2/tradeos-favicon-v2.svg" width="20" height="20">
+    <img src="../assets/logos/v2/tradeos-favicon-v2.svg" width="16" height="16">
+  </div>
+  <div class="note">The "OS" monogram favicon holds up down to 16px &#8212; the threshold for a browser tab icon. Confirms the mark's minimum viable size before the full nameplate/wordmark is required instead.</div>
+</div>
+
+</body>
+</html>

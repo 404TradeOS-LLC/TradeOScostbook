@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>TradeOS Industrial Design Language — Specimen Sheet</title>
+<meta name="design_doc_mode" content="canvas">
+<link rel="stylesheet" href="../styles.css">
+<style>
+  * { box-sizing: border-box; }
+  body { margin:0; background:#0a0a0a; }
+  .frame { position:absolute; width:380px; }
+  .label { color:#888; font-family:var(--font-mono); font-size:11px; letter-spacing:0.1em; text-transform:uppercase; margin-bottom:10px; display:flex; align-items:center; gap:8px; }
+  .badge-id { background:var(--color-copper); color:#000; font-weight:700; border-radius:3px; padding:2px 8px; font-size:10px; }
+  .note { color:#666; font-family:var(--font-sans); font-size:11.5px; margin-top:9px; line-height:1.5; }
+  .swatch { width:100%; height:210px; border-radius:6px; overflow:hidden; position:relative; background:var(--color-forge-dark); box-shadow:0 12px 30px rgba(0,0,0,0.4); display:flex; align-items:center; justify-content:center; }
+
+  /* Chamfer standard */
+  .g1-box { width:180px; height:110px; background: linear-gradient(160deg,#46484a,#101112); clip-path: polygon(14px 0, calc(100% - 14px) 0, 100% 14px, 100% calc(100% - 14px), calc(100% - 14px) 100%, 14px 100%, 0 calc(100% - 14px), 0 14px); position:relative; }
+  .g1-dim { position:absolute; top:-4px; left:0; width:14px; height:1px; background:var(--color-copper); }
+  .g1-label { position:absolute; top:-20px; left:0; font-family:var(--font-mono); font-size:9px; color:var(--color-copper); }
+
+  /* Bolt pattern */
+  .g2-box { width:180px; height:110px; background: linear-gradient(160deg,#46484a,#101112); position:relative; }
+  .g2-bolt { position:absolute; width:16px; height:16px; border-radius:50%; background: radial-gradient(circle at 33% 28%, #f2f2f2, #9c9c9c 42%, #4a4a4a 78%, #222 100%); }
+  .g2-guide { position:absolute; border:1px dashed rgba(184,115,51,0.4); }
+
+  /* Line weights */
+  .g3-row { display:flex; flex-direction:column; gap:14px; width:100%; padding:0 20px; }
+  .g3-line { display:flex; align-items:center; gap:10px; }
+  .g3-line .l { flex:1; background:#fff; }
+  .g3-line .cap { font-family:var(--font-mono); font-size:9px; color:#999; width:130px; }
+
+  /* Tick ruler rhythm */
+  .g4-ruler { display:flex; align-items:flex-end; gap:6px; }
+  .g4-ruler span { width:1px; background: rgba(184,115,51,0.5); height:8px; }
+  .g4-ruler span.major { background: var(--color-copper); height:14px; }
+
+  /* Serial convention */
+  .g5-plate { width:90%; padding:12px 16px; background: linear-gradient(160deg,#46484a,#101112); border-radius:4px; display:flex; justify-content:space-between; font-family:var(--font-mono); font-size:9px; color:#786c5c; }
+
+  /* Spacing inset */
+  .g6-box { width:180px; height:130px; background: linear-gradient(160deg,#46484a,#101112); position:relative; }
+  .g6-inset { position:absolute; inset:14px; border:1px dashed rgba(184,115,51,0.5); }
+  .g6-label { position:absolute; top:4px; left:16px; font-family:var(--font-mono); font-size:8px; color:var(--color-copper); }
+</style>
+</head>
+<body>
+
+<div class="frame" style="left:40px; top:40px;">
+  <div class="label"><span class="badge-id">G1</span>Chamfer standard</div>
+  <div class="swatch"><div class="g1-box"><div class="g1-dim"></div><div class="g1-label">2.5% of edge, 10&#8211;20px</div></div></div>
+  <div class="note">Diagonal cut, never a radius. Reads as machined, not molded.</div>
+</div>
+
+<div class="frame" style="left:440px; top:40px;">
+  <div class="label"><span class="badge-id">G2</span>Bolt pattern</div>
+  <div class="swatch">
+    <div class="g2-box">
+      <div class="g2-bolt" style="top:10px; left:10px;"></div>
+      <div class="g2-bolt" style="top:10px; right:10px;"></div>
+      <div class="g2-bolt" style="bottom:10px; left:10px;"></div>
+      <div class="g2-bolt" style="bottom:10px; right:10px;"></div>
+      <div class="g2-guide" style="top:2px; left:2px; width:24px; height:24px;"></div>
+    </div>
+  </div>
+  <div class="note">4 corners, ~6% inset from edge, diameter ~3.4% of plate height. Cross-slot at 45&#176;/135&#176;.</div>
+</div>
+
+<div class="frame" style="left:840px; top:40px;">
+  <div class="label"><span class="badge-id">G3</span>Line weight scale</div>
+  <div class="swatch">
+    <div class="g3-row">
+      <div class="g3-line"><div class="l" style="height:1px;"></div><span class="cap">Hairline &#8212; 1px</span></div>
+      <div class="g3-line"><div class="l" style="height:1.5px;"></div><span class="cap">Emphasis &#8212; 1.5px</span></div>
+      <div class="g3-line"><div class="l" style="height:2px;"></div><span class="cap">Bold structural &#8212; 2px</span></div>
+    </div>
+  </div>
+  <div class="note">Three weights only. Never above 2px &#8212; that reads as UI-toolkit, not engineered.</div>
+</div>
+
+<div class="frame" style="left:40px; top:330px;">
+  <div class="label"><span class="badge-id">G4</span>Tick-ruler rhythm</div>
+  <div class="swatch">
+    <div class="g4-ruler">
+      <span class="major"></span><span></span><span></span><span></span><span></span>
+      <span class="major"></span><span></span><span></span><span></span><span></span>
+      <span class="major"></span><span></span><span></span><span></span><span></span>
+      <span class="major"></span>
+    </div>
+  </div>
+  <div class="note">Major tick every 5th interval; minor ticks at ~35% opacity of major. Never irregular spacing.</div>
+</div>
+
+<div class="frame" style="left:440px; top:330px;">
+  <div class="label"><span class="badge-id">G5</span>Serial &amp; model convention</div>
+  <div class="swatch"><div class="g5-plate"><span>MODEL TOS-01 &#183; SER. 404-0001</span><span>FABRICATED &#183; TERRE HAUTE, IN</span></div></div>
+  <div class="note">Fixed format, bottom placement always: identity left, origin/context right.</div>
+</div>
+
+<div class="frame" style="left:840px; top:330px;">
+  <div class="label"><span class="badge-id">G6</span>Spacing inset (safe zone)</div>
+  <div class="swatch"><div class="g6-box"><div class="g6-inset"><div class="g6-label">~8% inset</div></div></div></div>
+  <div class="note">Content safe-zone from the chamfer edge. Bolts sit at the outer boundary of this zone, not centered within it.</div>
+</div>
+
+</body>
+</html>

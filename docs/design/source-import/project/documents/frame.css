@@ -1,0 +1,111 @@
+/* ── TradeOS Document Frame (System 2 — white-label) ──
+   Layout, spacing, typography hierarchy, table structure, print rules.
+   NEVER contractor-editable. Skin is injected via --doc-* custom properties
+   only — swapping them must never break layout, contrast, or hierarchy. */
+
+.doc-frame {
+  --doc-primary: #2f6b46;      /* contractor's brand color — default neutral until set */
+  --doc-ink: #1c1c1c;
+  --doc-muted: #6b6b6b;
+  --doc-line: #e2e2e2;
+  --doc-bg: #ffffff;
+  --doc-cover-bg: #16241b;     /* dark neutral cover backdrop, tinted by --doc-primary via overlay */
+  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  color: var(--doc-ink);
+  background: var(--doc-bg);
+}
+
+.doc-frame * { box-sizing: border-box; }
+
+/* ── Cover page ── */
+.doc-cover {
+  position: relative;
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 40px;
+  background: var(--doc-cover-bg);
+  overflow: hidden;
+}
+.doc-cover::before {
+  content: "";
+  position: absolute; inset: 0;
+  background: linear-gradient(180deg, rgba(0,0,0,0.15), rgba(0,0,0,0.55));
+}
+.doc-cover .doc-accent {
+  position: absolute; top: 0; left: 0; width: 6px; height: 100%;
+  background: var(--doc-primary);
+}
+.doc-cover .doc-logo {
+  position: relative; z-index: 2;
+  display: flex; align-items: center; gap: 10px;
+  color: #fff; font-size: 22px; font-weight: 700;
+  margin-bottom: auto;
+}
+.doc-cover .doc-logo .mark {
+  width: 40px; height: 40px; border-radius: 8px; background: var(--doc-primary);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 15px; font-weight: 700; color: #fff; flex-shrink: 0;
+}
+.doc-cover .doc-title-block { position: relative; z-index: 2; }
+.doc-cover .doc-doctype {
+  font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--doc-primary); font-weight: 600; margin-bottom: 8px;
+}
+.doc-cover h1 { color: #fff; font-size: 30px; font-weight: 600; margin: 0 0 6px; line-height: 1.15; }
+.doc-cover .doc-meta { color: rgba(255,255,255,0.75); font-size: 13px; display: flex; gap: 16px; margin-top: 14px; }
+
+/* ── Header band (recurring interior pages) ── */
+.doc-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 32px; border-bottom: 1px solid var(--doc-line);
+}
+.doc-header .doc-logo-sm { display: flex; align-items: center; gap: 8px; font-weight: 700; font-size: 14px; }
+.doc-header .doc-logo-sm .mark { width: 22px; height: 22px; border-radius: 5px; background: var(--doc-primary); }
+.doc-header .doc-doc-id { font-size: 11px; color: var(--doc-muted); }
+
+/* ── Footer band ── */
+.doc-footer {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 32px; border-top: 1px solid var(--doc-line);
+  font-size: 11px; color: var(--doc-muted);
+}
+.doc-footer .doc-powered { opacity: 0.7; }
+
+/* ── Section rhythm ── */
+.doc-section { padding: 28px 32px; border-bottom: 1px solid var(--doc-line); }
+.doc-section h2 { font-size: 18px; font-weight: 600; margin: 0 0 12px; }
+.doc-section p { font-size: 14px; line-height: 1.6; color: var(--doc-muted); margin: 0; }
+
+/* ── Pricing table (Frame-owned, used across Estimate/Invoice/Proposal/Change Order) ── */
+.doc-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.doc-table thead th {
+  text-align: left; font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em;
+  color: var(--doc-muted); font-weight: 600; padding: 0 0 10px; border-bottom: 2px solid var(--doc-ink);
+}
+.doc-table thead th.num { text-align: right; }
+.doc-table tbody td { padding: 12px 0; border-bottom: 1px solid var(--doc-line); vertical-align: top; }
+.doc-table tbody td.num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.doc-table tbody tr:last-child td { border-bottom: none; }
+.doc-table tfoot td { padding-top: 14px; font-weight: 600; font-size: 15px; }
+.doc-table tfoot td.num { text-align: right; font-variant-numeric: tabular-nums; }
+.doc-table .doc-item-name { font-weight: 500; }
+.doc-table .doc-item-desc { font-size: 12px; color: var(--doc-muted); margin-top: 2px; }
+.doc-total-row td { border-top: 2px solid var(--doc-ink); padding-top: 14px; }
+
+/* ── Trust signal row ── */
+.doc-trust { display: flex; flex-wrap: wrap; gap: 8px; }
+.doc-trust .doc-badge {
+  font-size: 11px; padding: 4px 10px; border-radius: 999px;
+  border: 1px solid var(--doc-line); color: var(--doc-muted);
+}
+
+/* ── Signature block ── */
+.doc-signature { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; padding: 28px 32px; }
+.doc-sig-box { border-top: 1.5px solid var(--doc-ink); padding-top: 8px; }
+.doc-sig-box .doc-sig-label { font-size: 11px; color: var(--doc-muted); text-transform: uppercase; letter-spacing: 0.06em; }
+.doc-sig-box .doc-sig-line { height: 40px; }
+
+/* ── Buttons (client-facing digital actions) ── */
+.doc-cta { display: inline-flex; align-items: center; gap: 6px; background: var(--doc-primary); color: #fff; font-size: 13px; font-weight: 600; padding: 9px 18px; border-radius: 8px; }

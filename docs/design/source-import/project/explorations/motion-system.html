@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>TradeOS Motion System — Splash, Boot, Loading, Reveal</title>
+<meta name="design_doc_mode" content="canvas">
+<link rel="stylesheet" href="../styles.css">
+<style>
+  * { box-sizing: border-box; }
+  body { margin:0; background:#0a0a0a; }
+  .frame { position:absolute; width:640px; }
+  .label { color:#888; font-family:var(--font-mono); font-size:11px; letter-spacing:0.1em; text-transform:uppercase; margin-bottom:10px; display:flex; align-items:center; gap:8px; }
+  .badge-id { background:var(--color-copper); color:#000; font-weight:700; border-radius:3px; padding:2px 8px; font-size:10px; }
+  .note { color:#666; font-family:var(--font-sans); font-size:12px; max-width:640px; margin-top:10px; line-height:1.55; }
+  .stage { width:100%; height:340px; border-radius:6px; overflow:hidden; position:relative; background:#0a0a0a; box-shadow:0 20px 50px rgba(0,0,0,0.5); }
+
+  /* ═════ M1 — Boot / splash sequence: laser cut reveal + mechanical clunk ═════ */
+  .m1-plate { position:absolute; inset:0;
+    background: linear-gradient(160deg, #46484a 0%, #24262a 45%, #101112 100%);
+  }
+  .m1-plate::before { content:""; position:absolute; inset:0;
+    background-image: repeating-linear-gradient(89deg, rgba(255,255,255,0.045) 0 1px, transparent 1px 2px);
+    mix-blend-mode: overlay;
+  }
+  .m1-beam { position:absolute; top:0; bottom:0; width:3px;
+    background: linear-gradient(180deg, transparent, #ffb066 12%, #fff 50%, #ffb066 88%, transparent);
+    filter: drop-shadow(0 0 10px #ff8c32) drop-shadow(0 0 26px #ff8c32);
+    animation: m1-sweep 3.6s cubic-bezier(.3,0,.2,1) infinite;
+  }
+  @keyframes m1-sweep { 0% { left:-3px; opacity:0; } 6% { opacity:1; } 40% { left:100%; opacity:1; } 46% { opacity:0; } 100% { opacity:0; left:100%; } }
+  .m1-word { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; z-index:2; }
+  .m1-word span { font-family:var(--font-display); font-weight:700; font-size:56px; letter-spacing:0.03em; text-transform:uppercase;
+    background: linear-gradient(180deg, #fcfaf5 0%, #d8cfba 40%, #a49685 75%, #756a5a 100%);
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+    clip-path: inset(0 100% 0 0);
+    animation: m1-reveal 3.6s cubic-bezier(.3,0,.2,1) infinite;
+  }
+  .m1-word .os { background: linear-gradient(180deg, var(--color-copper-light), var(--color-copper-dark)); -webkit-background-clip:text; background-clip:text; color:transparent; }
+  @keyframes m1-reveal { 0%,6% { clip-path: inset(0 100% 0 0); } 44% { clip-path: inset(0 0 0 0); } 100% { clip-path: inset(0 0 0 0); } }
+  .m1-frame { position:absolute; inset:20px; border:1.5px solid rgba(255,255,255,0.06); opacity:0; animation: m1-clunk 3.6s cubic-bezier(.3,0,.2,1) infinite; }
+  @keyframes m1-clunk { 0%,48% { opacity:0; transform:scale(1.015); } 54% { opacity:1; transform:scale(1); } 100% { opacity:1; } }
+  .m1-status { position:absolute; bottom:26px; left:0; right:0; text-align:center; font-family:var(--font-mono); font-size:10px; letter-spacing:0.2em; color:#5a4f42; opacity:0; animation: m1-status 3.6s cubic-bezier(.3,0,.2,1) infinite; }
+  @keyframes m1-status { 0%,54% { opacity:0; } 60% { opacity:1; } 100% { opacity:1; } }
+
+  /* ═════ M2 — Loading indicator: calibration sweep, mechanical not bouncy ═════ */
+  .m2-stage { display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; gap:22px; }
+  .m2-dial { width:140px; height:140px; position:relative; }
+  .m2-dial svg { width:100%; height:100%; transform:rotate(-90deg); }
+  .m2-track { fill:none; stroke:rgba(255,255,255,0.08); stroke-width:3; }
+  .m2-fill { fill:none; stroke:var(--color-copper); stroke-width:3; stroke-linecap:butt;
+    stroke-dasharray: 345; stroke-dashoffset:345;
+    animation: m2-fill 2.4s cubic-bezier(.4,0,.2,1) infinite;
+  }
+  @keyframes m2-fill { 0% { stroke-dashoffset:345; } 70% { stroke-dashoffset:20; } 85% { stroke-dashoffset:20; } 100% { stroke-dashoffset:345; } }
+  .m2-pct { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-family:var(--font-mono); font-size:20px; color:var(--color-bone); }
+  .m2-label { font-family:var(--font-mono); font-size:10px; letter-spacing:0.24em; color:#6b6458; text-transform:uppercase; }
+
+  /* ═════ M3 — Website intro: blueprint line-draw + crosshair lock ═════ */
+  .m3-stage { position:relative; height:100%; background: radial-gradient(120% 100% at 50% 0%, #14181c, #05070a 70%); overflow:hidden; }
+  .m3-grid { position:absolute; inset:0; background-image: linear-gradient(rgba(184,115,51,0.08) 1px, transparent 1px), linear-gradient(90deg, rgba(184,115,51,0.08) 1px, transparent 1px); background-size:28px 28px; }
+  .m3-hline, .m3-vline { position:absolute; background: rgba(184,115,51,0.7); }
+  .m3-hline { top:110px; left:60px; height:1px; width:0; animation: m3-h 3s ease-in-out infinite; }
+  .m3-vline { top:110px; left:60px; width:1px; height:0; animation: m3-v 3s ease-in-out infinite; }
+  @keyframes m3-h { 0%,10% { width:0; } 35% { width:520px; } 100% { width:520px; } }
+  @keyframes m3-v { 0%,35% { height:0; } 55% { height:140px; } 100% { height:140px; } }
+  .m3-cross { position:absolute; top:236px; left:566px; width:20px; height:20px; opacity:0; animation: m3-cross 3s ease-in-out infinite; }
+  .m3-cross::before, .m3-cross::after { content:""; position:absolute; background: var(--color-copper); }
+  .m3-cross::before { top:50%; left:0; right:0; height:1px; transform:translateY(-50%); }
+  .m3-cross::after { left:50%; top:0; bottom:0; width:1px; transform:translateX(-50%); }
+  @keyframes m3-cross { 0%,55% { opacity:0; transform:scale(1.8); } 65% { opacity:1; transform:scale(1); } 100% { opacity:1; } }
+  .m3-copy { position:absolute; left:60px; top:150px; opacity:0; animation: m3-copy 3s ease-in-out infinite; }
+  @keyframes m3-copy { 0%,62% { opacity:0; transform:translateY(10px); } 78% { opacity:1; transform:translateY(0); } 100% { opacity:1; } }
+  .m3-copy .eyebrow { font-family:var(--font-mono); font-size:11px; letter-spacing:0.2em; color:var(--color-copper); text-transform:uppercase; margin-bottom:10px; }
+  .m3-copy h2 { font-family:var(--font-display); font-weight:500; font-size:30px; color:var(--color-bone); margin:0; }
+
+  /* ═════ M4 — Interaction reveal: small nav mark, press/hover ═════ */
+  .m4-stage { display:flex; align-items:center; justify-content:center; height:100%; gap:60px; }
+  .m4-item { display:flex; flex-direction:column; align-items:center; gap:14px; }
+  .m4-mark { width:60px; height:60px; border-radius:6px; background: linear-gradient(160deg,#46484a,#101112); display:flex; align-items:center; justify-content:center; font-family:var(--font-display); font-weight:700; color:var(--color-copper); font-size:20px; transition: transform 0.12s ease-out, filter 0.12s ease-out; }
+  .m4-mark.hover { transform: scale(1.06); filter: brightness(1.15); }
+  .m4-mark.press { transform: scale(0.94); filter: brightness(1.3); }
+  .m4-cap { font-family:var(--font-mono); font-size:9px; letter-spacing:0.15em; color:#6b6458; text-transform:uppercase; }
+</style>
+</head>
+<body>
+
+<div class="frame" style="left:40px; top:40px;">
+  <div class="label"><span class="badge-id">M1</span>Boot / splash sequence</div>
+  <div class="stage">
+    <div class="m1-plate"></div>
+    <div class="m1-frame"></div>
+    <div class="m1-beam"></div>
+    <div class="m1-word"><span>Trade<span class="os">OS</span></span></div>
+    <div class="m1-status">SYSTEM ONLINE</div>
+  </div>
+  <div class="note">2–3s on cold launch only, never repeating. A single beam sweeps once, the mark reveals through the cut, the plate settles ("clunk" = border sharpening), status confirms. Skippable, and only plays once per session.</div>
+</div>
+
+<div class="frame" style="left:720px; top:40px;">
+  <div class="label"><span class="badge-id">M2</span>Loading indicator — calibration sweep</div>
+  <div class="stage">
+    <div class="m2-stage">
+      <div class="m2-dial">
+        <svg viewBox="0 0 120 120"><circle class="m2-track" cx="60" cy="60" r="55"/><circle class="m2-fill" cx="60" cy="60" r="55"/></svg>
+        <div class="m2-pct">74%</div>
+      </div>
+      <div class="m2-label">Calculating Estimate</div>
+    </div>
+  </div>
+  <div class="note">A precise ring-sweep, not a spinner or bounce — reads like a calibration gauge settling into place. Used for any real wait (estimate generation, document export) \u2014 never decorative, always tied to genuine progress.</div>
+</div>
+
+<div class="frame" style="left:40px; top:440px;">
+  <div class="label"><span class="badge-id">M3</span>Website intro — blueprint line-draw + crosshair lock</div>
+  <div class="stage">
+    <div class="m3-stage">
+      <div class="m3-grid"></div>
+      <div class="m3-hline"></div>
+      <div class="m3-vline"></div>
+      <div class="m3-cross"></div>
+      <div class="m3-copy"><div class="eyebrow">Websites. SEO. Leads. Growth.</div><h2>Stop being a 404.</h2></div>
+    </div>
+  </div>
+  <div class="note">Drafting lines draw themselves to a point, a crosshair locks on, then the hero headline resolves — the same blueprint/targeting language already used across the brand (§23), now in motion. One-time entrance only, gated on <code>prefers-reduced-motion</code>.</div>
+</div>
+
+<div class="frame" style="left:720px; top:440px;">
+  <div class="label"><span class="badge-id">M4</span>Interaction states — nav mark hover / press</div>
+  <div class="stage">
+    <div class="m4-stage">
+      <div class="m4-item"><div class="m4-mark">OS</div><span class="m4-cap">Default</span></div>
+      <div class="m4-item"><div class="m4-mark hover">OS</div><span class="m4-cap">Hover</span></div>
+      <div class="m4-item"><div class="m4-mark press">OS</div><span class="m4-cap">Press</span></div>
+    </div>
+  </div>
+  <div class="note">The one interactive-press pattern in the whole system (§9, Rule 6): scale(0.96) + brightness pulse — a physical switch click. Hover raises scale/brightness slightly. No bounce, no elastic easing, anywhere.</div>
+</div>
+
+</body>
+</html>
