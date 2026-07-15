@@ -23,6 +23,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { SelectField } from "@/components/ui/select-field";
 import { Textarea } from "@/components/ui/textarea";
+import { uploadSettingsAssetAction } from "@/app/actions/settings";
 import { clientFetch } from "@/lib/clientApi";
 import { cn } from "@/lib/utils";
 import { type OrganizationSettingsResponse, type SettingsRoleProfile, type SettingsTeamMember, type TradeOsSettingsDraft } from "@/lib/settings";
@@ -99,6 +100,7 @@ export function SettingsConsole({ initialDraft, initialWorkspaceData, developerM
   const [isSaving, setIsSaving] = useState(false);
   const [isPending, startTransition] = useTransition();
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
+  const [uploadingAssetKeys, setUploadingAssetKeys] = useState<Set<string>>(new Set());
   const searchInputRef = useRef<HTMLInputElement | null>(null);
   const deferredSearchQuery = useDeferredValue(searchQuery);
   const dirty = isDirtyDraft(draft, savedDraft);
@@ -360,17 +362,42 @@ export function SettingsConsole({ initialDraft, initialWorkspaceData, developerM
     setDraft((current) => ({ ...current, [key]: value }));
   }
 
-  function handleAssetUpload(asset: SettingsAssetDefinition, event: ChangeEvent<HTMLInputElement>) {
+  async function handleAssetUpload(asset: SettingsAssetDefinition, event: ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
+    event.target.value = "";
     if (!file) return;
 
-    const previewUrl = URL.createObjectURL(file);
-    updateDraft(asset.key, previewUrl as TradeOsSettingsDraft[typeof asset.key]);
-    showToast({
-      tone: "info",
-      title: `${asset.label} ready to save`,
-      description: `${file.name} was staged locally as a placeholder asset.`,
-    });
+    const assetKey = String(asset.key);
+    setUploadingAssetKeys((current) => new Set(current).add(assetKey));
+
+    try {
+      const formData = new FormData();
+      formData.set("file", file);
+      formData.set("assetKey", assetKey);
+      const result = await uploadSettingsAssetAction(formData);
+
+      if (!result.url) {
+        showToast({
+          tone: "error",
+          title: `${asset.label} upload failed`,
+          description: result.error ?? "Something went wrong.",
+        });
+        return;
+      }
+
+      updateDraft(asset.key, result.url as TradeOsSettingsDraft[typeof asset.key]);
+      showToast({
+        tone: "info",
+        title: `${asset.label} ready to save`,
+        description: `${file.name} uploaded — press Save changes to apply it.`,
+      });
+    } finally {
+      setUploadingAssetKeys((current) => {
+        const next = new Set(current);
+        next.delete(assetKey);
+        return next;
+      });
+    }
   }
 
   async function saveChanges() {
@@ -600,6 +627,7 @@ export function SettingsConsole({ initialDraft, initialWorkspaceData, developerM
                 draft={draft}
                 onChange={updateDraft}
                 onAssetUpload={handleAssetUpload}
+                uploadingAssetKeys={uploadingAssetKeys}
               />
             ))
           )}
@@ -621,12 +649,14 @@ function SettingsCard({
   draft,
   onChange,
   onAssetUpload,
+  uploadingAssetKeys,
 }: {
   card: SettingsCardDefinition;
   section: SettingsSectionDefinition;
   draft: TradeOsSettingsDraft;
   onChange: <K extends keyof TradeOsSettingsDraft>(key: K, value: TradeOsSettingsDraft[K]) => void;
   onAssetUpload: (asset: SettingsAssetDefinition, event: ChangeEvent<HTMLInputElement>) => void;
+  uploadingAssetKeys: Set<string>;
 }) {
   return (
     <Card id={`card-${section.id}-${card.id}`} className="rounded-[24px] border-border/70">
@@ -668,6 +698,7 @@ function SettingsCard({
                   asset={asset}
                   previewUrl={typeof previewValue === "string" ? previewValue : ""}
                   onUpload={onAssetUpload}
+                  isUploading={uploadingAssetKeys.has(String(asset.key))}
                 />
               );
             })}
@@ -796,11 +827,13 @@ function AssetCard({
   asset,
   previewUrl,
   onUpload,
+  isUploading,
 }: {
   sectionId: string;
   asset: SettingsAssetDefinition;
   previewUrl: string;
   onUpload: (asset: SettingsAssetDefinition, event: ChangeEvent<HTMLInputElement>) => void;
+  isUploading: boolean;
 }) {
   const id = `asset-${sectionId}-${String(asset.key)}`;
 
@@ -811,10 +844,21 @@ function AssetCard({
           <h3 className="text-sm font-semibold text-foreground">{asset.label}</h3>
           <p className="text-sm text-muted-foreground">{asset.description}</p>
         </div>
-        <label className="inline-flex cursor-pointer items-center gap-2 rounded-xl border border-border bg-background px-3 py-2 text-sm font-medium text-foreground transition hover:bg-muted">
-          <Upload className="size-4" />
-          Upload
-          <input type="file" accept={asset.accept} className="hidden" onChange={(event) => onUpload(asset, event)} />
+        <label
+          className={cn(
+            "inline-flex items-center gap-2 rounded-xl border border-border bg-background px-3 py-2 text-sm font-medium text-foreground transition",
+            isUploading ? "cursor-not-allowed opacity-60" : "cursor-pointer hover:bg-muted"
+          )}
+        >
+          {isUploading ? <LoaderCircle className="size-4 animate-spin" /> : <Upload className="size-4" />}
+          {isUploading ? "Uploading…" : "Upload"}
+          <input
+            type="file"
+            accept={asset.accept}
+            className="hidden"
+            disabled={isUploading}
+            onChange={(event) => onUpload(asset, event)}
+          />
         </label>
       </div>
       <div className="mt-4 overflow-hidden rounded-2xl border border-border/70 bg-background">
@@ -823,7 +867,7 @@ function AssetCard({
           <img src={previewUrl} alt={`${asset.label} preview`} className="h-36 w-full object-contain bg-muted/20 p-4" />
         ) : (
           <div className="grid h-36 place-items-center bg-[linear-gradient(135deg,rgba(17,24,39,0.03),rgba(217,119,6,0.08))] p-4 text-center text-sm text-muted-foreground">
-            Placeholder preview. Uploaded assets appear here before backend storage is connected.
+            No asset uploaded yet.
           </div>
         )}
       </div>
