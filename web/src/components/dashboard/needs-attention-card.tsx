@@ -47,11 +47,15 @@ function Row({ children }: { children: React.ReactNode }) {
 
 function RowHeader({ title, subtitle }: { title: string; subtitle: string }) {
   return (
-    <div>
-      <div className="font-medium text-foreground">{title}</div>
-      <div className="text-sm text-muted-foreground">{subtitle}</div>
+    <div className="min-w-0">
+      <div className="break-words font-medium text-foreground">{title}</div>
+      <div className="break-words text-sm text-muted-foreground">{subtitle}</div>
     </div>
   );
+}
+
+function SectionLabel({ children }: { children: React.ReactNode }) {
+  return <h3 className="text-xs uppercase tracking-[0.18em] text-muted-foreground">{children}</h3>;
 }
 
 export function NeedsAttentionCard({
@@ -88,7 +92,7 @@ export function NeedsAttentionCard({
           <>
             {estimates.length > 0 ? (
               <div className="space-y-2">
-                <div className="text-xs uppercase tracking-[0.18em] text-muted-foreground">Estimates in progress</div>
+                <SectionLabel>Estimates in progress</SectionLabel>
                 <div className="space-y-2">
                   {estimates.map((row) => (
                     <Row key={row.estimateId}>
@@ -99,12 +103,22 @@ export function NeedsAttentionCard({
                         />
                         <div className="flex flex-wrap items-center gap-2">
                           <StatusBadge status={row.status} />
-                          <Link href={`/projects/${row.projectId}/estimates/${row.estimateId}`} className={buttonVariants({ variant: "outline", size: "sm" })}>
+                          <Link
+                            href={`/projects/${row.projectId}/estimates/${row.estimateId}`}
+                            aria-label={`Continue ${row.projectName} estimate v${row.version}`}
+                            className={buttonVariants({ variant: "outline", size: "sm" })}
+                          >
                             Continue
                           </Link>
-                          <Link href={`/projects/${row.projectId}/estimates/${row.estimateId}/assist`} className={buttonVariants({ size: "sm" })}>
-                            AI assist
-                          </Link>
+                          {row.status === "draft" ? (
+                            <Link
+                              href={`/projects/${row.projectId}/estimates/${row.estimateId}/assist`}
+                              aria-label={`Open AI assist for ${row.projectName} estimate v${row.version}`}
+                              className={buttonVariants({ variant: "outline", size: "sm" })}
+                            >
+                              AI assist
+                            </Link>
+                          ) : null}
                         </div>
                       </div>
                     </Row>
@@ -115,7 +129,7 @@ export function NeedsAttentionCard({
 
             {proposals.length > 0 ? (
               <div className="space-y-2">
-                <div className="text-xs uppercase tracking-[0.18em] text-muted-foreground">Proposals awaiting a response</div>
+                <SectionLabel>Proposals awaiting a response</SectionLabel>
                 <div className="space-y-2">
                   {proposals.map((row) => (
                     <Row key={row.proposalId}>
@@ -126,7 +140,11 @@ export function NeedsAttentionCard({
                         />
                         <div className="flex flex-wrap items-center gap-2">
                           <StatusBadge status={row.status} />
-                          <Link href={`/projects/${row.projectId}/proposals/${row.proposalId}`} className={buttonVariants({ variant: "outline", size: "sm" })}>
+                          <Link
+                            href={`/projects/${row.projectId}/proposals/${row.proposalId}`}
+                            aria-label={`Review proposal for ${row.projectName}`}
+                            className={buttonVariants({ variant: "outline", size: "sm" })}
+                          >
                             Review proposal
                           </Link>
                         </div>
@@ -139,7 +157,7 @@ export function NeedsAttentionCard({
 
             {invoices.length > 0 ? (
               <div className="space-y-2">
-                <div className="text-xs uppercase tracking-[0.18em] text-muted-foreground">Invoices needing follow-up</div>
+                <SectionLabel>Invoices needing follow-up</SectionLabel>
                 <div className="space-y-2">
                   {invoices.map((row) => (
                     <Row key={row.invoiceId}>
@@ -150,7 +168,11 @@ export function NeedsAttentionCard({
                         />
                         <div className="flex flex-wrap items-center gap-2">
                           <StatusBadge status={row.status} />
-                          <Link href={`/projects/${row.projectId}/invoices/${row.invoiceId}`} className={buttonVariants({ variant: "outline", size: "sm" })}>
+                          <Link
+                            href={`/projects/${row.projectId}/invoices/${row.invoiceId}`}
+                            aria-label={`Review invoice for ${row.projectName}`}
+                            className={buttonVariants({ variant: "outline", size: "sm" })}
+                          >
                             Review invoice
                           </Link>
                         </div>
@@ -163,7 +185,7 @@ export function NeedsAttentionCard({
 
             {readyToStart.length > 0 ? (
               <div className="space-y-2">
-                <div className="text-xs uppercase tracking-[0.18em] text-muted-foreground">Ready to start an estimate</div>
+                <SectionLabel>Ready to start an estimate</SectionLabel>
                 <div className="space-y-2">
                   {readyToStart.map((row) => (
                     <Row key={row.projectId}>
@@ -171,7 +193,7 @@ export function NeedsAttentionCard({
                         <RowHeader title={row.projectName} subtitle={row.customerName} />
                         <form action={createEstimateAction}>
                           <input type="hidden" name="projectId" value={row.projectId} />
-                          <Button type="submit" size="sm">
+                          <Button type="submit" size="sm" aria-label={`Start estimate for ${row.projectName}`}>
                             Start estimate
                           </Button>
                         </form>
