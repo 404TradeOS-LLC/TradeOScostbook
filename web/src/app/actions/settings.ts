@@ -4,8 +4,7 @@ import { getOrganizationSettings } from "@/lib/api";
 import { getSessionToken } from "@/lib/session";
 import { createClient as createSupabaseClient } from "@/lib/supabase/server";
 import { buildStorageObjectUrl, isPublicStorageBucket } from "@/lib/storage";
-
-const MAX_ASSET_UPLOAD_BYTES = 6 * 1024 * 1024;
+import { validateSettingsAssetUpload } from "@/lib/settingsAssetUpload";
 
 export interface UploadSettingsAssetResult {
   url?: string;
@@ -17,7 +16,13 @@ export interface UploadSettingsAssetResult {
 // which is only valid for the current tab/session and silently produces a
 // dead image URL after PATCH /settings persists it and the page reloads.
 // This uploads to the same Supabase Storage bucket project files already
-// use, so the persisted URL is durable.
+// use and returns a public storage URL.
+//
+// Settings asset uploads currently require a public storage bucket: a
+// private bucket only yields a non-signed /authenticated/ object URL, which
+// won't render through a plain <img src="..."> after reload. Real signed-URL
+// support for private buckets is future architecture work, not implemented
+// here (see validateSettingsAssetUpload in @/lib/settingsAssetUpload).
 export async function uploadSettingsAssetAction(formData: FormData): Promise<UploadSettingsAssetResult> {
   const token = await getSessionToken();
   if (!token) return { error: "Not authenticated." };
@@ -28,15 +33,13 @@ export async function uploadSettingsAssetAction(formData: FormData): Promise<Upl
   if (!(file instanceof File) || file.size === 0) {
     return { error: "Select a file to upload." };
   }
-  if (!assetKey) {
-    return { error: "Missing asset field." };
-  }
-  if (!file.type.startsWith("image/")) {
-    return { error: "Brand assets must be image files." };
-  }
-  if (file.size > MAX_ASSET_UPLOAD_BYTES) {
-    return { error: "Each brand asset must be 6MB or smaller." };
-  }
+
+  const validationError = validateSettingsAssetUpload({
+    assetKey,
+    file: { size: file.size, type: file.type },
+    isPublicBucket: isPublicStorageBucket(),
+  });
+  if (validationError) return { error: validationError };
 
   try {
     const { orgId } = await getOrganizationSettings(token);
@@ -54,7 +57,9 @@ export async function uploadSettingsAssetAction(formData: FormData): Promise<Upl
       throw new Error(uploadError.message);
     }
 
-    return { url: buildStorageObjectUrl(bucket, storagePath, isPublicStorageBucket()) };
+    // validateSettingsAssetUpload already required a public bucket above, so
+    // this always resolves to a public object URL, never an /authenticated/ one.
+    return { url: buildStorageObjectUrl(bucket, storagePath, true) };
   } catch (err) {
     return { error: err instanceof Error ? err.message : "Upload failed." };
   }
