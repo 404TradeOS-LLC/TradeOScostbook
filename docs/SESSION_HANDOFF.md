@@ -1,78 +1,65 @@
 ---
 status: current
 owner: platform
-last_verified: 2026-07-15
+last_verified: 2026-07-16
 source_of_truth: true
 related_code:
-  - app/modules/ai-estimate-assist/structuredEstimator.ts
-  - app/modules/estimate-engine/service.ts
-  - app/db/requestSession.ts
-  - app/prisma/schema.prisma
-  - docs/CURRENT_STATE.md
+  - docs/TRADEOS_BIBLE.md
+  - docs/SPRINT_BACKLOG.md
+  - docs/ENGINEERING_COMMAND_CENTER.md
+  - docs/REPOSITORY_GOVERNANCE.md
+  - docs/agent-prompts/NEXT_SPRINT_PROTOCOL.md
 ---
 
 # TradeOS Session Handoff
 
-## Session Metadata
+## Current mission
 
-- date: 2026-07-15
-- agent/tool: Codex
-- worktree path: `/Users/showb/TradeOS-ai-estimator`
-- branch: `feature/ai-estimator-engine`
-- base branch: `main`
-- upstream: none configured for this branch
-- remote: `https://github.com/404TradeOS-LLC/TradeOScostbook.git`
+Finish validation and review readiness for PR #31, the TradeOS Bible foundation. Do not begin destructive consolidation, archive removal, README cleanup, ruleset mutation, or the package knowledge-corpus cleanup until the foundation lands.
 
-## Mission
+## Live pull-request state
 
-Review and harden the backend-only structured AI estimator implementation for human review.
-
-Explicitly out of scope:
-
-- frontend/UI, contractor experience, onboarding UX, demo screens, dispatcher UX, components, layouts, styling, navigation, and design-system presentation work
-- new AI architecture or autonomous database writes
-- pushes, PR creation, merges, rebases, dependency upgrades, and unrelated cleanup
+- PR #31 — `docs/tradeos-bible-foundation` into `main`
+  - status: open draft;
+  - scope: seven Bible volumes, 50-sprint backlog, next-sprint protocol, Command Center, governance, and handoff integration;
+  - current head: verify live GitHub before editing.
+- PR #32 — Volume 3 engineering expansion
+  - status: merged into PR #31’s foundation branch as `b2529e6`;
+  - no remaining child-PR work.
+- PR #30 — Settings Console brand-asset persistence
+  - status: open at last verification;
+  - owns Settings/Brand Studio web and related current-state scope.
+- PRs #27, #28, and #29 are merged and must not be recreated.
 
 ## Completed
 
-- kept work isolated in `/Users/showb/TradeOS-ai-estimator` on `feature/ai-estimator-engine`
-- used focused read-only sub-agents for authorization/tenancy, apply safety, draft correctness, test coverage, and architecture/docs review
-- preserved the existing `ai-estimate-assist`, Knowledge Runtime, Cost Database, Assemblies Database, and Estimate Engine architecture
-- added server-signed review tokens to resolved structured draft lines
-- required accepted apply lines to present a matching, unexpired review token bound to estimate, organization, draft line, target kind, target ID, engine version, and issue time
-- failed closed in production if no AI estimator review-token secret or `AUTH_JWT_SECRET` is configured
-- kept generated text untrusted for identity, pricing, authorization, and persistence decisions
-- kept apply writes routed through `EstimateEngineService.addLineItem(...)`
-- wrapped structured apply in the existing service-level transaction helper and updated that helper so non-HTTP transactions bind the active Prisma transaction through async-local routing
-- bounded parsed draft quantities to the same maximum as reviewed apply quantities
-- made pricing retrieval failures review-safe: the draft returns zero-priced unresolved-pricing warnings instead of inventing or trusting fallback prices
-- rejected inactive cost items and assemblies as valid structured estimator targets
-- expanded focused tests for review-token provenance, stale/missing/mismatched tokens, production secret failure, inactive targets, pricing-failure warnings, excessive draft quantities, controller bounds, partial apply failures, and source-key first insert/replay behavior
-- updated documentation ownership so AI estimator controller and rate-limit middleware changes require AI-assist/API/current-state docs
-- marked legacy document-generator scripts as not current RC1 implementation truth
+- expanded Bible Volumes 1 through 6;
+- created Volume 7 Knowledge Runtime;
+- merged the expanded Volume 3 child PR into the foundation;
+- corrected backlog dependency logic so no sprint is selectable before S001 lands;
+- replaced vague sprint dependencies with explicit sprint IDs or external-access blockers;
+- clarified doctrine, implementation state, sprint state, handoff, ADR, research, and archive boundaries;
+- updated repository governance for the solo-maintainer zero-approval posture without weakening PR or CI requirements;
+- preserved `packages/knowledge-engine/**` for a separate segmented audit.
 
-## Validation Performed
+## Current blocker
 
-- `npm test -- structured-ai-estimator.service.test.ts ai-estimate-assist.controller.test.ts estimate-engine.service.test.ts --runInBand`: passed, 3 suites / 43 tests
-- `npm run docs:check`: passed
-- `npm run docs:test`: passed, 30 tests
-- `cd app && npm test`: passed, 53 suites / 358 tests
-- `cd app && npm run lint`: passed
-- `cd app && npm run build`: passed
-- `cd app && npm run test:integration`: passed, 1 suite / 20 live RLS tests
-- `git diff --check`: passed before handoff refresh
+The previous validation pass found `docs:check` required `docs/REPOSITORY_GOVERNANCE.md` because `docs/agent-prompts/NEXT_SPRINT_PROTOCOL.md` changed. The governance file is now included with a meaningful policy update.
 
-## Blocked Validation
+The complete final validation must be rerun on the new PR #31 head.
 
-- none
+## Next eligible sprint
 
-## Known Issues or Blockers
+None. S001 remains `IN_REVIEW`, and the backlog must not select general work until PR #31 lands on `main`.
 
-- branch `feature/ai-estimator-engine` has no upstream configured
-- changes are not pushed
-- structured apply now has signed per-line draft provenance but still does not persist a full draft-run record or store the full contractor prompt
-- broader manual estimate line-item sort-order races remain outside this sprint
+## Exact next safe action
 
-## Next Exact Task
+On the current `docs/tradeos-bible-foundation` head, run:
 
-Inspect local commits and open a human review PR when ready. If pushing from this worktree, use `git push -u origin feature/ai-estimator-engine`.
+```bash
+npm run docs:test
+npm run docs:check -- --base origin/main
+git diff --check
+```
+
+Then mechanically verify 50 unique sprint IDs, valid dependencies, seven linked Bible volumes, the final docs-only changed-file list, and GitHub checks. Do not mark ready or merge until all validation is green.
