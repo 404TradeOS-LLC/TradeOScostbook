@@ -7,74 +7,59 @@ related_code:
   - docs/TRADEOS_BIBLE.md
   - docs/SPRINT_BACKLOG.md
   - docs/ENGINEERING_COMMAND_CENTER.md
+  - docs/REPOSITORY_GOVERNANCE.md
   - docs/agent-prompts/NEXT_SPRINT_PROTOCOL.md
 ---
 
 # TradeOS Session Handoff
 
-## Current Mission
+## Current mission
 
-Harden and land the TradeOS Bible foundation, then execute the documentation repair plan from the read-only repository audit without deleting or consolidating evidence prematurely.
+Finish validation and review readiness for PR #31, the TradeOS Bible foundation. Do not begin destructive consolidation, archive removal, README cleanup, ruleset mutation, or the package knowledge-corpus cleanup until the foundation lands.
 
-## Live Pull Request State
+## Live pull-request state
 
 - PR #31 — `docs/tradeos-bible-foundation` into `main`
-  - status: open draft
-  - role: Bible foundation, seven volumes, 50-sprint backlog, and next-sprint protocol
-  - current head after repair work: verify live GitHub before editing
-- PR #32 — `docs/tradeos-bible-volume-3-engineering` into `docs/tradeos-bible-foundation`
-  - status: open draft
-  - scope: Volume 3 only
-  - blocker: the base branch advanced after PR creation; refresh against the current PR #31 head before merge
-- PR #30 — `fix/brand-studio-asset-upload-persistence` into `main`
-  - status: open and mergeable at last verification
-  - scope: Settings Console brand-asset persistence, public-bucket guard, validation, tests, and documentation
+  - status: open draft;
+  - scope: seven Bible volumes, 50-sprint backlog, next-sprint protocol, Command Center, governance, and handoff integration;
+  - current head: verify live GitHub before editing.
+- PR #32 — Volume 3 engineering expansion
+  - status: merged into PR #31’s foundation branch as `b2529e6`;
+  - no remaining child-PR work.
+- PR #30 — Settings Console brand-asset persistence
+  - status: open at last verification;
+  - owns Settings/Brand Studio web and related current-state scope.
 - PRs #27, #28, and #29 are merged and must not be recreated.
 
-## Completed This Repair Pass
+## Completed
 
-- completed and committed Volume 6 founder doctrine
-- created and committed Volume 7 Knowledge Runtime doctrine
-- updated the Bible index to reflect all seven volumes
-- clarified the source-of-truth layers: doctrine, implementation state, sprint state, roadmap, handoff, technical contracts, ADRs, research, and archive
-- adopted the documentation-audit principle that accepted ADRs remain active supporting references rather than generic archive material
-- preserved the package knowledge corpus for a separate audit instead of deleting suspected duplicates
+- expanded Bible Volumes 1 through 6;
+- created Volume 7 Knowledge Runtime;
+- merged the expanded Volume 3 child PR into the foundation;
+- corrected backlog dependency logic so no sprint is selectable before S001 lands;
+- replaced vague sprint dependencies with explicit sprint IDs or external-access blockers;
+- clarified doctrine, implementation state, sprint state, handoff, ADR, research, and archive boundaries;
+- updated repository governance for the solo-maintainer zero-approval posture without weakening PR or CI requirements;
+- preserved `packages/knowledge-engine/**` for a separate segmented audit.
 
-## Immediate Risks
+## Current blocker
 
-- PR #31 is not merged, so the Bible is proposed canonical doctrine until it lands on `main`.
-- PR #32 is stacked on an older PR #31 base and is currently not mergeable.
-- `docs/SPRINT_BACKLOG.md` still needs a final live-state correction pass, including S003 readiness.
-- `docs/ENGINEERING_COMMAND_CENTER.md` contains stale ruleset and recently-landed-work claims that require live verification before correction.
-- entry-point docs and legacy generator scripts remain untouched pending the foundation merge and preservation plan.
-- `packages/knowledge-engine/**` contains thousands of documents and requires its own segmented audit.
+The previous validation pass found `docs:check` required `docs/REPOSITORY_GOVERNANCE.md` because `docs/agent-prompts/NEXT_SPRINT_PROTOCOL.md` changed. The governance file is now included with a meaningful policy update.
 
-## Next Eligible Sprint
+The complete final validation must be rerun on the new PR #31 head.
 
-None should begin from the general backlog until the Bible foundation stack is reconciled.
+## Next eligible sprint
 
-## Why No Sprint Is Eligible Yet
+None. S001 remains `IN_REVIEW`, and the backlog must not select general work until PR #31 lands on `main`.
 
-S001 remains in review. S003 changes governance and should not run as an independent `READY` sprint while the foundation branch still contains stale governance statements and an unresolved stacked PR. Runtime feature sprints must not use the unmerged Bible branch as if it were `main` truth.
+## Exact next safe action
 
-## Dependencies
+On the current `docs/tradeos-bible-foundation` head, run:
 
-1. refresh PR #32 onto the current PR #31 head or incorporate its single-file Volume 3 change safely;
-2. repair the backlog and Command Center live-state claims;
-3. run docs validation on the complete stacked result;
-4. merge PR #31 only after the final diff and checks are reviewed;
-5. begin non-destructive documentation cleanup from current `main` afterward.
+```bash
+npm run docs:test
+npm run docs:check -- --base origin/main
+git diff --check
+```
 
-## Overlapping PRs Checked
-
-- PR #30 occupies Settings/Brand Studio web and related current-state documentation scope.
-- PR #31 occupies the Bible foundation and sprint-system docs.
-- PR #32 occupies `docs/bible/VOLUME_3_ENGINEERING.md` only.
-
-## Exact Next Safe Action
-
-Refresh PR #32 against the current `docs/tradeos-bible-foundation` head without modifying other Bible volumes, then verify the one-file diff and docs checks. Do not start archive, deletion, README consolidation, ruleset changes, or the package knowledge-corpus cleanup yet.
-
-## Startup Prompt
-
-Read `AGENTS.md`, `docs/TRADEOS_BIBLE.md`, `docs/CURRENT_STATE.md`, `docs/SPRINT_BACKLOG.md`, `docs/SESSION_HANDOFF.md`, and `docs/agent-prompts/NEXT_SPRINT_PROTOCOL.md`. Inspect live PRs #30, #31, and #32. Reconcile PR #32 with the current PR #31 head, keep the diff limited to `docs/bible/VOLUME_3_ENGINEERING.md`, run required docs validation, and stop on unexpected branch movement or scope overlap.
+Then mechanically verify 50 unique sprint IDs, valid dependencies, seven linked Bible volumes, the final docs-only changed-file list, and GitHub checks. Do not mark ready or merge until all validation is green.
