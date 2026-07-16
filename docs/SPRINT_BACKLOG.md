@@ -30,13 +30,13 @@ Acceptance: draft PR exists; docs checks pass; next sprint is mechanically selec
 Evidence: branch `docs/tradeos-bible-foundation`.
 
 ### S002 — Contractor UX research and Founder Preview specification
-Status: IN_REVIEW
+Status: DONE
 Dependencies: none
 Objective: Land the verified contractor research and Founder Preview experience specification.
 Allowed paths: PR #27 documentation scope only.
 Forbidden paths: runtime code.
 Acceptance: PR #27 merged with green checks and no source-of-truth conflicts.
-Evidence: PR #27.
+Evidence: PR #27 merged as `279bdae`.
 
 ### S003 — Solo-maintainer governance calibration
 Status: READY
