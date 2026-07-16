@@ -140,3 +140,5 @@ A PR is ready for human review only when:
 - the branch is up to date;
 - review threads are resolved;
 - the PR description accurately states current scope, validation, limitations, and remaining risks.
+
+For PR #31, the ownership-triggered governance update is intentional. The final changed-file scope is therefore 13 docs files, not the earlier 12-file expectation. Final local and GitHub validation must use the latest branch head.
