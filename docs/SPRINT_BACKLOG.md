@@ -27,7 +27,7 @@ Objective: Establish the canonical Bible index, numbered sprint queue, and auton
 Allowed paths: `docs/**`, `AGENTS.md` if required.
 Forbidden paths: runtime code, schema, dependencies, CI behavior.
 Acceptance: draft PR exists; docs checks pass; next sprint is mechanically selectable.
-Evidence: branch `docs/tradeos-bible-foundation`.
+Evidence: PR #31, branch `docs/tradeos-bible-foundation`.
 
 ### S002 — Contractor UX research and Founder Preview specification
 Status: DONE
@@ -39,8 +39,8 @@ Acceptance: PR #27 merged with green checks and no source-of-truth conflicts.
 Evidence: PR #27 merged as `279bdae`.
 
 ### S003 — Solo-maintainer governance calibration
-Status: READY
-Dependencies: none
+Status: PLANNED
+Dependencies: S001
 Objective: Document and verify a solo-maintainer ruleset that requires PRs and CI but zero approving reviews.
 Allowed paths: governance docs and live GitHub ruleset configuration.
 Forbidden paths: disabling PRs, required checks, force-push protection, or deletion protection.
@@ -64,7 +64,7 @@ Acceptance: one canonical startup flow and one canonical completion flow.
 ## Phase 2 — RC1 Correctness and Lifecycle Normalization
 
 ### S006 — Lifecycle compatibility inventory
-Status: READY
+Status: PLANNED
 Dependencies: S001
 Objective: Inventory every stored, API, shared-contract, UI, and portal lifecycle value for projects, estimates, proposals, contracts, invoices, and jobs.
 Allowed paths: docs, shared contracts, narrow tests.
@@ -254,7 +254,7 @@ Acceptance: owners can identify and diagnose dispatch issues.
 
 ### S035 — Query performance inventory
 Status: PLANNED
-Dependencies: lifecycle sprints complete
+Dependencies: S007, S008, S009, S010, S011, S012
 Objective: Capture slow/high-frequency query paths and representative plans.
 Acceptance: prioritized evidence-based optimization list.
 
@@ -277,7 +277,7 @@ Objective: Standardize retries, idempotency, and failure recording for asynchron
 Acceptance: no duplicate side effects under retry.
 
 ### S039 — Backup and recovery verification
-Status: PLANNED
+Status: BLOCKED
 Dependencies: production environment access
 Objective: Verify backups, restore procedure, RPO/RTO expectations, and migration recovery.
 Acceptance: documented restore rehearsal evidence.
@@ -286,7 +286,7 @@ Acceptance: documented restore rehearsal evidence.
 
 ### S040 — Tenant boundary regression suite
 Status: PLANNED
-Dependencies: lifecycle normalization complete
+Dependencies: S007, S008, S009, S010, S011, S012
 Objective: Expand cross-org denial tests across major modules.
 Acceptance: every critical read/write path has tenant-boundary proof.
 
@@ -309,7 +309,7 @@ Objective: Record meaningful auth, tenant, privilege, and sensitive workflow eve
 Acceptance: security-relevant actions are attributable and queryable.
 
 ### S044 — Secrets and environment posture
-Status: PLANNED
+Status: BLOCKED
 Dependencies: production environment access
 Objective: Verify secret ownership, rotation, least privilege, and environment separation.
 Acceptance: no tracked secrets and documented production rotation process.
@@ -317,7 +317,7 @@ Acceptance: no tracked secrets and documented production rotation process.
 ## Phase 9 — Production Deployment and Operational Readiness
 
 ### S045 — Production environment inventory
-Status: PLANNED
+Status: BLOCKED
 Dependencies: live deployment access
 Objective: Inventory production services, domains, environment variables, approvals, and owners.
 Acceptance: authoritative production topology and access map.
@@ -345,7 +345,7 @@ Acceptance: onboarding checklist, support path, feedback capture, and rollback p
 
 ### S049 — Stale branch, PR, and worktree retirement
 Status: PLANNED
-Dependencies: active RC PRs merged
+Dependencies: S001, S013
 Objective: Remove stale branches/worktrees only after verifying merge and ownership state.
 Acceptance: no misleading active branch or obsolete draft PR remains.
 
@@ -357,4 +357,4 @@ Acceptance: launch decision, known-risk register, and successor backlog approved
 
 ## Next Eligible Sprint
 
-Selection is determined by `docs/agent-prompts/NEXT_SPRINT_PROTOCOL.md` after checking live PRs and dependencies. As of this file's creation, candidates are S003 and S006; S003 is lower-numbered and therefore selected first if the live ruleset still needs calibration.
+No sprint is eligible while S001 remains `IN_REVIEW`. After PR #31 merges, select the lowest-numbered `READY` sprint whose dependencies are satisfied and whose paths do not overlap an open PR. S003 is expected to become the first candidate unless live governance evidence shows it is already complete.
