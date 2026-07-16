@@ -18,7 +18,7 @@ related_code:
 
 ## Purpose
 
-This document is the concise operating overview for the current TradeOS engineering program. It does not duplicate the full doctrine in the Bible or the detailed algorithm in the agent protocols.
+This is the concise operating overview for TradeOS engineering. It does not replace the Bible, Current State, Sprint Backlog, Session Handoff, module contracts, ADRs, or research evidence.
 
 Start with:
 
@@ -28,97 +28,80 @@ Start with:
 4. [SESSION_HANDOFF.md](SESSION_HANDOFF.md)
 5. [agent-prompts/NEXT_SPRINT_PROTOCOL.md](agent-prompts/NEXT_SPRINT_PROTOCOL.md)
 
-## Project Identity
+## Project identity
 
 - `404 TradeOS` is the parent company and operating context.
-- `TradeOS` is the contractor SaaS product implemented in this repository.
-- The repository remains named `TradeOScostbook`, while the merged product surface and doctrine cover the broader TradeOS platform.
+- `TradeOS` is the contractor SaaS product in this repository.
+- The repository remains named `TradeOScostbook`, while the implemented surface and doctrine cover the broader TradeOS platform.
 
-## Current Engineering Phase
+## Current engineering phase
 
 TradeOS is in `RC1 hardening`.
 
 Verified implementation truth belongs in [CURRENT_STATE.md](CURRENT_STATE.md). Strategic sequencing belongs in [ROADMAP.md](ROADMAP.md). Executable work belongs in [SPRINT_BACKLOG.md](SPRINT_BACKLOG.md).
 
-## Current Milestone
+## Current milestone
 
-Current milestone: stabilize the Bible foundation and documentation truth model before resuming general backlog execution.
+Finish and land the Bible foundation before resuming general sprint execution.
 
-Immediate goals:
+Completed foundation work includes:
 
-- reconcile the stacked Volume 3 PR with the current Bible foundation branch;
-- correct stale live-state claims in the sprint queue and operational docs;
-- run complete documentation validation on the combined foundation;
-- merge the foundation before destructive consolidation or archive work;
-- preserve the large package knowledge corpus until a separate audit proves what is active, vendored, generated, duplicated, or removable.
+- seven Bible volumes;
+- a 50-sprint dependency-ordered backlog;
+- a mechanical next-sprint protocol;
+- merged Volume 3 engineering expansion from PR #32;
+- corrected sprint dependency logic;
+- updated handoff and governance integration;
+- preservation of the large knowledge-engine corpus pending a separate audit.
 
-## Current Product Surface
+Remaining foundation work:
 
-Verified implemented areas include:
+- rerun complete local docs validation on the final head;
+- inspect the final docs-only diff and links;
+- wait for GitHub checks;
+- move PR #31 from draft only after all required validation is green.
 
-- [Auth and tenancy](modules/auth-and-tenancy.md)
-- [CRM](modules/crm.md)
-- [Projects and workspace](modules/projects.md)
-- [Cost book](modules/cost-book.md)
-- [Estimating](modules/estimating.md)
-- [AI Estimate Assist](modules/ai-estimate-assist.md)
-- [Proposals](modules/proposals.md)
-- [Contracts](modules/contracts.md)
-- [Invoices and payments](modules/invoices-and-payments.md)
-- [Jobs and scheduling](modules/jobs-and-scheduling.md)
-- [Activity and intelligence](modules/activity-and-intelligence.md)
-- [Brand Studio](modules/brand-studio.md)
-- [Settings and operations](modules/settings-and-operations.md)
-- [Customer portal](modules/customer-portal.md)
+## Canonical execution rule
 
-Do not infer release readiness from this list. Read [CURRENT_STATE.md](CURRENT_STATE.md) for caveats and verified gaps.
-
-## Canonical Execution Rule
-
-`docs/SPRINT_BACKLOG.md` is the tactical queue. Broad priorities in this document or the roadmap do not override the numbered queue.
-
-An agent may begin work only when:
+The Sprint Backlog is the tactical queue. An agent may begin only when:
 
 - the sprint is `READY`;
-- its dependencies are merged;
-- no open PR or active worktree overlaps its allowed paths;
-- required infrastructure is available;
+- every sprint dependency is `DONE`;
+- no overlapping PR or worktree exists;
+- required external infrastructure is available;
 - no founder decision remains unresolved.
 
 If no sprint is eligible, stop and report the blocker instead of inventing work.
 
-## Active PR Coordination
+## Active PR coordination
 
 At the last verified handoff:
 
-- PR #30 occupies Settings/Brand Studio web and related current-state scope.
-- PR #31 occupies the Bible foundation and sprint-system docs.
-- PR #32 occupies `docs/bible/VOLUME_3_ENGINEERING.md` and requires refresh against the current PR #31 head.
+- PR #30 owns Settings/Brand Studio web and related current-state scope;
+- PR #31 owns the Bible foundation and sprint-system documentation;
+- PR #32 is merged into PR #31’s branch;
 - PRs #27, #28, and #29 are merged.
 
-Always verify live GitHub state before editing. This section is an operational summary, not a substitute for GitHub.
+Always verify GitHub before editing. This summary is not a substitute for live PR state.
 
-## Current Blockers and Risks
+## Current blockers and risks
 
-- The Bible foundation is not yet merged into `main`.
-- The stacked Volume 3 PR is behind its advancing base and is not currently mergeable.
-- The sprint backlog still requires a final live-state correction pass.
-- Repository ruleset and branch-protection enforcement must be checked against live GitHub before documentation is changed; dated claims are not evidence of present enforcement.
-- Entry-point READMEs and legacy generator scripts contain stale material, but they must not be deleted before useful setup, competitive, pricing, or historical evidence is preserved.
+- PR #31 is not yet merged, so the Bible remains proposed canonical doctrine until it lands on `main`.
+- The final validation pass must be rerun after adding the governance owner document.
+- Entry-point READMEs and legacy generator scripts contain stale material, but useful setup, competitive, pricing, and historical evidence must be preserved before archive or removal decisions.
 - `packages/knowledge-engine/**` contains thousands of documents and requires a separate segmented audit.
+- Ruleset and branch-protection facts must be verified directly in GitHub before being stated as current.
 
-## Required Verification
+## Required verification
 
-The current required CI job names are expected to include:
+Expected CI jobs include:
 
-- `Docs consistency`
-- `App lint, unit tests, and build`
-- `App integration tests`
-- `Web lint and build`
+- `Docs consistency`;
+- `App lint, unit tests, and build`;
+- `App integration tests`;
+- `Web lint and build`.
 
-The exact required-check configuration must be verified against live GitHub rules before governance documentation is declared current.
-
-Run the validation required by the selected sprint. Documentation-only foundation work must at minimum run:
+Documentation foundation work must run:
 
 ```bash
 npm run docs:test
@@ -126,24 +109,23 @@ npm run docs:check -- --base origin/main
 git diff --check
 ```
 
-When working on a stacked docs PR, use the actual target base branch for the docs-check comparison where repository tooling supports it.
+The exact required-check configuration remains live GitHub state.
 
-## Session Startup
-
-Every agent must:
-
-1. verify the exact repository path and worktree;
-2. verify branch, clean state, remote, and upstream;
-3. fetch origin;
-4. read the Bible, Current State, Sprint Backlog, Session Handoff, and Next Sprint Protocol;
-5. inspect open PRs, recent merges, and worktree overlap;
-6. state mission, allowed paths, forbidden paths, validation, and stop conditions before editing.
-
-## Session Completion
+## Session startup
 
 Every agent must:
 
-1. inspect the complete diff against the correct current base;
+1. verify repository path, worktree, branch, upstream, and clean state;
+2. fetch origin;
+3. read the Bible, Current State, Sprint Backlog, Session Handoff, and Next Sprint Protocol;
+4. inspect open PRs, recent merges, and worktree overlap;
+5. state mission, allowed paths, forbidden paths, validation, and stop conditions.
+
+## Session completion
+
+Every agent must:
+
+1. inspect the complete diff against the correct base;
 2. run required validation;
 3. update affected source-of-truth owners;
 4. update sprint evidence only when justified;
@@ -153,11 +135,11 @@ Every agent must:
 8. open or update one PR;
 9. report the exact next safe action.
 
-## Next Engineer Starts Here
+## Next engineer starts here
 
-Read [SESSION_HANDOFF.md](SESSION_HANDOFF.md). Reconcile PR #32 with the current PR #31 head before beginning a general sprint. Do not begin archive, deletion, README consolidation, ruleset mutation, or package knowledge-corpus cleanup until the Bible foundation is validated and merged.
+Read [SESSION_HANDOFF.md](SESSION_HANDOFF.md). Rerun final PR #31 validation on the latest head. Do not begin archive, deletion, README consolidation, ruleset mutation, or package knowledge-corpus cleanup until the foundation is validated and merged.
 
-## Source-of-Truth Links
+## Source-of-truth links
 
 - [TRADEOS_BIBLE.md](TRADEOS_BIBLE.md)
 - [CURRENT_STATE.md](CURRENT_STATE.md)
