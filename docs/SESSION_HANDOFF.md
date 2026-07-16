@@ -1,78 +1,80 @@
 ---
 status: current
 owner: platform
-last_verified: 2026-07-15
+last_verified: 2026-07-16
 source_of_truth: true
 related_code:
-  - app/modules/ai-estimate-assist/structuredEstimator.ts
-  - app/modules/estimate-engine/service.ts
-  - app/db/requestSession.ts
-  - app/prisma/schema.prisma
-  - docs/CURRENT_STATE.md
+  - docs/TRADEOS_BIBLE.md
+  - docs/SPRINT_BACKLOG.md
+  - docs/ENGINEERING_COMMAND_CENTER.md
+  - docs/agent-prompts/NEXT_SPRINT_PROTOCOL.md
 ---
 
 # TradeOS Session Handoff
 
-## Session Metadata
+## Current Mission
 
-- date: 2026-07-15
-- agent/tool: Codex
-- worktree path: `/Users/showb/TradeOS-ai-estimator`
-- branch: `feature/ai-estimator-engine`
-- base branch: `main`
-- upstream: none configured for this branch
-- remote: `https://github.com/404TradeOS-LLC/TradeOScostbook.git`
+Harden and land the TradeOS Bible foundation, then execute the documentation repair plan from the read-only repository audit without deleting or consolidating evidence prematurely.
 
-## Mission
+## Live Pull Request State
 
-Review and harden the backend-only structured AI estimator implementation for human review.
+- PR #31 — `docs/tradeos-bible-foundation` into `main`
+  - status: open draft
+  - role: Bible foundation, seven volumes, 50-sprint backlog, and next-sprint protocol
+  - current head after repair work: verify live GitHub before editing
+- PR #32 — `docs/tradeos-bible-volume-3-engineering` into `docs/tradeos-bible-foundation`
+  - status: open draft
+  - scope: Volume 3 only
+  - blocker: the base branch advanced after PR creation; refresh against the current PR #31 head before merge
+- PR #30 — `fix/brand-studio-asset-upload-persistence` into `main`
+  - status: open and mergeable at last verification
+  - scope: Settings Console brand-asset persistence, public-bucket guard, validation, tests, and documentation
+- PRs #27, #28, and #29 are merged and must not be recreated.
 
-Explicitly out of scope:
+## Completed This Repair Pass
 
-- frontend/UI, contractor experience, onboarding UX, demo screens, dispatcher UX, components, layouts, styling, navigation, and design-system presentation work
-- new AI architecture or autonomous database writes
-- pushes, PR creation, merges, rebases, dependency upgrades, and unrelated cleanup
+- completed and committed Volume 6 founder doctrine
+- created and committed Volume 7 Knowledge Runtime doctrine
+- updated the Bible index to reflect all seven volumes
+- clarified the source-of-truth layers: doctrine, implementation state, sprint state, roadmap, handoff, technical contracts, ADRs, research, and archive
+- adopted the documentation-audit principle that accepted ADRs remain active supporting references rather than generic archive material
+- preserved the package knowledge corpus for a separate audit instead of deleting suspected duplicates
 
-## Completed
+## Immediate Risks
 
-- kept work isolated in `/Users/showb/TradeOS-ai-estimator` on `feature/ai-estimator-engine`
-- used focused read-only sub-agents for authorization/tenancy, apply safety, draft correctness, test coverage, and architecture/docs review
-- preserved the existing `ai-estimate-assist`, Knowledge Runtime, Cost Database, Assemblies Database, and Estimate Engine architecture
-- added server-signed review tokens to resolved structured draft lines
-- required accepted apply lines to present a matching, unexpired review token bound to estimate, organization, draft line, target kind, target ID, engine version, and issue time
-- failed closed in production if no AI estimator review-token secret or `AUTH_JWT_SECRET` is configured
-- kept generated text untrusted for identity, pricing, authorization, and persistence decisions
-- kept apply writes routed through `EstimateEngineService.addLineItem(...)`
-- wrapped structured apply in the existing service-level transaction helper and updated that helper so non-HTTP transactions bind the active Prisma transaction through async-local routing
-- bounded parsed draft quantities to the same maximum as reviewed apply quantities
-- made pricing retrieval failures review-safe: the draft returns zero-priced unresolved-pricing warnings instead of inventing or trusting fallback prices
-- rejected inactive cost items and assemblies as valid structured estimator targets
-- expanded focused tests for review-token provenance, stale/missing/mismatched tokens, production secret failure, inactive targets, pricing-failure warnings, excessive draft quantities, controller bounds, partial apply failures, and source-key first insert/replay behavior
-- updated documentation ownership so AI estimator controller and rate-limit middleware changes require AI-assist/API/current-state docs
-- marked legacy document-generator scripts as not current RC1 implementation truth
+- PR #31 is not merged, so the Bible is proposed canonical doctrine until it lands on `main`.
+- PR #32 is stacked on an older PR #31 base and is currently not mergeable.
+- `docs/SPRINT_BACKLOG.md` still needs a final live-state correction pass, including S003 readiness.
+- `docs/ENGINEERING_COMMAND_CENTER.md` contains stale ruleset and recently-landed-work claims that require live verification before correction.
+- entry-point docs and legacy generator scripts remain untouched pending the foundation merge and preservation plan.
+- `packages/knowledge-engine/**` contains thousands of documents and requires its own segmented audit.
 
-## Validation Performed
+## Next Eligible Sprint
 
-- `npm test -- structured-ai-estimator.service.test.ts ai-estimate-assist.controller.test.ts estimate-engine.service.test.ts --runInBand`: passed, 3 suites / 43 tests
-- `npm run docs:check`: passed
-- `npm run docs:test`: passed, 30 tests
-- `cd app && npm test`: passed, 53 suites / 358 tests
-- `cd app && npm run lint`: passed
-- `cd app && npm run build`: passed
-- `cd app && npm run test:integration`: passed, 1 suite / 20 live RLS tests
-- `git diff --check`: passed before handoff refresh
+None should begin from the general backlog until the Bible foundation stack is reconciled.
 
-## Blocked Validation
+## Why No Sprint Is Eligible Yet
 
-- none
+S001 remains in review. S003 changes governance and should not run as an independent `READY` sprint while the foundation branch still contains stale governance statements and an unresolved stacked PR. Runtime feature sprints must not use the unmerged Bible branch as if it were `main` truth.
 
-## Known Issues or Blockers
+## Dependencies
 
-- branch `feature/ai-estimator-engine` has no upstream configured
-- changes are not pushed
-- structured apply now has signed per-line draft provenance but still does not persist a full draft-run record or store the full contractor prompt
-- broader manual estimate line-item sort-order races remain outside this sprint
+1. refresh PR #32 onto the current PR #31 head or incorporate its single-file Volume 3 change safely;
+2. repair the backlog and Command Center live-state claims;
+3. run docs validation on the complete stacked result;
+4. merge PR #31 only after the final diff and checks are reviewed;
+5. begin non-destructive documentation cleanup from current `main` afterward.
 
-## Next Exact Task
+## Overlapping PRs Checked
 
-Inspect local commits and open a human review PR when ready. If pushing from this worktree, use `git push -u origin feature/ai-estimator-engine`.
+- PR #30 occupies Settings/Brand Studio web and related current-state documentation scope.
+- PR #31 occupies the Bible foundation and sprint-system docs.
+- PR #32 occupies `docs/bible/VOLUME_3_ENGINEERING.md` only.
+
+## Exact Next Safe Action
+
+Refresh PR #32 against the current `docs/tradeos-bible-foundation` head without modifying other Bible volumes, then verify the one-file diff and docs checks. Do not start archive, deletion, README consolidation, ruleset changes, or the package knowledge-corpus cleanup yet.
+
+## Startup Prompt
+
+Read `AGENTS.md`, `docs/TRADEOS_BIBLE.md`, `docs/CURRENT_STATE.md`, `docs/SPRINT_BACKLOG.md`, `docs/SESSION_HANDOFF.md`, and `docs/agent-prompts/NEXT_SPRINT_PROTOCOL.md`. Inspect live PRs #30, #31, and #32. Reconcile PR #32 with the current PR #31 head, keep the diff limited to `docs/bible/VOLUME_3_ENGINEERING.md`, run required docs validation, and stop on unexpected branch movement or scope overlap.
