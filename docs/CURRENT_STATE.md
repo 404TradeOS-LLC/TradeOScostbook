@@ -1,7 +1,7 @@
 ---
 status: current
 owner: platform
-last_verified: 2026-07-15
+last_verified: 2026-07-16
 source_of_truth: true
 related_code:
   - app/backend/server.ts
@@ -12,12 +12,15 @@ related_code:
   - web/src/app
   - web/src/components/dashboard/needs-attention-card.tsx
   - web/src/components/estimate-assist/ai-estimate-assist.tsx
+  - web/src/app/actions/settings.ts
+  - web/src/lib/storage.ts
+  - web/src/lib/settingsAssetUpload.ts
   - .github/workflows/verify-repository.yml
 ---
 
 # Current State
 
-Last verified against the repository on 2026-07-15.
+Last verified against the repository on 2026-07-16.
 
 ## Current milestone
 
@@ -69,6 +72,8 @@ See module docs in `docs/modules/`.
 - Unused `web/src/lib/api.ts` helpers (`signup`, `login`, `AuthSession`, `listProposalsByProject`, `listInvoicesByProject`) were removed after confirming the real auth path calls Supabase directly from Server Actions and that no caller used the two list helpers.
 - `claude.md` was renamed to `CLAUDE.md` — both names pointed at the same file only because of this machine's case-insensitive filesystem; git tracked the lowercase name, which would not resolve as `CLAUDE.md` on a case-sensitive filesystem (Linux CI, most Docker images).
 - Explicitly *not* removed: `web/src/components/ui/checkbox.tsx` and the `lucide-react` dependency — both are live (used by Brand Studio and Settings consoles), and `@supabase/supabase-js` — it is a required peer dependency of the actively-used `@supabase/ssr` package, not a dead dependency.
+- Settings Console's brand asset uploader (logo/dark logo/icon/watermark) previously staged an ephemeral `URL.createObjectURL()` blob straight into the settings draft, which silently broke on page reload since it was never actually persisted anywhere durable. It now uploads to the same Supabase Storage bucket project files already use, via `uploadSettingsAssetAction` (`web/src/app/actions/settings.ts`), and returns a real **public** storage URL. `buildStorageObjectUrl`/`isPublicStorageBucket`, previously private to `web/src/app/actions/projects.ts`, were extracted into the shared `web/src/lib/storage.ts` module so this is their second caller instead of a third duplicate copy.
+- Follow-up hardening on the settings asset uploader: `assetKey` is now validated against a strict allowlist (`logoUrl`, `darkLogoUrl`, `iconUrl`, `watermarkUrl` — the only four settings asset fields that exist) via `validateSettingsAssetUpload` (`web/src/lib/settingsAssetUpload.ts`), and the action now requires a **public** storage bucket, returning a clear error instead of an unusable `/authenticated/` object URL when the bucket is private. Earlier PR wording claiming a "public/signed URL" was inaccurate — no signed-URL generation exists for this path; that remains future work (private-bucket support for settings assets is not implemented). Uploading before "Save changes" can still leave an orphaned storage object if the user abandons the form without saving — tracked as non-blocking technical debt, not fixed here.
 
 ## Known blockers and unresolved technical debt
 
@@ -77,6 +82,8 @@ See module docs in `docs/modules/`.
 - Documentation governance was missing before this branch and is being added here
 - Production deployment state and environment approvals are not inferred from code and must be verified per environment
 - Some older implementation notes and planning artifacts required archiving because they conflicted with the live repository
+- Settings brand asset uploads (`uploadSettingsAssetAction`) currently require a public storage bucket; private-bucket support (real signed-URL generation) is not implemented
+- Settings brand asset uploads can leave an orphaned storage object if a user uploads a file but abandons the settings form before pressing "Save changes" — non-blocking, no cleanup logic exists for this yet
 
 ## Recent verified infrastructure facts
 
