@@ -16,7 +16,7 @@ related_code:
 
 ## Current Mission
 
-First-party post-Bible truth repair is in progress on branch `docs/first-party-truth-repair` in worktree `/Users/showb/TradeOS-first-party-truth-repair`.
+First-party post-Bible truth repair is in review as PR #35 on branch `docs/first-party-truth-repair` in worktree `/Users/showb/TradeOS-first-party-truth-repair`.
 
 Mission scope:
 
@@ -27,6 +27,8 @@ Mission scope:
 - avoid Claude-owned knowledge-engine package work, PR #30 work, runtime code, app code, and web code.
 
 Base commit: `origin/main` at `ac72ff235db687d9cb8619820e536aec040afc6b`, the PR #31 merge commit.
+
+PR URL: https://github.com/404TradeOS-LLC/TradeOScostbook/pull/35
 
 ## Live Pull-Request State
 
@@ -45,6 +47,10 @@ Verified on 2026-07-18:
   - status: open;
   - owner/lane: Claude knowledge-engine Phase B/C readiness research;
   - collision rule: do not touch `packages/knowledge-engine/**` or PR #34 branch.
+- PR #35 — `docs/first-party-truth-repair` into `main`
+  - status: open draft;
+  - owner/lane: Codex first-party operational truth repair;
+  - collision rule: keep the diff documentation-only and avoid Claude-owned or PR #30-owned scope.
 
 Recently merged evidence:
 
@@ -127,7 +133,7 @@ Why blocked:
 
 Prerequisites:
 
-- merge or close this truth-repair branch;
+- merge or close PR #35;
 - merge or close PR #33;
 - fetch `origin`;
 - re-check open PRs and active worktrees;

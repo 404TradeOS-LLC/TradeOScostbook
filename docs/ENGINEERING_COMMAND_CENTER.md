@@ -47,7 +47,7 @@ The TradeOS Bible foundation is merged on `main` as PR #31, commit `ac72ff235db6
 | Lane | Owner | Branch / PR | Status | Dependencies | Collision warnings |
 | --- | --- | --- | --- | --- | --- |
 | Founder decisions | Founder | none | WAITING | S014, S024, S039, S044, S045, S048 need founder or environment input before execution. | Do not resolve product-source, retention/privacy/cost, production access, secret rotation, backup, beta-tenant, or rollout-date decisions by inference. |
-| First-party truth repair | Codex | `docs/first-party-truth-repair` / draft PR pending | IN_PROGRESS | Based on `origin/main` at PR #31 merge commit. | Do not touch `packages/knowledge-engine/**`, PR #30 files, runtime code, `app/**` implementation, or `web/**` implementation. |
+| First-party truth repair | Codex | PR #35, `docs/first-party-truth-repair` | IN_REVIEW | Based on `origin/main` at PR #31 merge commit. | Do not touch `packages/knowledge-engine/**`, PR #30 files, runtime code, `app/**` implementation, or `web/**` implementation. |
 | Knowledge-engine Phase A | Claude | PR #33, `docs/knowledge-engine-phase-a-guardrails` | OPEN | Owns knowledge-engine guardrails and related governance/doc-ownership changes. | Do not edit PR #33 branch or `packages/knowledge-engine/**`. Expect doc-file overlap with this repair branch in `docs/README.md`, `docs/DOC_OWNERSHIP.yml`, `docs/REPOSITORY_GOVERNANCE.md`, and this file. |
 | Knowledge-engine Phase B/C readiness | Claude | PR #34, `fix/knowledge-engine-canonical-paths` stacked on PR #33 | OPEN | Depends on PR #33 branch. | Do not inspect or classify package internals from this branch. |
 | Brand Studio asset persistence | Product PR | PR #30, `fix/brand-studio-asset-upload-persistence` | OPEN | Independent Brand Studio/Settings web work. | Do not modify, review, rebase, merge, or mark complete from this branch. |
@@ -64,7 +64,7 @@ The TradeOS Bible foundation is merged on `main` as PR #31, commit `ac72ff235db6
 
 ## Next Review Order
 
-1. Review and merge or close the first-party truth-repair PR after docs validation is green.
+1. Review and merge or close PR #35 after docs validation is green.
 2. Review Claude PR #33 before any governance/doc-ownership sprint work.
 3. Review Claude PR #34 after PR #33 state is understood because it is stacked on the Phase A branch.
 4. Review PR #30 separately; it is unrelated Brand Studio asset-persistence work.
