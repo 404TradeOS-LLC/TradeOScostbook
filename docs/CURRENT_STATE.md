@@ -1,7 +1,7 @@
 ---
 status: current
 owner: platform
-last_verified: 2026-07-14
+last_verified: 2026-07-15
 source_of_truth: true
 related_code:
   - app/backend/server.ts
@@ -10,12 +10,14 @@ related_code:
   - app/prisma/migrations/20260703090000_add_search_trgm_indexes/migration.sql
   - app/backend/routes
   - web/src/app
+  - web/src/components/dashboard/needs-attention-card.tsx
+  - web/src/components/estimate-assist/ai-estimate-assist.tsx
   - .github/workflows/verify-repository.yml
 ---
 
 # Current State
 
-Last verified against the repository on 2026-07-14.
+Last verified against the repository on 2026-07-15.
 
 ## Current milestone
 
@@ -30,12 +32,12 @@ The repository is no longer organized around MVP planning documents. The active 
 - Projects and project workspace
 - Site visit intake
 - Cost book: divisions, categories, subcategories, cost items, labor, materials, equipment, assemblies
-- Estimating: estimate creation, line items, duplication, comparison, AI estimate assist
+- Estimating: estimate creation, line items, duplication, comparison, AI estimate assist, and structured contractor-language draft generation
 - Proposals
 - Contracts
 - Invoices and payment recording
 - Change orders
-- Jobs and scheduling
+- Jobs and scheduling: job creation, assignment, scheduling, rescheduling, dispatcher coordination, and field-status workflows
 - Project tasks
 - Activity, notifications, recents, saved views, feature flags, and search-oriented intelligence primitives
 - Brand Studio
@@ -43,6 +45,7 @@ The repository is no longer organized around MVP planning documents. The active 
 - Customer portal document views
 - Supplier review queue and scheduler plumbing
 - Knowledge runtime integration
+- Backend structured AI estimator orchestration that stages contractor-language scopes into reviewable estimate drafts using existing costbook and estimate-engine services
 
 See module docs in `docs/modules/`.
 
@@ -53,6 +56,19 @@ See module docs in `docs/modules/`.
 - Contract persistence still stores `pending_signature`; global lifecycle docs treat that as compatibility storage under canonical contract states
 - Supplier integration feed ingestion is scaffolded around a stub fetcher; queue, review, audit, and scheduling plumbing are real
 - Customer portal exists for proposal, contract, invoice, and project views, but hardening is still tracked as RC work
+- Structured AI estimator drafts remain review-first; they do not autonomously write estimate line items and do not call external model APIs in the current implementation
+- Structured AI estimator apply now uses server-signed review tokens, server-side active target validation, per-estimate apply serialization, and optional estimate-line `sourceKey` duplicate protection for reviewed AI lines; Docker-backed live RLS integration verification passed locally on this branch
+
+## Recent internal cleanup
+
+- The dashboard (`web/src/app/(app)/dashboard/page.tsx`) now composes a "Needs attention" section from the existing per-project data fan-out it already fetches (draft/ready estimates, proposals awaiting a response, invoices that are sent, overdue, or partially paid, and projects with no estimate yet), each linking directly into the existing estimate builder, AI Estimate Assist, proposal, and invoice pages. AI assist is only offered for draft estimates, since a `ready` estimate's line items are locked. No new backend endpoints, aggregation service, or design system were introduced; the new `web/src/components/dashboard/needs-attention-card.tsx` component reuses `Card`, `StatusBadge`, `EmptyState`, and `Button` plus the existing `createEstimateAction` server action.
+- The AI Estimate Assist review panel (`web/src/components/estimate-assist/ai-estimate-assist.tsx`) now also surfaces the resolved target's `matchMethod` (already returned by the backend but previously unused by the frontend) next to the existing match-score badge, making the "why this was matched" provenance more visible without adding any new backend field.
+- Five duplicate private `round2()` rounding helpers (in `cost-database`, `assemblies-database`, `change-orders`, `estimate-engine`, and `knowledge-runtime` services) were consolidated to import the one already exported from `app/modules/estimate-engine/formulas.ts`. No rounding behavior changed.
+- Four internal-only exports (`mapPrismaKnownRequestError`, `CreateOrganizationInput`, `SupplierPriceUpdateStatus`, `SupplierFeedQuote`, `ClientApiError`) had their `export` keyword removed after confirming no other file imports them.
+- Confirmed-dead frontend code was removed: the unused shadcn `Select` primitive (`web/src/components/ui/select.tsx`), an unwired AI-suggestions component pair, an unused project-files panel, and a dead Supabase browser-client wrapper (`web/src/lib/supabase/client.ts`) that had already been superseded by server-side `@supabase/ssr` usage.
+- Unused `web/src/lib/api.ts` helpers (`signup`, `login`, `AuthSession`, `listProposalsByProject`, `listInvoicesByProject`) were removed after confirming the real auth path calls Supabase directly from Server Actions and that no caller used the two list helpers.
+- `claude.md` was renamed to `CLAUDE.md` — both names pointed at the same file only because of this machine's case-insensitive filesystem; git tracked the lowercase name, which would not resolve as `CLAUDE.md` on a case-sensitive filesystem (Linux CI, most Docker images).
+- Explicitly *not* removed: `web/src/components/ui/checkbox.tsx` and the `lucide-react` dependency — both are live (used by Brand Studio and Settings consoles), and `@supabase/supabase-js` — it is a required peer dependency of the actively-used `@supabase/ssr` package, not a dead dependency.
 
 ## Known blockers and unresolved technical debt
 

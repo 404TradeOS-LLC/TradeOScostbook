@@ -1,7 +1,7 @@
 ---
 status: current
 owner: platform
-last_verified: 2026-07-14
+last_verified: 2026-07-15
 source_of_truth: true
 related_code:
   - app/domain/contracts.ts
@@ -15,6 +15,17 @@ related_code:
 # Workflow Lifecycles
 
 This file defines canonical display states and the current compatibility layer for persisted values.
+
+## Current operational relationship
+
+Current workflow relationship:
+
+`Customer -> Project -> Job -> Schedule/Assignment -> Field Work -> Completion -> Invoice readiness`
+
+Important scope note:
+
+- estimates, proposals, and contracts may feed project and job execution, but the current repository does not enforce one rigid automatic chain where every job must pass through the same commercial sequence before field work begins
+- scheduling, technician assignment, dispatcher coordination, and field-status progression are already part of the implemented product surface
 
 ## Projects
 
@@ -61,6 +72,11 @@ Compatibility persistence:
 
 - persisted values such as `rejected` normalize to canonical `declined`
 - proposal-linked downstream statuses are normalized for display through `legacyEstimateStatusMap`
+
+Implementation notes:
+
+- `EstimateEngineService`'s cost/price rounding now imports the shared `round2()` helper from `estimate-engine/formulas.ts` instead of defining its own private copy (a duplication cleanup with no change to rounding behavior or transition rules).
+- Structured AI estimator replay protection adds optional line-item `sourceKey` handling but does not change estimate lifecycle states or the draft-only mutation rule.
 
 ## Proposals
 
@@ -149,6 +165,10 @@ Privileged override actions:
 - only owners and admins may override schedule conflicts
 - only owners and admins may reopen completed jobs
 - manager roles can archive jobs
+
+Operational role note:
+
+- dispatchers coordinate assignment, schedule changes, and permitted job-state progression within the current RBAC model, but current docs do not claim automated routing or optimization behavior
 
 ## Invoices
 

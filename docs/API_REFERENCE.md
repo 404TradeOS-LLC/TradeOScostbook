@@ -43,6 +43,7 @@ Public routes are limited to:
 - controllers own Zod validation and HTTP shaping
 - services return typed DTOs
 - browser clients normally talk to the backend through `web/src/lib/api.ts` or `web/src/lib/clientApi.ts`
+- signup/login themselves go through Supabase Auth directly in Server Actions (`web/src/app/actions/auth.ts`), not through `api.ts` — the module previously also exported unused `signup`/`login`/`AuthSession` helpers that duplicated this path; those were removed as dead code
 - binary documents are proxied separately from JSON APIs
 
 ## Error conventions
@@ -57,6 +58,8 @@ Known Prisma mappings include:
 - unique-constraint conflicts to `409`
 - foreign-key conflicts to `409`
 - record-not-found conditions to `404`
+
+`mapPrismaKnownRequestError` (the function implementing this mapping) is an internal helper local to `errorHandler.ts`; it is not exported, since no other module has ever needed to call it directly.
 
 ## Route groups
 
@@ -90,6 +93,15 @@ Mounted route groups from `app/backend/server.ts`:
 - `/api/v1/import/customers`
 - `/api/v1/brand-studio`
 - `/api/v1/intelligence`
+
+AI estimating routes under `/api/v1/estimates`:
+
+- `POST /api/v1/estimates/:id/ai-suggestions`
+- `POST /api/v1/estimates/:id/ai-suggestions/apply`
+- `POST /api/v1/estimates/:id/ai-estimator/draft`
+- `POST /api/v1/estimates/:id/ai-estimator/apply`
+
+The structured AI estimator endpoints are authenticated, rate-limited, and tenant-scoped like other estimate routes. Draft generation returns reviewable line items, server-signed review tokens for resolved targets, tool-run metadata, target-resolution status, and cost breakdowns. Apply accepts reviewed line items, requires write permission, requires accepted lines to present a matching unexpired review token, validates accepted targets against org-scoped active cost items or assemblies, serializes concurrent apply attempts per estimate, skips duplicate or already-existing reviewed lines, and writes estimate lines only by calling the existing Estimate Engine line-item service.
 
 ## Detailed module links
 
