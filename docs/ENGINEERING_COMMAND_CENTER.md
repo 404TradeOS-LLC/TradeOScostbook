@@ -94,8 +94,8 @@ Reference: [ROADMAP.md](ROADMAP.md), [WORKFLOW_LIFECYCLES.md](WORKFLOW_LIFECYCLE
 
 2. Repository verification and governance stability
 Objective: keep required checks, ownership rules, and worktree policy reliable.
-Why it matters: RC1 hardening fails if merges can skip verification or if current docs drift from implementation.
-Definition of done: branch policy is documented, docs-check stays low-noise, and the required verification path remains reproducible locally and in CI.
+Why it matters: RC1 hardening fails if merges can skip verification, intake arrives without scope, or current docs drift from implementation.
+Definition of done: branch policy, PR templates, issue templates, labels, and docs ownership are documented; docs-check stays low-noise; and the required verification path remains reproducible locally and in CI.
 Reference: [REPOSITORY_GOVERNANCE.md](REPOSITORY_GOVERNANCE.md), [DOC_OWNERSHIP.yml](DOC_OWNERSHIP.yml)
 
 3. Customer portal hardening
@@ -152,6 +152,9 @@ Authoritative references:
   - `App lint, unit tests, and build`
   - `App integration tests`
   - `Web lint and build`
+- PR templates must capture startup verification, scope, documentation impact, risk review, and exact final status.
+- Issue templates must capture area, priority, owner path, verification expectations, and stop conditions before work starts.
+- Labels must follow the taxonomy in `.github/labels.yml`.
 - Documentation must change with implementation whenever [DOC_OWNERSHIP.yml](DOC_OWNERSHIP.yml) requires it.
 
 See [REPOSITORY_GOVERNANCE.md](REPOSITORY_GOVERNANCE.md) for the full policy, cleanup lifecycle, and manual GitHub settings still needed.
