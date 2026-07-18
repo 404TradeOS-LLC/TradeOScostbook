@@ -106,6 +106,13 @@ Required policy:
 
 When a changed file triggers an ownership requirement, the owning document must be included and updated meaningfully in the same PR. Do not add an empty or cosmetic edit merely to satisfy the checker.
 
+Ownership is not limited to `app/**` and `web/**`. A package-level data corpus can be its own
+owning subject with its own README as the canonical entry point, rather than requiring a
+`docs/modules/*.md` file for every change. `packages/knowledge-engine/README.md` is the first
+instance of this pattern: it owns the package's canonical-path, provenance, and known-duplicate
+documentation, separate from `app/modules/knowledge-runtime/README.md`, which owns the live API
+consumer's documentation.
+
 The Bible does not replace:
 
 - `CURRENT_STATE.md` for verified implementation truth;
