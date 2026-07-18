@@ -64,7 +64,13 @@ The canonical algorithm (implemented twice, once per language, both required to 
    (max 8 levels) anchored to the helper module's own file location rather than the caller's
    — so every consumer gets the same trustworthy starting point regardless of how it was
    invoked (imported vs. run standalone as a subprocess). Verified to converge on the true
-   repo root even when the walk is started from inside the duplicate tree.
+   repo root even when the walk is started from inside the duplicate tree. Markers:
+   `packages/knowledge-engine/README.md` **and** `app/package.json` — deliberately *not*
+   `exports/json/costbook.json` like `loader.ts` uses, because this resolver backs
+   `master_pipeline.py`, which *writes* that file; requiring it as a marker would make it
+   impossible to resolve a root to regenerate it into after a deliberate clean/rebuild. Both
+   markers are stable, hand-authored, committed source content, never touched by any pipeline
+   write path.
 
 Any new path-resolution code added to this package (Python or otherwise) should call into
 `package_root.py` rather than reimplementing cwd- or `__file__`-relative logic.

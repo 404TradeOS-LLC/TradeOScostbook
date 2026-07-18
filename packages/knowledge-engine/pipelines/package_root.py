@@ -17,8 +17,14 @@ from typing import Optional
 
 _MAX_WALK_DEPTH = 8
 
+# Both markers must be stable, hand-authored/committed files -- never pipeline-generated
+# output. packages/knowledge-engine/exports/json/costbook.json was tried first, but that is
+# exactly the file master_pipeline.py regenerates; requiring it to already exist broke the
+# bootstrap case (an operator deliberately clears exports/ to force a clean rebuild, then
+# can't resolve a root to rebuild it into). README.md is committed source content, present
+# since Phase A, and not touched by any pipeline write path.
 REPO_MARKERS = (
-    Path("packages") / "knowledge-engine" / "exports" / "json" / "costbook.json",
+    Path("packages") / "knowledge-engine" / "README.md",
     Path("app") / "package.json",
 )
 

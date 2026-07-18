@@ -64,6 +64,20 @@ class ResolveRepoRootTests(unittest.TestCase):
             self.assertIn(str(REPO_MARKERS[0]), message)
             self.assertIn(str(REPO_MARKERS[1]), message)
 
+    def test_resolution_does_not_depend_on_generated_export_output_existing(self):
+        # Regression test: the markers must be stable, committed source content, never
+        # pipeline-generated output. If exports/json/costbook.json were a marker, an operator
+        # deliberately clearing exports/ to force a clean rebuild could never resolve a root
+        # to regenerate it into. Simulate that exact bootstrap scenario on a synthetic tree.
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp).resolve()
+            (root / "app").mkdir()
+            (root / "app" / "package.json").write_text("{}")
+            (root / "packages" / "knowledge-engine").mkdir(parents=True)
+            (root / "packages" / "knowledge-engine" / "README.md").write_text("# stub")
+            # Deliberately no exports/json/costbook.json anywhere -- the bootstrap case.
+            self.assertEqual(resolve_repo_root(start=root), root)
+
 
 class ResolvePackageAndExportRootTests(unittest.TestCase):
     def test_resolve_package_root_matches_the_real_canonical_package_directory(self):
