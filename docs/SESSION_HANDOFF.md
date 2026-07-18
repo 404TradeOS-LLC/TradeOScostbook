@@ -1,92 +1,67 @@
 ---
 status: current
 owner: platform
-last_verified: 2026-07-15
+last_verified: 2026-07-18
 source_of_truth: true
 related_code:
-  - .github/pull_request_template.md
-  - .github/PULL_REQUEST_TEMPLATE/
-  - .github/ISSUE_TEMPLATE/
-  - .github/labels.yml
+  - docs/TRADEOS_BIBLE.md
+  - docs/SPRINT_BACKLOG.md
   - docs/ENGINEERING_COMMAND_CENTER.md
   - docs/REPOSITORY_GOVERNANCE.md
+  - docs/agent-prompts/NEXT_SPRINT_PROTOCOL.md
+  - packages/knowledge-engine/README.md
 ---
 
 # TradeOS Session Handoff
 
-## Session Metadata
+## Current mission
 
-- date: 2026-07-15
-- agent/tool: Codex
-- worktree path: `/Users/showb/TradeOS-engineering-governance-pack`
-- branch: `feature/engineering-governance-pack`
-- base branch: `main`
-- upstream: none configured at session start
-- remote: `https://github.com/404TradeOS-LLC/TradeOScostbook.git`
+PR #31 (the TradeOS Bible foundation) has landed on `main`. Current focus is the `packages/knowledge-engine/**` cleanup called out in PR #31's handoff: Phase A (documentation/governance guardrails, PR #33) and Phase B (pipeline path-canonicalization, PR #34, stacked on Phase A) are both validated and ready for review. Do not begin Phase C (any move/delete/archive of `packages/knowledge-engine/knowledge-engine/**`, the confirmed self-nested duplicate tree) until both land on `main` and a founder explicitly authorizes it — see `packages/knowledge-engine/README.md` §6/§8.
 
-## Mission
+## Live pull-request state
 
-Build a repository engineering-governance pack for TradeOS RC1 work.
-
-Explicitly out of scope:
-
-- runtime `app/` and `web/` implementation changes
-- UI, contractor experience, onboarding UX, demo screens, dispatcher UX, components, layouts, styling, navigation, and design-system presentation work
-- dependency upgrades, lockfile replacement, merges, rebases, and unrelated cleanup
+- PR #31 — `docs/tradeos-bible-foundation` into `main`
+  - status: **merged** (2026-07-16).
+- PR #32 — Volume 3 engineering expansion
+  - status: merged into PR #31's foundation branch as `b2529e6`; no remaining child-PR work.
+- PR #33 — `docs/knowledge-engine-phase-a-guardrails` into `main`
+  - status: open, non-draft, all required checks green, ready for review;
+  - scope: `packages/knowledge-engine/**` ownership, governance, and safety-guardrail documentation only — no runtime/loader/pipeline/schema/generated/vendored content changed.
+- PR #34 — `fix/knowledge-engine-canonical-paths`, stacked on PR #33
+  - status: open, marked ready for review, all required checks green;
+  - scope: canonicalizes the knowledge-engine export pipeline's output-path resolution; does not move, delete, or change the content of the duplicate tree.
+- PR #30 — Settings Console brand-asset persistence
+  - status: open at last verification; owns Settings/Brand Studio web and related current-state scope; out of scope for the knowledge-engine work above.
+- PRs #27, #28, and #29 are merged and must not be recreated.
 
 ## Completed
 
-- created a clean sibling worktree at `/Users/showb/TradeOS-engineering-governance-pack`
-- created branch `feature/engineering-governance-pack` from current `origin/main`
-- installed root dependencies with `npm ci` using the existing lockfile
-- replaced the default PR template with a required RC1 readiness checklist
-- added specialized PR templates for backend, frontend, docs/governance, and security work
-- added issue forms for bug reports, engineering tasks, feature requests, governance/docs tasks, and security reviews
-- disabled blank public issues and routed sensitive reports to private security advisories
-- added `.github/labels.yml` as the canonical label taxonomy
-- updated documentation ownership so PR templates, issue templates, and labels require governance docs alignment
-- updated repository governance, documentation entrypoint, and Command Center docs to describe the new governance pack
+- expanded Bible Volumes 1 through 6;
+- created Volume 7 Knowledge Runtime;
+- merged the expanded Volume 3 child PR into the foundation;
+- corrected backlog dependency logic so no sprint is selectable before S001 lands;
+- replaced vague sprint dependencies with explicit sprint IDs or external-access blockers;
+- clarified doctrine, implementation state, sprint state, handoff, ADR, research, and archive boundaries;
+- updated repository governance for the solo-maintainer zero-approval posture without weakening PR or CI requirements;
+- landed PR #31 on `main`;
+- completed the `packages/knowledge-engine/**` segmented audit called out above: Phase A guardrail docs (PR #33) and Phase B path-canonicalization (PR #34) are both independently verified (doctrine/scope review, implementation review, live test execution, git-tree-hash integrity proof, and read-only Phase C research) and ready for review.
 
-## Files Changed
+## Current blocker
 
-- `.github/pull_request_template.md`
-- `.github/PULL_REQUEST_TEMPLATE/backend.md`
-- `.github/PULL_REQUEST_TEMPLATE/frontend.md`
-- `.github/PULL_REQUEST_TEMPLATE/docs-governance.md`
-- `.github/PULL_REQUEST_TEMPLATE/security.md`
-- `.github/ISSUE_TEMPLATE/config.yml`
-- `.github/ISSUE_TEMPLATE/bug_report.yml`
-- `.github/ISSUE_TEMPLATE/engineering_task.yml`
-- `.github/ISSUE_TEMPLATE/feature_request.yml`
-- `.github/ISSUE_TEMPLATE/governance_docs.yml`
-- `.github/ISSUE_TEMPLATE/security_review.yml`
-- `.github/labels.yml`
-- `docs/DOC_OWNERSHIP.yml`
-- `docs/ENGINEERING_COMMAND_CENTER.md`
-- `docs/README.md`
-- `docs/REPOSITORY_GOVERNANCE.md`
-- `docs/SESSION_HANDOFF.md`
+None for PR #33/#34 — both are green and unblocked. Phase C (duplicate-tree removal) remains blocked pending founder authorization, a CI reference-guard, and a rollback tag, per `packages/knowledge-engine/README.md`.
 
-## Verification Performed
+## Next eligible sprint
 
-- `git fetch origin --prune`: passed
-- `npm ci`: passed
-- YAML parse check for `.github/labels.yml` and all issue-template YAML files: passed
-- `npm run docs:check`: passed
-- `npm run docs:test`: passed, 29 tests
-- `git diff --check`: passed
+None selected yet. The backlog should reflect PR #31 having landed before selecting further general work.
 
-## Checks Not Run
+## Exact next safe action
 
-- backend unit, lint, build, and integration checks were not run because no `app/` files changed
-- frontend lint and build were not run because no `web/` files changed
+Merge PR #33, then PR #34, in that order (PR #34 is stacked on PR #33's branch). After both land on `main`, re-verify:
 
-## Known Issues or Blockers
+```bash
+npm run docs:test
+npm run docs:check -- --base origin/main
+git diff --check
+```
 
-- branch `feature/engineering-governance-pack` has no upstream configured
-- changes are not committed or pushed yet
-- GitHub labels are defined in `.github/labels.yml`, but applying them to the live repository still requires a label-sync process or manual GitHub configuration
-
-## Next Exact Task
-
-Review the governance-pack diff, then commit and push `feature/engineering-governance-pack` if the template and label taxonomy are approved. After pushing, open a PR and confirm `npm run docs:check` remains green in CI.
+Do not begin any Phase C (duplicate-tree) work until a founder explicitly authorizes it.

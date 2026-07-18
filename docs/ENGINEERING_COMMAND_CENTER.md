@@ -1,200 +1,149 @@
 ---
 status: current
 owner: platform
-last_verified: 2026-07-14
+last_verified: 2026-07-16
 source_of_truth: true
 related_code:
   - AGENTS.md
+  - docs/TRADEOS_BIBLE.md
   - docs/CURRENT_STATE.md
   - docs/ROADMAP.md
+  - docs/SPRINT_BACKLOG.md
   - docs/REPOSITORY_GOVERNANCE.md
   - docs/SESSION_HANDOFF.md
+  - docs/agent-prompts/NEXT_SPRINT_PROTOCOL.md
 ---
 
 # TradeOS Engineering Command Center
 
-## 1. Project Identity
+## Purpose
 
-- `404 TradeOS` is the parent organization context for the company, development business, and related admin or marketing operations.
-- `TradeOS` is the contractor SaaS product implemented in this repository.
-- The current repository is named `TradeOScostbook`, but the live docs and merged product surface already reflect a broader TradeOS platform.
-- This document does not rename the repository. It establishes the engineering operating context for the current codebase.
+This is the concise operating overview for TradeOS engineering. It does not replace the Bible, Current State, Sprint Backlog, Session Handoff, module contracts, ADRs, or research evidence.
 
-## 2. Current Engineering Phase
+Start with:
+
+1. [TRADEOS_BIBLE.md](TRADEOS_BIBLE.md)
+2. [CURRENT_STATE.md](CURRENT_STATE.md)
+3. [SPRINT_BACKLOG.md](SPRINT_BACKLOG.md)
+4. [SESSION_HANDOFF.md](SESSION_HANDOFF.md)
+5. [agent-prompts/NEXT_SPRINT_PROTOCOL.md](agent-prompts/NEXT_SPRINT_PROTOCOL.md)
+
+## Project identity
+
+- `404 TradeOS` is the parent company and operating context.
+- `TradeOS` is the contractor SaaS product in this repository.
+- The repository remains named `TradeOScostbook`, while the implemented surface and doctrine cover the broader TradeOS platform.
+
+## Current engineering phase
 
 TradeOS is in `RC1 hardening`.
 
-Authoritative reference:
+Verified implementation truth belongs in [CURRENT_STATE.md](CURRENT_STATE.md). Strategic sequencing belongs in [ROADMAP.md](ROADMAP.md). Executable work belongs in [SPRINT_BACKLOG.md](SPRINT_BACKLOG.md).
 
-- [CURRENT_STATE.md](CURRENT_STATE.md)
+## Current milestone
 
-## 3. Current Milestone
+Finish and land the Bible foundation before resuming general sprint execution.
 
-Current milestone: `Lifecycle normalization`
+Completed foundation work includes:
 
-Goal:
+- seven Bible volumes;
+- a 50-sprint dependency-ordered backlog;
+- a mechanical next-sprint protocol;
+- merged Volume 3 engineering expansion from PR #32;
+- corrected sprint dependency logic;
+- updated handoff and governance integration;
+- preservation of the large knowledge-engine corpus pending a separate audit.
 
-- align project, estimate, proposal, contract, invoice, and job lifecycle states across persistence, APIs, shared contracts, workspace UI, and customer portal surfaces without redesigning the architecture
+Remaining foundation work:
 
-Explicit exclusions:
+- rerun complete local docs validation on the final head;
+- inspect the final docs-only diff and links;
+- wait for GitHub checks;
+- move PR #31 from draft only after all required validation is green.
 
-- live supplier-feed ingestion
-- advanced dispatch optimization
-- automated route optimization
-- fleet-routing intelligence
-- automatic technician-routing decisions
-- public payment processing
-- broad UI redesign
-- architecture rewrite
-- unrelated feature expansion
+## Canonical execution rule
 
-These exclusions do not remove the existing jobs, scheduling, technician-assignment, dispatcher, or field-work coordination surface already implemented in TradeOS.
+The Sprint Backlog is the tactical queue. An agent may begin only when:
 
-Authoritative reference:
+- the sprint is `READY`;
+- every sprint dependency is `DONE`;
+- no overlapping PR or worktree exists;
+- required external infrastructure is available;
+- no founder decision remains unresolved.
 
-- [ROADMAP.md](ROADMAP.md)
+If no sprint is eligible, stop and report the blocker instead of inventing work.
 
-## 4. Current Product Surface
+## Active PR coordination
 
-Verified implemented areas:
+At the last verified handoff:
 
-- [Auth and tenancy](modules/auth-and-tenancy.md)
-- [CRM](modules/crm.md)
-- [Projects and workspace](modules/projects.md)
-- [Cost book](modules/cost-book.md)
-- [Estimating](modules/estimating.md)
-- [AI Estimate Assist](modules/ai-estimate-assist.md)
-- [Proposals](modules/proposals.md)
-- [Contracts](modules/contracts.md)
-- [Invoices and payments](modules/invoices-and-payments.md)
-- [Jobs and scheduling](modules/jobs-and-scheduling.md)
-- [Activity and intelligence](modules/activity-and-intelligence.md)
-- [Brand Studio](modules/brand-studio.md)
-- [Settings and operations](modules/settings-and-operations.md)
-- [Customer portal](modules/customer-portal.md)
+- PR #30 owns Settings/Brand Studio web and related current-state scope;
+- PR #31 owns the Bible foundation and sprint-system documentation;
+- PR #32 is merged into PR #31’s branch;
+- PRs #27, #28, and #29 are merged.
 
-See [CURRENT_STATE.md](CURRENT_STATE.md) for the verified module list and implementation caveats.
+Always verify GitHub before editing. This summary is not a substitute for live PR state.
 
-Current operational scope already includes:
+## Current blockers and risks
 
-- customer -> project -> job coordination
-- job creation and assignment
-- technician assignment
-- scheduling and rescheduling
-- dispatcher-managed workload coordination within current RBAC limits
-- field-work status coordination from scheduling through completion and invoice readiness
+- PR #31 is not yet merged, so the Bible remains proposed canonical doctrine until it lands on `main`.
+- The final validation pass must be rerun after adding the governance owner document.
+- Entry-point READMEs and legacy generator scripts contain stale material, but useful setup, competitive, pricing, and historical evidence must be preserved before archive or removal decisions.
+- `packages/knowledge-engine/**` (9,986 files) received its separate segmented audit on 2026-07-16, and Phase A documentation/governance guardrails (root README, corrected canonical-path docs, focused `docs/DOC_OWNERSHIP.yml` rules, historical notices on conflicting runtime guidance, a package-scoped `.gitignore`) have landed. The package still contains a confirmed 4,746-tracked-file self-nested exact-duplicate tree and ~1,400 vendored third-party skill directories with incomplete license coverage; both are documented but intentionally untouched pending founder-approved Phase B/C/D migration work — do not begin archive or deletion in this package without that approval.
+- Ruleset and branch-protection facts must be verified directly in GitHub before being stated as current.
 
-## 5. Top Engineering Priorities
+## Required verification
 
-1. Lifecycle normalization
-Objective: remove conflicting lifecycle language between storage, APIs, and UI.
-Why it matters: status drift is a release-readiness risk across project, proposal, contract, invoice, and job flows.
-Definition of done: canonical lifecycle labels and transitions read the same way across shared contracts, persistence, APIs, workspace UI, and portal surfaces, with compatibility shims reduced or explicitly documented.
-Reference: [ROADMAP.md](ROADMAP.md), [WORKFLOW_LIFECYCLES.md](WORKFLOW_LIFECYCLES.md)
+Expected CI jobs include:
 
-2. Repository verification and governance stability
-Objective: keep required checks, ownership rules, and worktree policy reliable.
-Why it matters: RC1 hardening fails if merges can skip verification, intake arrives without scope, or current docs drift from implementation.
-Definition of done: branch policy, PR templates, issue templates, labels, and docs ownership are documented; docs-check stays low-noise; and the required verification path remains reproducible locally and in CI.
-Reference: [REPOSITORY_GOVERNANCE.md](REPOSITORY_GOVERNANCE.md), [DOC_OWNERSHIP.yml](DOC_OWNERSHIP.yml)
+- `Docs consistency`;
+- `App lint, unit tests, and build`;
+- `App integration tests`;
+- `Web lint and build`.
 
-3. Customer portal hardening
-Objective: tighten the contractor-visible portal experience without expanding product scope.
-Why it matters: the portal is already live in the repo and remains an explicit RC follow-through area.
-Definition of done: portal behaviors and document views are release-ready enough that CURRENT_STATE no longer flags portal hardening as an RC follow-up item.
-Reference: [CURRENT_STATE.md](CURRENT_STATE.md), [ROADMAP.md](ROADMAP.md), [modules/customer-portal.md](modules/customer-portal.md)
+Documentation foundation work must run:
 
-4. Production deployment and environment approval verification
-Objective: verify the real production approval posture outside the codebase.
-Why it matters: deployment confidence cannot be inferred only from tracked code or local test success.
-Definition of done: environment approvals, migration rollout expectations, and production verification steps are confirmed against the live GitHub and deployment environment setup.
-Reference: [CURRENT_STATE.md](CURRENT_STATE.md), [REPOSITORY_GOVERNANCE.md](REPOSITORY_GOVERNANCE.md), [.github/workflows/deploy-migrations.yml](../.github/workflows/deploy-migrations.yml)
+```bash
+npm run docs:test
+npm run docs:check -- --base origin/main
+git diff --check
+```
 
-5. Stale draft PR cleanup and truth-drift reduction
-Objective: reduce overlap from old draft PRs that predate recent merged work.
-Why it matters: outdated draft branches compete with the current source-of-truth docs and can mislead future sessions.
-Definition of done: active drafts are reviewed for overlap, clearly triaged in handoff, and future work starts from current main instead of stale branch assumptions.
-Reference: [SESSION_HANDOFF.md](SESSION_HANDOFF.md), [REPOSITORY_GOVERNANCE.md](REPOSITORY_GOVERNANCE.md)
+The exact required-check configuration remains live GitHub state.
 
-## 6. Current Blockers and Risks
+PR templates must capture startup verification, scope, documentation impact, risk review, and exact final status. Issue templates must capture area, priority, owner path, verification expectations, and stop conditions before work starts. Labels must follow the taxonomy in `.github/labels.yml`. See [REPOSITORY_GOVERNANCE.md](REPOSITORY_GOVERNANCE.md) for the full policy.
 
-- Release blocker: lifecycle compatibility values remain active for projects, proposals, and contracts, so the same business stage can still appear under different stored and display labels.
-- Technical debt: supplier connector plumbing exists, but live supplier feed ingestion is still stubbed.
-- Technical debt: cost-item and assembly substring search still lacks trigram coverage for `code` columns, so mixed name-or-code queries can remain scan-heavy.
-- Environment verification gap: production deployment state, environment approvals, and migration-review posture must be verified outside the repository.
-- Governance enforcement gap: `main` still has no live GitHub branch protection or ruleset enforcement as of 2026-07-14.
-- Stale branch and PR cleanup risk: multiple open draft PRs are 10 to 12 commits behind current `main`, and some overlap already-merged governance, lifecycle, or knowledge-runtime work.
-
-Authoritative references:
-
-- [CURRENT_STATE.md](CURRENT_STATE.md)
-- [ROADMAP.md](ROADMAP.md)
-- [REPOSITORY_GOVERNANCE.md](REPOSITORY_GOVERNANCE.md)
-
-## 7. Recently Landed Work
-
-- `d6942ee` / PR [#23](https://github.com/404TradeOS-LLC/TradeOScostbook/pull/23): repaired the Prisma seed workflow so root-level seeding works under forced RLS.
-- `cfe781d` / PR [#22](https://github.com/404TradeOS-LLC/TradeOScostbook/pull/22): established the current documentation source-of-truth system, ownership rules, and governance baseline.
-- `9a7760b` / PR [#21](https://github.com/404TradeOS-LLC/TradeOScostbook/pull/21): restored canonical role and lifecycle contracts that earlier branch history had orphaned.
-- `49ebbd7` / PR [#20](https://github.com/404TradeOS-LLC/TradeOScostbook/pull/20): added the job scheduling engine and document lifecycle history.
-- `91002f8` / PR [#19](https://github.com/404TradeOS-LLC/TradeOScostbook/pull/19): integrated the TradeOS Blueprint design system and consolidated shared web UI patterns.
-
-## 8. Active Branch and PR Policy
-
-- Engineering policy is that `main` is merge-only and must be treated as protected.
-- Current enforcement gap: GitHub branch protection and rulesets are still not configured on `main` as of 2026-07-14.
-- Feature, fix, chore, and docs branches are short-lived.
-- Use one linked worktree per mission.
-- Do not do direct runtime implementation work in the shared governance worktree.
-- Branches must be current with `origin/main` before PR readiness.
-- Required CI target checks are:
-  - `Docs consistency`
-  - `App lint, unit tests, and build`
-  - `App integration tests`
-  - `Web lint and build`
-- PR templates must capture startup verification, scope, documentation impact, risk review, and exact final status.
-- Issue templates must capture area, priority, owner path, verification expectations, and stop conditions before work starts.
-- Labels must follow the taxonomy in `.github/labels.yml`.
-- Documentation must change with implementation whenever [DOC_OWNERSHIP.yml](DOC_OWNERSHIP.yml) requires it.
-
-See [REPOSITORY_GOVERNANCE.md](REPOSITORY_GOVERNANCE.md) for the full policy, cleanup lifecycle, and manual GitHub settings still needed.
-
-## 9. Session Startup Protocol
+## Session startup
 
 Every agent must:
 
-1. verify exact path
-2. verify branch
-3. verify clean state
-4. verify remote and upstream
-5. fetch origin
-6. inspect this Command Center
-7. read [CURRENT_STATE.md](CURRENT_STATE.md)
-8. read [SESSION_HANDOFF.md](SESSION_HANDOFF.md)
-9. inspect open PR and branch overlap
-10. state mission, allowed paths, forbidden paths, exclusions, verification plan, and stop conditions before editing
+1. verify repository path, worktree, branch, upstream, and clean state;
+2. fetch origin;
+3. read the Bible, Current State, Sprint Backlog, Session Handoff, and Next Sprint Protocol;
+4. inspect open PRs, recent merges, and worktree overlap;
+5. state mission, allowed paths, forbidden paths, validation, and stop conditions.
 
-## 10. Session Completion Protocol
+## Session completion
 
 Every agent must:
 
-1. inspect the final diff
-2. run required tests and checks
-3. update affected source-of-truth docs
-4. update this Command Center only when mission, priorities, blockers, risks, release state, CI requirements, or operating protocol changed
-5. replace [SESSION_HANDOFF.md](SESSION_HANDOFF.md) with the current concise handoff
-6. confirm no unrelated changes
-7. commit and push
-8. report exact final `git status --short --branch`
-9. state PR readiness
-10. identify the precise next task
+1. inspect the complete diff against the correct base;
+2. run required validation;
+3. update affected source-of-truth owners;
+4. update sprint evidence only when justified;
+5. replace the session handoff with concise current truth;
+6. confirm no unrelated changes;
+7. commit and push intentionally;
+8. open or update one PR;
+9. report the exact next safe action.
 
-## 11. Next Engineer Starts Here
+## Next engineer starts here
 
-Read [SESSION_HANDOFF.md](SESSION_HANDOFF.md), verify whether the governance branch is already merged, inspect active PRs for overlap, continue the current `Lifecycle normalization` milestone unless the mission is explicitly governance-only, and do not start unrelated feature work.
+Read [SESSION_HANDOFF.md](SESSION_HANDOFF.md). Rerun final PR #31 validation on the latest head. Do not begin archive, deletion, README consolidation, ruleset mutation, or package knowledge-corpus cleanup until the foundation is validated and merged.
 
-## 12. Source-of-Truth Links
+## Source-of-truth links
 
+- [TRADEOS_BIBLE.md](TRADEOS_BIBLE.md)
 - [CURRENT_STATE.md](CURRENT_STATE.md)
 - [PRODUCT_SCOPE.md](PRODUCT_SCOPE.md)
 - [ARCHITECTURE.md](ARCHITECTURE.md)
@@ -203,6 +152,7 @@ Read [SESSION_HANDOFF.md](SESSION_HANDOFF.md), verify whether the governance bra
 - [RBAC_MATRIX.md](RBAC_MATRIX.md)
 - [WORKFLOW_LIFECYCLES.md](WORKFLOW_LIFECYCLES.md)
 - [ROADMAP.md](ROADMAP.md)
+- [SPRINT_BACKLOG.md](SPRINT_BACKLOG.md)
 - [REPOSITORY_GOVERNANCE.md](REPOSITORY_GOVERNANCE.md)
 - [SESSION_HANDOFF.md](SESSION_HANDOFF.md)
 - [DOC_OWNERSHIP.yml](DOC_OWNERSHIP.yml)
