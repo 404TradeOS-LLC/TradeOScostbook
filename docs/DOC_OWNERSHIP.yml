@@ -244,8 +244,9 @@ rules:
       - docs/README.md
       - docs/DOC_OWNERSHIP.yml
     requires:
-      - docs/DOC_OWNERSHIP.yml
+      - docs/README.md
       - docs/ENGINEERING_COMMAND_CENTER.md
+      - docs/REPOSITORY_GOVERNANCE.md
     explanation: Source-of-truth hierarchy and operating-system documentation changes must keep the docs entrypoint, command center, and governance policy aligned.
 
   # --- packages/knowledge-engine ownership (Phase A guardrails, 2026-07-16) ---
