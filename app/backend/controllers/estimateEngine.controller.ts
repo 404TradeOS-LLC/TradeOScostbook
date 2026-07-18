@@ -67,11 +67,11 @@ export const estimateEngineController = {
 
   async removeLineItem(req: Request, res: Response) {
     const auth = requirePermissions(req, ["crm.write"]);
-    await service.removeLineItem(req.params.lineItemId, requireOrgId(req));
+    const { estimateId } = await service.removeLineItem(req.params.lineItemId, requireOrgId(req));
     await activityService.record({
       orgId: requireOrgId(req),
       entityType: "estimate",
-      entityId: req.params.id,
+      entityId: estimateId,
       eventType: "estimate.line_item_removed",
       title: "Estimate line item removed",
       actorUserId: auth.userId,

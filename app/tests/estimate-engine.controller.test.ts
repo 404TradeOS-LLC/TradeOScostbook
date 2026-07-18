@@ -98,4 +98,26 @@ describe("estimateEngineController", () => {
     );
     expect(res.status).toHaveBeenCalledWith(201);
   });
+
+  it("records the line item's actual estimate id, not the URL's, when the two differ", async () => {
+    // Regression test: the service resolves the line item's real estimate independently of
+    // the route param, so a mismatched/stale URL id must not produce a misleading audit entry.
+    removeLineItemMock.mockResolvedValue({ estimateId: "estimate-2" });
+    recordMock.mockResolvedValue({});
+
+    const req = buildRequest("dispatcher");
+    const res = buildResponse();
+
+    await estimateEngineController.removeLineItem(req, res);
+
+    expect(removeLineItemMock).toHaveBeenCalledWith("line-1", "org-1");
+    expect(recordMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        entityId: "estimate-2",
+        eventType: "estimate.line_item_removed",
+        metadata: { lineItemId: "line-1" },
+      })
+    );
+    expect(res.status).toHaveBeenCalledWith(204);
+  });
 });
