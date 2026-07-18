@@ -1,12 +1,13 @@
 import { Request, Response } from "express";
 import { z } from "zod";
 import { AIEstimateAssistService } from "../../modules/ai-estimate-assist/service";
-import { requireOrgId } from "../requestContext";
+import { requireOrgId, requirePermissions } from "../requestContext";
 
 const service = new AIEstimateAssistService();
 
 export const aiEstimateAssistController = {
   async generate(req: Request, res: Response) {
+    requirePermissions(req, ["crm.read"]);
     const schema = z.object({
       scopeOfWork: z.string().trim().optional().default(""),
     });
@@ -21,6 +22,7 @@ export const aiEstimateAssistController = {
   },
 
   async apply(req: Request, res: Response) {
+    requirePermissions(req, ["crm.write"]);
     const schema = z.object({
       suggestions: z.array(
         z.object({
