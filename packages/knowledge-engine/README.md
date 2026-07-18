@@ -140,11 +140,13 @@ for exactly what that changed and what it deliberately did not.
 entire package**, verified two ways now: Phase A's `sha256sum` pass across all 11 top-level
 subdirectories, and a Phase B re-verification (2026-07-16) via `git ls-files` counts and a full
 recursive `diff -rq`. Current true counts: **4,746 tracked files in the duplicate vs. 4,748 in
-the canonical tree** (not the earlier "4,993" figure, which was stale). Only **4 files now
+the canonical tree** (not the earlier "4,993" figure, which was stale). Only **7 files now
 differ** in content between the two trees — `docs/knowledge-engine-architecture.md`,
-`docs/migration-plan.md`, `runtime/README.md`, and `review/runtime/README.md` — because Phase A
-edited the canonical copies of those files only, and correctly did not propagate the edits into
-the duplicate. Every other file remains byte-for-byte identical. It landed in the same single
+`docs/migration-plan.md`, `runtime/README.md`, and `review/runtime/README.md` (edited by Phase A),
+plus `pipelines/master_pipeline.py`, `pipelines/export/sync_manager.py`, and
+`pipelines/export/publish_to_supabase.py` (edited by Phase B) — because each phase edited the
+canonical copies of those files only, and correctly did not propagate the edits into the
+duplicate. Every other file remains byte-for-byte identical. It landed in the same single
 squash-merge commit as the rest of this package, with a later filesystem mtime, and Phase B's
 exhaustive `git grep` sweep (see [`PATHS.md`](PATHS.md)) confirms it still has **zero functional
 references anywhere else in the repository** — only this README and `docs/DOC_OWNERSHIP.yml`
